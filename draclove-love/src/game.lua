@@ -6,10 +6,6 @@ local blob_size = 20
 local arena_size = 1200
 
 function love.keyreleased(key)
-	if key == "escape" then
-		love.event.quit()
-	end
-
 	if key == "space" and not L.dead and not L.won then
 		local mx, my = L:getMousePos()
 		local dx,dy = L:angle_vec(L:angle_look_at(0, 0, mx, my))
