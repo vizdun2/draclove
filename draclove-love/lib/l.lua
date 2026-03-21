@@ -249,7 +249,7 @@ function love.update(dt)
     local mod_time = love.filesystem.getInfo("src/game.lua").modtime
     if not last_mod_time or (mod_time > last_mod_time) then
         local contents, _size = love.filesystem.read("src/game.lua")
-        local status, err = pcall(function () loadstring(contents)() end)
+        local status, err = xpcall(function () loadstring(contents)() end, debug.traceback)
         print(mod_time, last_mod_time, status, err)
 
         load_assets()
