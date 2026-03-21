@@ -7,6 +7,7 @@ local L = {
     cam_y = 0,
     dt = 0,
     assets = {},
+    playing_sounds = {},
     setup = function() end,
     render = function() end,
 }
@@ -22,11 +23,13 @@ local square_quad = love.graphics.newQuad(0,0,square_size,square_size,square_siz
 local function load_assets()
     L.assets = {
         textures = {},
+        sounds = {},
     }
 
     local files = love.filesystem.getDirectoryItems("assets")
     for i,filename in ipairs(files) do
-        local texture_name, texture_row, texture_col = filename:match("^(.*)%_([0-9]+)x([0-9]+).png$")
+        local texture_name, texture_row, texture_col = filename:match("^(.*)_([0-9]+)x([0-9]+)%.png$")
+        local audio_name = filename:match("^(.*)%.mp3$") or filename:match("^(.*)%.wav$")
 
         if texture_name then
             local image = love.graphics.newImage("assets/" .. filename)
@@ -47,6 +50,8 @@ local function load_assets()
                 quads = quads,
                 image = image,
             }
+        elseif audio_name then
+            L.assets.sounds[audio_name] = love.audio.newSource("assets/" .. filename, "static")
         end
     end
 end
@@ -67,6 +72,14 @@ end
 function L:set_cam(x,y)
     L.cam_x = x or 0
     L.cam_y = y or 0
+end
+
+function L:play(audio_name, volume)
+    if audio_name and L.assets.sounds[audio_name] then
+        local source = L.assets.sounds[audio_name]:clone()
+        source:setVolume(volume or 1)
+        source:play()
+    end
 end
 
 local function get_obj_sprite_stuffs(obj)

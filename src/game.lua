@@ -14,6 +14,7 @@ function love.keyreleased(key)
 		local mx, my = L:getMousePos()
 		local dx,dy = L:angle_vec(L:angle_look_at(0, 0, mx, my))
 		table.insert(L.bullets, {expire=L:time()+2, dx=dx, dy=dy, sprite="laser",sprite_t=0.15,s=1.5, x=L.player.x, y=L.player.y, r=L:angle_look_at(0, 0, dx, dy) + 90})
+		L:play("laser")
 	end
 
 	if key == "backspace" then
@@ -46,6 +47,7 @@ end
 
 local function spawn_explo(x,y)
 	table.insert(L.explosions, {x=x,y=y,sprite="explosion",sprite_t=0.15,expire=L:time()+0.15*5,s=3})
+	L:play("explosion", 0.05)
 end
 
 local function update_enemies(dt)
