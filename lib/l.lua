@@ -8,6 +8,7 @@ local L = {
     dt = 0,
     assets = {},
     playing_sounds = {},
+    fonts = {},
     setup = function() end,
     render = function() end,
 }
@@ -24,12 +25,14 @@ local function load_assets()
     L.assets = {
         textures = {},
         sounds = {},
+        fonts = {},
     }
 
     local files = love.filesystem.getDirectoryItems("assets")
     for i,filename in ipairs(files) do
         local texture_name, texture_row, texture_col = filename:match("^(.*)_([0-9]+)x([0-9]+)%.png$")
         local audio_name = filename:match("^(.*)%.mp3$") or filename:match("^(.*)%.wav$")
+        local font_name = filename:match("^(.*)%.ttf$")
 
         if texture_name then
             local image = love.graphics.newImage("assets/" .. filename)
@@ -52,6 +55,8 @@ local function load_assets()
             }
         elseif audio_name then
             L.assets.sounds[audio_name] = love.audio.newSource("assets/" .. filename, "static")
+        elseif font_name then
+            L.assets.fonts[font_name] = filename
         end
     end
 end
@@ -91,13 +96,29 @@ local function get_obj_sprite_stuffs(obj)
     return drawable, sprite_width, sprite_height, row_count, col_count
 end
 
+local default_font = love.graphics.getFont()
+default_font:setFilter("nearest", "nearest")
+local function lazy_get_font(name, size)
+    local font_id = (name or "") .. size
+
+    if not name then
+        return default_font
+    elseif L.fonts[font_id] then
+        return L.fonts[font_id]
+    else
+        local new_font = love.graphics.newFont("assets/" .. L.assets.fonts[name], size)
+        new_font:setFilter("nearest", "nearest")
+        L.fonts[font_id] = new_font
+        return new_font
+    end
+end
+
 function L:draw(obj)
     local r,g,b,a = hex_to_rgb(obj.c or "#ffffff")
     love.graphics.setColor(r,g,b,a)
 	
     if obj.text then
-        local font = love.graphics.getFont()
-        font:setFilter("nearest", "nearest")
+        local font = lazy_get_font(obj.font, obj.font_size or 13)
 	    local plainText = love.graphics.newText(font, obj.text)
         local w,h = plainText:getWidth(), plainText:getHeight()
 

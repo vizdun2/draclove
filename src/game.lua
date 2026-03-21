@@ -157,14 +157,14 @@ function L.render(dt)
 	end
 
 	L:set_cam()
-	L:draw({text="Health: " .. L.hp,align="lt",x=-640 + 20,y=-360 + 20,s=3})
-	L:draw({text="Enemies: " .. L.enemy_count,align="lt",x=-640 + 20,y=-360 + 50,s=3})
+	L:draw({text="Health: " .. L.hp,font="pixelifysans",font_size=42,align="lt",x=-640 + 20,y=-360 + 20})
+	L:draw({text="Enemies: " .. L.enemy_count,font="pixelifysans",font_size=42,align="lt",x=-640 + 20,y=-360 + 70})
 	if L.dead then
 		L:draw({x=0,y=0,sx=40,sy=25,c="#700000ab"})
-		L:draw({text="You died.",align="mt",x=0,y=-200,s=3})
+		L:draw({text="You died.",font="pixelifysans",font_size=42,align="mt",x=0,y=-200})
 	elseif L.won then
 		L:draw({x=0,y=0,sx=40,sy=25,c="#007000ab"})
-		L:draw({text="You won.",align="mt",x=0,y=-200,s=3})
+		L:draw({text="You won.",font="pixelifysans",font_size=42,align="mt",x=0,y=-200})
 	elseif L.red_screen and not L:pasttime(L.red_screen) then
 		L:draw({x=0,y=0,sx=40,sy=25,c="#ff000040"})
 	end
