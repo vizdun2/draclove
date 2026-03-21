@@ -6,15 +6,50 @@ local L = {
     cam_x = 0,
     cam_y = 0,
     dt = 0,
+    assets = {},
     setup = function() end,
     render = function() end,
 }
 
 local square_size = 32
 local square_canvas = love.graphics.newCanvas(square_size, square_size)
+square_canvas:setFilter("nearest", "nearest")
 love.graphics.setCanvas(square_canvas)
 love.graphics.clear(1,1,1,1)
 love.graphics.setCanvas()
+local square_quad = love.graphics.newQuad(0,0,square_size,square_size,square_size,square_size)
+
+local function load_assets()
+    L.assets = {
+        textures = {},
+    }
+
+    local files = love.filesystem.getDirectoryItems("assets")
+    for i,filename in ipairs(files) do
+        local texture_name, texture_row, texture_col = filename:match("^(.*)%_([0-9]+)x([0-9]+).png$")
+
+        if texture_name then
+            local image = love.graphics.newImage("assets/" .. filename)
+            image:setFilter("nearest", "nearest")
+            local w,h = image:getWidth(),image:getHeight()
+
+            local quads = {}
+            local r, c = tonumber(texture_row), tonumber(texture_col)
+            for j=0,r-1 do
+                for i=0,c-1 do
+                    table.insert(quads, love.graphics.newQuad(w/c*i,h/r*j,w/c,h/r,w,h))
+                end
+            end
+
+            L.assets.textures[texture_name] = {
+                row = r,
+                col = c,
+                quads = quads,
+                image = image,
+            }
+        end
+    end
+end
 
 function hex_to_rgb(hex)
     local hex = hex:gsub("#","")
@@ -32,6 +67,15 @@ end
 function L:set_cam(x,y)
     L.cam_x = x or 0
     L.cam_y = y or 0
+end
+
+local function get_obj_sprite_stuffs(obj)
+    local drawable = (obj.sprite and L.assets.textures[obj.sprite].image) or square_canvas
+    local row_count = (obj.sprite and L.assets.textures[obj.sprite].row) or 1
+    local col_count = (obj.sprite and L.assets.textures[obj.sprite].col) or 1
+    local sprite_width = drawable:getWidth() / col_count
+    local sprite_height = drawable:getHeight() / row_count
+    return drawable, sprite_width, sprite_height, row_count, col_count
 end
 
 function L:draw(obj)
@@ -77,15 +121,19 @@ function L:draw(obj)
             margin_y
         )
     else
+        local drawable, sprite_width, sprite_height, r, c = get_obj_sprite_stuffs(obj)
+        local sprite_i = (obj.sprite_t and (math.floor(L:time() / obj.sprite_t) % (r*c) + 1)) or 1
+
         love.graphics.draw(
-            square_canvas,
+            drawable,
+            (obj.sprite and L.assets.textures[obj.sprite].quads[sprite_i]) or square_quad,
             (obj.x or 0) + L.width / 2 - L.cam_x,
             (obj.y or 0) + L.height / 2 - L.cam_y,
             math.rad(obj.r or 0),
             (obj.sx or 1) * (obj.s or 1),
             (obj.sy or 1) * (obj.s or 1),
-            square_size / 2,
-            square_size / 2
+            sprite_width / 2,
+            sprite_height / 2
         )
     end
 
@@ -94,10 +142,12 @@ end
 
 local i = 0
 function L:collide(a, b)
-    local aw = square_size * (a.sx or 1) * (a.s or 1)
-    local ah = square_size * (a.sy or 1) * (a.s or 1)
-    local bw = square_size * (a.sx or 1) * (a.s or 1)
-    local bh = square_size * (a.sy or 1) * (a.s or 1)
+    local _, uaw, uah = get_obj_sprite_stuffs(a)
+    local _, ubw, ubh = get_obj_sprite_stuffs(b)
+    local aw = uaw * (a.sx or 1) * (a.s or 1)
+    local ah = uah * (a.sy or 1) * (a.s or 1)
+    local bw = ubw * (a.sx or 1) * (a.s or 1)
+    local bh = ubh * (a.sy or 1) * (a.s or 1)
 
     local sa = math.sqrt(aw*aw+ah*ah)
     local sb = math.sqrt(bw*bw+bh*bh)
@@ -111,7 +161,7 @@ function L:collide(a, b)
         return false
     end
 
-    local sat =rotated_rect_collision({x=a.x, y=a.y, w=aw, h=ah, angle=math.rad(a.r or 0)}, {x=b.x, y=b.y, w=bw, h=bh, angle=math.rad(b.r or 0)})
+    local sat = rotated_rect_collision({x=a.x, y=a.y, w=aw, h=ah, angle=math.rad(a.r or 0)}, {x=b.x, y=b.y, w=bw, h=bh, angle=math.rad(b.r or 0)})
 
     if not sat then
         return false
@@ -166,6 +216,8 @@ function love.update(dt)
     if not last_mod_time or (mod_time > last_mod_time) then
         local status, err = pcall(function () dofile("src/game.lua") end)
         print(mod_time, last_mod_time, status, err)
+
+        load_assets()
 
         if not last_mod_time then
             L.setup()
