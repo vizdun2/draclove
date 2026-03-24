@@ -28,7 +28,7 @@ function L.setup()
 	L.red_screen = nil
 	L.dead = false
 	L.won = false
-	
+
 	for i=1,L.enemy_count do
 		local enemy = {
 			x = math.random(-arena_size + blob_size, arena_size - blob_size),
@@ -58,7 +58,7 @@ local function update_enemies(dt)
 		local oldx, oldy = enemy.x, enemy.y
 		enemy.x = enemy.x + enemy.dx * ship_speed * dt
 		enemy.y = enemy.y + enemy.dy * ship_speed * dt
-		
+
 		for jk,jenemy in pairs(L.enemies) do
 			if k ~= jk and L:collide(enemy, jenemy) then
 				enemy.x, enemy.y = oldx, oldy
@@ -134,7 +134,7 @@ function L.render(dt)
 	if L.enemy_count == 0 then
 		L.won = true
 	end
-	
+
 	love.graphics.clear(0.05,0.05,0.05,1)
 	L:set_cam(L.player.x, L.player.y)
 
@@ -145,7 +145,7 @@ function L.render(dt)
 	for k,enemy in pairs(L.enemies) do
 		L:draw(enemy)
 	end
-	
+
 	L:draw(L.player)
 
 	for k,explo in pairs(L.explosions) do

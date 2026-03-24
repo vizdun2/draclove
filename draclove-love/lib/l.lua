@@ -7,10 +7,9 @@ local L = {
     cam_y = 0,
     dt = 0,
     assets = {},
-    playing_sounds = {},
     fonts = {},
     setup = function() end,
-    render = function() end,
+    render = function(dt) end,
 }
 
 local square_size = 32
@@ -61,7 +60,7 @@ local function load_assets()
     end
 end
 
-function hex_to_rgb(hex)
+local function hex_to_rgb(hex)
     local hex = hex:gsub("#","")
     local r = tonumber("0x"..hex:sub(1,2))/255
     local g = tonumber("0x"..hex:sub(3,4))/255
@@ -70,7 +69,7 @@ function hex_to_rgb(hex)
     if #hex == 8 then
         a = tonumber("0x"..hex:sub(7,8))/255
     end
-    
+
     return r,g,b,a
 end
 
@@ -79,6 +78,8 @@ function L:set_cam(x,y)
     L.cam_y = y or 0
 end
 
+---@param audio_name string? Audio name
+---@param volume number? Volume multiplier eg. 0.75
 function L:play(audio_name, volume)
     if audio_name and L.assets.sounds[audio_name] then
         local source = L.assets.sounds[audio_name]:clone()
@@ -113,10 +114,37 @@ local function lazy_get_font(name, size)
     end
 end
 
+---@alias Alignment
+---| '"lt"' Left, top
+---| '"lm"' Left, middle
+---| '"lb"' Left, bottom
+---| '"mt"' Center, top
+---| '"mm"' Center, middle
+---| '"mb"' Center, bottom
+---| '"rt"' Right, top
+---| '"rm"' Right, middle
+---| '"rb"' Right, bottom
+
+---@class Obj
+---@field c string? Hex color eg. "#ffffff"
+---@field text string? Text
+---@field font string? Font
+---@field font_size number? Font/text size
+---@field align Alignment? Text alignment
+---@field x number? X position
+---@field y number? Y position
+---@field r number? Rotation in degrees
+---@field s number? Scale
+---@field sx number? Scale across the X axis
+---@field sy number? Scale across the Y axis
+---@field sprite string? Sprite
+---@field sprite_t number? Sprite animation frame duration
+
+---@param obj Obj
 function L:draw(obj)
     local r,g,b,a = hex_to_rgb(obj.c or "#ffffff")
     love.graphics.setColor(r,g,b,a)
-	
+
     if obj.text then
         local font = lazy_get_font(obj.font, obj.font_size or 13)
 	    local plainText = love.graphics.newText(font, obj.text)
@@ -136,11 +164,11 @@ function L:draw(obj)
         end
 
         local margin_y = 0
-        if align_hor == "t" then
+        if align_ver == "t" then
             margin_y = 0
-        elseif align_hor == "m" then
+        elseif align_ver == "m" then
             margin_y = h / 2
-        elseif align_hor == "b" then
+        elseif align_ver == "b" then
             margin_y = h
         end
 
@@ -175,6 +203,8 @@ function L:draw(obj)
 end
 
 local i = 0
+---@param a Obj
+---@param b Obj
 function L:collide(a, b)
     local _, uaw, uah = get_obj_sprite_stuffs(a)
     local _, ubw, ubh = get_obj_sprite_stuffs(b)
@@ -257,7 +287,7 @@ function love.update(dt)
         if not last_mod_time then
             L.setup()
         end
-        
+
         last_mod_time = mod_time
     end
 end
@@ -266,7 +296,7 @@ function love.draw()
 	local swidth, sheight = love.graphics.getDimensions()
 	local canvas = love.graphics.newCanvas(L.width, L.height)
 	love.graphics.setCanvas(canvas)
-	
+
     L:set_cam()
 	L.render(L.dt)
     L:set_cam()

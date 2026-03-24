@@ -13,7 +13,7 @@ local function normalize(v)
 end
 
 -- Get rectangle corners
-function getCorners(rect)
+local function getCorners(rect)
     local cx, cy = rect.x, rect.y
     local w, h = rect.w / 2, rect.h / 2
     local angle = rect.angle
@@ -38,7 +38,7 @@ function getCorners(rect)
 end
 
 -- Project points onto axis
-function project(points, axis)
+local function project(points, axis)
     local min = dot(points[1], axis)
     local max = min
 
@@ -52,12 +52,12 @@ function project(points, axis)
 end
 
 -- Check overlap
-function overlap(minA, maxA, minB, maxB)
+local function overlap(minA, maxA, minB, maxB)
     return maxA >= minB and maxB >= minA
 end
 
 -- Main collision function
-function rotatedRectCollision(a, b)
+local function rotatedRectCollision(a, b)
     local cornersA = getCorners(a)
     local cornersB = getCorners(b)
 
