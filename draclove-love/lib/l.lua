@@ -73,14 +73,14 @@ local function hex_to_rgb(hex)
     return r,g,b,a
 end
 
-function L:set_cam(x,y)
+function L.set_cam(x,y)
     L.cam_x = x or 0
     L.cam_y = y or 0
 end
 
 ---@param audio_name string? Audio name
 ---@param volume number? Volume multiplier eg. 0.75
-function L:play(audio_name, volume)
+function L.play(audio_name, volume)
     if audio_name and L.assets.sounds[audio_name] then
         local source = L.assets.sounds[audio_name]:clone()
         source:setVolume(volume or 1)
@@ -141,7 +141,7 @@ end
 ---@field sprite_t number? Sprite animation frame duration
 
 ---@param obj Obj
-function L:draw(obj)
+function L.draw(obj)
     local r,g,b,a = hex_to_rgb(obj.c or "#ffffff")
     love.graphics.setColor(r,g,b,a)
 
@@ -184,7 +184,7 @@ function L:draw(obj)
         )
     else
         local drawable, sprite_width, sprite_height, r, c = get_obj_sprite_stuffs(obj)
-        local sprite_i = (obj.sprite_t and (math.floor(L:time() / obj.sprite_t) % (r*c) + 1)) or 1
+        local sprite_i = (obj.sprite_t and (math.floor(L.time() / obj.sprite_t) % (r*c) + 1)) or 1
 
         love.graphics.draw(
             drawable,
@@ -205,13 +205,13 @@ end
 local i = 0
 ---@param a Obj
 ---@param b Obj
-function L:collide(a, b)
+function L.collide(a, b)
     local _, uaw, uah = get_obj_sprite_stuffs(a)
     local _, ubw, ubh = get_obj_sprite_stuffs(b)
     local aw = uaw * (a.sx or 1) * (a.s or 1)
     local ah = uah * (a.sy or 1) * (a.s or 1)
-    local bw = ubw * (a.sx or 1) * (a.s or 1)
-    local bh = ubh * (a.sy or 1) * (a.s or 1)
+    local bw = ubw * (b.sx or 1) * (b.s or 1)
+    local bh = ubh * (b.sy or 1) * (b.s or 1)
 
     local sa = math.sqrt(aw*aw+ah*ah)
     local sb = math.sqrt(bw*bw+bh*bh)
@@ -237,15 +237,15 @@ function L:collide(a, b)
     return true
 end
 
-function L:angle_look_at(x1, y1, x2, y2)
+function L.angle_look_at(x1, y1, x2, y2)
 	return math.deg(math.atan2(y2-y1, x2-x1))
 end
 
-function L:angle_vec(angle)
+function L.angle_vec(angle)
 	return math.cos(math.rad(angle)), math.sin(math.rad(angle))
 end
 
-function L:getRatio()
+function L.getRatio()
 	local swidth, sheight = love.graphics.getDimensions()
 	local ratioX, ratioY = swidth / L.width, sheight / L.height
 	local ratio = ((ratioX <= ratioY) and ratioX) or ratioY
@@ -253,22 +253,30 @@ function L:getRatio()
 	return ratio
 end
 
-function L:getMousePos()
+function L.getMousePos()
 	local nx, ny = love.mouse.getPosition()
-	local ratio = L:getRatio()
+	local ratio = L.getRatio()
 	local swidth, sheight = love.graphics.getDimensions()
 	return (nx - ((swidth - L.width * ratio) / 2)) / ratio - L.width / 2, (ny - ((sheight - L.height * ratio) / 2)) / ratio - L.height / 2
 end
 
-function L:time()
+--- @param scale number? 
+--- @return Obj
+function L.getMouse(scale)
+    local x,y = L.getMousePos()
+    local wx, wy = L.cam_x + x, L.cam_y + y
+	return { x=wx, y=wy, s=(scale or 1) }
+end
+
+function L.time()
     return love.timer.getTime()
 end
 
-function L:pasttime(t)
-    return L:time() > t
+function L.pasttime(t)
+    return L.time() > t
 end
 
-function L:reset()
+function L.reset()
     L.setup()
 end
 
@@ -297,12 +305,12 @@ function love.draw()
 	local canvas = love.graphics.newCanvas(L.width, L.height)
 	love.graphics.setCanvas(canvas)
 
-    L:set_cam()
+    L.set_cam()
 	L.render(L.dt)
-    L:set_cam()
+    L.set_cam()
 
 	love.graphics.setCanvas()
-	local ratio = L:getRatio()
+	local ratio = L.getRatio()
 	love.graphics.draw(canvas, swidth / 2, sheight / 2, 0, ratio, ratio, L.width / 2, L.height / 2)
 end
 
