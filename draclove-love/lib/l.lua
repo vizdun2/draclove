@@ -5,7 +5,9 @@ local L = {
     height = 720,
     cam_x = 0,
     cam_y = 0,
+    cam_s = 0,
     dt = 0,
+    setup_done = false,
     assets = {},
     fonts = {},
     setup = function() end,
@@ -16,9 +18,9 @@ local square_size = 32
 local square_canvas = love.graphics.newCanvas(square_size, square_size)
 square_canvas:setFilter("nearest", "nearest")
 love.graphics.setCanvas(square_canvas)
-love.graphics.clear(1,1,1,1)
+love.graphics.clear(1, 1, 1, 1)
 love.graphics.setCanvas()
-local square_quad = love.graphics.newQuad(0,0,square_size,square_size,square_size,square_size)
+local square_quad = love.graphics.newQuad(0, 0, square_size, square_size, square_size, square_size)
 
 local function load_assets()
     L.assets = {
@@ -28,7 +30,7 @@ local function load_assets()
     }
 
     local files = love.filesystem.getDirectoryItems("assets")
-    for i,filename in ipairs(files) do
+    for i, filename in ipairs(files) do
         local texture_name, texture_row, texture_col = filename:match("^(.*)_([0-9]+)x([0-9]+)%.png$")
         local audio_name = filename:match("^(.*)%.mp3$") or filename:match("^(.*)%.wav$")
         local font_name = filename:match("^(.*)%.ttf$")
@@ -36,13 +38,13 @@ local function load_assets()
         if texture_name then
             local image = love.graphics.newImage("assets/" .. filename)
             image:setFilter("nearest", "nearest")
-            local w,h = image:getWidth(),image:getHeight()
+            local w, h = image:getWidth(), image:getHeight()
 
             local quads = {}
             local r, c = tonumber(texture_row), tonumber(texture_col)
-            for j=0,r-1 do
-                for i=0,c-1 do
-                    table.insert(quads, love.graphics.newQuad(w/c*i,h/r*j,w/c,h/r,w,h))
+            for j = 0, r - 1 do
+                for i = 0, c - 1 do
+                    table.insert(quads, love.graphics.newQuad(w / c * i, h / r * j, w / c, h / r, w, h))
                 end
             end
 
@@ -61,21 +63,22 @@ local function load_assets()
 end
 
 local function hex_to_rgb(hex)
-    local hex = hex:gsub("#","")
-    local r = tonumber("0x"..hex:sub(1,2))/255
-    local g = tonumber("0x"..hex:sub(3,4))/255
-    local b = tonumber("0x"..hex:sub(5,6))/255
+    local hex = hex:gsub("#", "")
+    local r = tonumber("0x" .. hex:sub(1, 2)) / 255
+    local g = tonumber("0x" .. hex:sub(3, 4)) / 255
+    local b = tonumber("0x" .. hex:sub(5, 6)) / 255
     local a = 1
     if #hex == 8 then
-        a = tonumber("0x"..hex:sub(7,8))/255
+        a = tonumber("0x" .. hex:sub(7, 8)) / 255
     end
 
-    return r,g,b,a
+    return r, g, b, a
 end
 
-function L.set_cam(x,y)
+function L.set_cam(x, y, s)
     L.cam_x = x or 0
     L.cam_y = y or 0
+    L.cam_s = s or 1
 end
 
 ---@param audio_name string? Audio name
@@ -142,17 +145,17 @@ end
 
 ---@param obj Obj
 function L.draw(obj)
-    local r,g,b,a = hex_to_rgb(obj.c or "#ffffff")
-    love.graphics.setColor(r,g,b,a)
+    local r, g, b, a = hex_to_rgb(obj.c or "#ffffff")
+    love.graphics.setColor(r, g, b, a)
 
     if obj.text then
         local font = lazy_get_font(obj.font, obj.font_size or 13)
-	    local plainText = love.graphics.newText(font, obj.text)
-        local w,h = plainText:getWidth(), plainText:getHeight()
+        local plainText = love.graphics.newText(font, obj.text)
+        local w, h = plainText:getWidth(), plainText:getHeight()
 
         local align = obj.align or "lt"
-        local align_hor = align:sub(1,1)
-        local align_ver = align:sub(2,2)
+        local align_hor = align:sub(1, 1)
+        local align_ver = align:sub(2, 2)
 
         local margin_x = 0
         if align_hor == "l" then
@@ -174,32 +177,32 @@ function L.draw(obj)
 
         love.graphics.draw(
             plainText,
-            (obj.x or 0) + L.width / 2 - L.cam_x,
-            (obj.y or 0) + L.height / 2 - L.cam_y,
+            (((obj.x or 0) - L.cam_x) * L.cam_s) + L.width / 2,
+            (((obj.y or 0) - L.cam_y) * L.cam_s) + L.height / 2,
             math.rad(obj.r or 0),
-            (obj.sx or 1) * (obj.s or 1),
-            (obj.sy or 1) * (obj.s or 1),
+            (obj.sx or 1) * (obj.s or 1) * L.cam_s,
+            (obj.sy or 1) * (obj.s or 1) * L.cam_s,
             margin_x,
             margin_y
         )
     else
         local drawable, sprite_width, sprite_height, r, c = get_obj_sprite_stuffs(obj)
-        local sprite_i = (obj.sprite_t and (math.floor(L.time() / obj.sprite_t) % (r*c) + 1)) or 1
+        local sprite_i = (obj.sprite_t and (math.floor(L.time() / obj.sprite_t) % (r * c) + 1)) or 1
 
         love.graphics.draw(
             drawable,
             (obj.sprite and L.assets.textures[obj.sprite].quads[sprite_i]) or square_quad,
-            (obj.x or 0) + L.width / 2 - L.cam_x,
-            (obj.y or 0) + L.height / 2 - L.cam_y,
+            (((obj.x or 0) - L.cam_x) * L.cam_s) + L.width / 2,
+            (((obj.y or 0) - L.cam_y) * L.cam_s) + L.height / 2,
             math.rad(obj.r or 0),
-            (obj.sx or 1) * (obj.s or 1),
-            (obj.sy or 1) * (obj.s or 1),
+            (obj.sx or 1) * (obj.s or 1) * L.cam_s,
+            (obj.sy or 1) * (obj.s or 1) * L.cam_s,
             sprite_width / 2,
             sprite_height / 2
         )
     end
 
-    love.graphics.setColor(255,255,255,1)
+    love.graphics.setColor(255, 255, 255, 1)
 end
 
 local i = 0
@@ -213,19 +216,20 @@ function L.collide(a, b)
     local bw = ubw * (b.sx or 1) * (b.s or 1)
     local bh = ubh * (b.sy or 1) * (b.s or 1)
 
-    local sa = math.sqrt(aw*aw+ah*ah)
-    local sb = math.sqrt(bw*bw+bh*bh)
+    local sa = math.sqrt(aw * aw + ah * ah)
+    local sb = math.sqrt(bw * bw + bh * bh)
 
-    local aabb = a.x - sa/2 < b.x + sb/2 and
-        a.x + sa/2 > b.x - sb/2 and
-        a.y - sa/2 < b.y + sb/2 and
-        a.y + sa/2 > b.y - sb/2
+    local aabb = a.x - sa / 2 < b.x + sb / 2 and
+        a.x + sa / 2 > b.x - sb / 2 and
+        a.y - sa / 2 < b.y + sb / 2 and
+        a.y + sa / 2 > b.y - sb / 2
 
     if not aabb then
         return false
     end
 
-    local sat = rotated_rect_collision({x=a.x, y=a.y, w=aw, h=ah, angle=math.rad(a.r or 0)}, {x=b.x, y=b.y, w=bw, h=bh, angle=math.rad(b.r or 0)})
+    local sat = rotated_rect_collision({ x = a.x, y = a.y, w = aw, h = ah, angle = math.rad(a.r or 0) },
+        { x = b.x, y = b.y, w = bw, h = bh, angle = math.rad(b.r or 0) })
 
     if not sat then
         return false
@@ -238,34 +242,35 @@ function L.collide(a, b)
 end
 
 function L.angle_look_at(x1, y1, x2, y2)
-	return math.deg(math.atan2(y2-y1, x2-x1))
+    return math.deg(math.atan2(y2 - y1, x2 - x1))
 end
 
 function L.angle_vec(angle)
-	return math.cos(math.rad(angle)), math.sin(math.rad(angle))
+    return math.cos(math.rad(angle)), math.sin(math.rad(angle))
 end
 
 function L.getRatio()
-	local swidth, sheight = love.graphics.getDimensions()
-	local ratioX, ratioY = swidth / L.width, sheight / L.height
-	local ratio = ((ratioX <= ratioY) and ratioX) or ratioY
+    local swidth, sheight = love.graphics.getDimensions()
+    local ratioX, ratioY = swidth / L.width, sheight / L.height
+    local ratio = ((ratioX <= ratioY) and ratioX) or ratioY
 
-	return ratio
+    return ratio
 end
 
 function L.getMousePos()
-	local nx, ny = love.mouse.getPosition()
-	local ratio = L.getRatio()
-	local swidth, sheight = love.graphics.getDimensions()
-	return (nx - ((swidth - L.width * ratio) / 2)) / ratio - L.width / 2, (ny - ((sheight - L.height * ratio) / 2)) / ratio - L.height / 2
+    local nx, ny = love.mouse.getPosition()
+    local ratio = L.getRatio()
+    local swidth, sheight = love.graphics.getDimensions()
+    return (((nx - ((swidth - L.width * ratio) / 2)) / ratio) - L.width / 2),
+        (((ny - ((sheight - L.height * ratio) / 2)) / ratio) - L.height / 2)
 end
 
---- @param scale number? 
+--- @param scale number?
 --- @return Obj
 function L.getMouse(scale)
-    local x,y = L.getMousePos()
+    local x, y = L.getMousePos()
     local wx, wy = L.cam_x + x, L.cam_y + y
-	return { x=wx, y=wy, s=(scale or 1) }
+    return { x = wx, y = wy, s = (scale or 1) }
 end
 
 function L.time()
@@ -277,23 +282,41 @@ function L.pasttime(t)
 end
 
 function L.reset()
-    L.setup()
+    local status, err = xpcall(function() L.setup() end, debug.traceback)
+    if err then
+        L.print(err)
+    else
+        L.setup_done = true
+    end
+end
+
+local prev_text
+function L.print(text)
+    L.draw({text=text,c="#FF0000", x=-L.width/2, y=-L.height/2, s=2})
+    if prev_text ~= text then
+        print(text)
+    end
+    prev_text = text
 end
 
 local last_mod_time = nil
 function love.update(dt)
-	L.dt = dt
+    L.dt = dt
 
     local mod_time = love.filesystem.getInfo("src/game.lua").modtime
     if not last_mod_time or (mod_time > last_mod_time) then
         local contents, _size = love.filesystem.read("src/game.lua")
-        local status, err = xpcall(function () loadstring(contents)() end, debug.traceback)
-        print(mod_time, last_mod_time, status, err)
+        local status, err = xpcall(function() loadstring(contents)() end, debug.traceback)
+        print(mod_time, last_mod_time)
+
+        if err then
+            L.print(err)
+        end
 
         load_assets()
 
-        if not last_mod_time then
-            L.setup()
+        if not L.setup_done then
+            L.reset()
         end
 
         last_mod_time = mod_time
@@ -301,17 +324,20 @@ function love.update(dt)
 end
 
 function love.draw()
-	local swidth, sheight = love.graphics.getDimensions()
-	local canvas = love.graphics.newCanvas(L.width, L.height)
-	love.graphics.setCanvas(canvas)
+    local swidth, sheight = love.graphics.getDimensions()
+    local canvas = love.graphics.newCanvas(L.width, L.height)
+    love.graphics.setCanvas(canvas)
 
     L.set_cam()
-	L.render(L.dt)
+    local status, err = xpcall(function() L.render(L.dt) end, debug.traceback)
+    if err then
+        L.print(err)
+    end
     L.set_cam()
 
-	love.graphics.setCanvas()
-	local ratio = L.getRatio()
-	love.graphics.draw(canvas, swidth / 2, sheight / 2, 0, ratio, ratio, L.width / 2, L.height / 2)
+    love.graphics.setCanvas()
+    local ratio = L.getRatio()
+    love.graphics.draw(canvas, swidth / 2, sheight / 2, 0, ratio, ratio, L.width / 2, L.height / 2)
 end
 
 return L

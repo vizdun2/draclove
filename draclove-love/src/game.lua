@@ -136,7 +136,11 @@ function L.render(dt)
 	end
 
 	love.graphics.clear(0.05,0.05,0.05,1)
-	L.set_cam(L.player.x, L.player.y)
+	L.set_cam(L.player.x, L.player.y, 2)
+
+	if L.collide(L.player, L.getMouse()) then
+		print("touching the space ship")
+	end
 
 	for k,bullet in pairs(L.bullets) do
 		L.draw(bullet)
