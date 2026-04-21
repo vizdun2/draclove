@@ -1,7 +1,7 @@
 local L = require("lib/l")
 
 function L.setup()
-	L.plane = {sprite="stuff/letadlo", x=0, y=0, dead=false, velocity=0}
+	L.plane = {x=0, y=0, dead=false, velocity=0}
 end
 
 local function change_plane_velocity(dt)

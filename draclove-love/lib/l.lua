@@ -339,6 +339,20 @@ function L.print(...)
     prev_text = text
 end
 
+function L.patch(a, b)
+    local c = {}
+
+    for key, value in pairs(a) do
+        c[key] = value
+    end
+
+    for key, value in pairs(b) do
+        c[key] = value
+    end
+
+    return c
+end
+
 local last_mod_time = nil
 function love.update(dt)
     L.dt = dt
