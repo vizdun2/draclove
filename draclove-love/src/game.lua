@@ -1,7 +1,7 @@
 local L = require("lib/l")
 
 function L.setup()
-	L.plane = {x=0, y=0, dead=false, velocity=0}
+	L.plane = {sprite="stuff/letadlo", x=0, y=0, dead=false, velocity=0}
 end
 
 local function change_plane_velocity(dt)
@@ -42,7 +42,7 @@ end
 function L.render(dt)
 	change_plane_velocity(dt)
 	move_plane(dt)
-	L.draw({text="Dt: " .. dt, font="pixelifysans",font_size=42,align="mm",x=0,y=0})
+	-- L.draw({text="Dt: " .. dt, font="pixelifysans",font_size=42,align="mm",x=0,y=0})
 	L.draw(L.plane)
 	if L.key_released("backspace") then 
 		L.reset()

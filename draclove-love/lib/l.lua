@@ -24,6 +24,47 @@ love.graphics.clear(1, 1, 1, 1)
 love.graphics.setCanvas()
 local square_quad = love.graphics.newQuad(0, 0, square_size, square_size, square_size, square_size)
 
+local function load_assets_rec(dir)
+    local files = love.filesystem.getDirectoryItems(dir)
+    local dirwithoutassets = string.sub(dir, 8)
+    for i, filename in ipairs(files) do
+        if love.filesystem.getInfo(dir .. filename).type == "directory" then
+            load_assets_rec(dir .. filename .. "/")
+        else
+            local texture_name, texture_row, texture_col = filename:match("^(.*)_([0-9]+)x([0-9]+)%.png$")
+            local audio_name = filename:match("^(.*)%.mp3$") or filename:match("^(.*)%.wav$")
+            local font_name = filename:match("^(.*)%.ttf$")
+
+            if texture_name then
+                local image = love.graphics.newImage(dir .. filename)
+                image:setFilter("nearest", "nearest")
+                local w, h = image:getWidth(), image:getHeight()
+
+                local quads = {}
+                local r, c = tonumber(texture_row), tonumber(texture_col)
+                for j = 0, r - 1 do
+                    for i = 0, c - 1 do
+                        table.insert(quads, love.graphics.newQuad(w / c * i, h / r * j, w / c, h / r, w, h))
+                    end
+                end
+
+                print(dirwithoutassets .. texture_name)
+
+                L.assets.textures[dirwithoutassets .. texture_name] = {
+                    row = r,
+                    col = c,
+                    quads = quads,
+                    image = image,
+                }
+            elseif audio_name then
+                L.assets.sounds[dirwithoutassets .. audio_name] = love.audio.newSource(dir .. filename, "static")
+            elseif font_name then
+                L.assets.fonts[dirwithoutassets .. font_name] = filename
+            end
+        end
+    end
+end
+
 local function load_assets()
     L.assets = {
         textures = {},
@@ -31,37 +72,7 @@ local function load_assets()
         fonts = {},
     }
 
-    local files = love.filesystem.getDirectoryItems("assets")
-    for i, filename in ipairs(files) do
-        local texture_name, texture_row, texture_col = filename:match("^(.*)_([0-9]+)x([0-9]+)%.png$")
-        local audio_name = filename:match("^(.*)%.mp3$") or filename:match("^(.*)%.wav$")
-        local font_name = filename:match("^(.*)%.ttf$")
-
-        if texture_name then
-            local image = love.graphics.newImage("assets/" .. filename)
-            image:setFilter("nearest", "nearest")
-            local w, h = image:getWidth(), image:getHeight()
-
-            local quads = {}
-            local r, c = tonumber(texture_row), tonumber(texture_col)
-            for j = 0, r - 1 do
-                for i = 0, c - 1 do
-                    table.insert(quads, love.graphics.newQuad(w / c * i, h / r * j, w / c, h / r, w, h))
-                end
-            end
-
-            L.assets.textures[texture_name] = {
-                row = r,
-                col = c,
-                quads = quads,
-                image = image,
-            }
-        elseif audio_name then
-            L.assets.sounds[audio_name] = love.audio.newSource("assets/" .. filename, "static")
-        elseif font_name then
-            L.assets.fonts[font_name] = filename
-        end
-    end
+    load_assets_rec("assets/")
 end
 
 local function hex_to_rgb(hex)
@@ -94,9 +105,9 @@ function L.play(audio_name, volume)
 end
 
 local function get_obj_sprite_stuffs(obj)
-    local drawable = (obj.sprite and L.assets.textures[obj.sprite].image) or square_canvas
-    local row_count = (obj.sprite and L.assets.textures[obj.sprite].row) or 1
-    local col_count = (obj.sprite and L.assets.textures[obj.sprite].col) or 1
+    local drawable = (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].image) or square_canvas
+    local row_count = (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].row) or 1
+    local col_count = (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].col) or 1
     local sprite_width = drawable:getWidth() / col_count
     local sprite_height = drawable:getHeight() / row_count
     return drawable, sprite_width, sprite_height, row_count, col_count
@@ -193,7 +204,7 @@ function L.draw(obj)
 
         love.graphics.draw(
             drawable,
-            (obj.sprite and L.assets.textures[obj.sprite].quads[sprite_i]) or square_quad,
+            (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].quads[sprite_i]) or square_quad,
             (((obj.x or 0) - L.cam_x) * L.cam_s) + L.width / 2,
             (((obj.y or 0) - L.cam_y) * L.cam_s) + L.height / 2,
             math.rad(obj.r or 0),

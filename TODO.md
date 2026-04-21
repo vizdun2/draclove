@@ -1,4 +1,3 @@
-- subdirs for spries
 - table append/superset functional bs thing
 - debug sprite
 - pretty print log
