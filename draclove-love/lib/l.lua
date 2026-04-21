@@ -105,7 +105,7 @@ function L.play(audio_name, volume)
 end
 
 local function get_obj_sprite_stuffs(obj)
-    local drawable = (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].image) or square_canvas
+    local drawable = (obj.debug and square_canvas) or (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].image) or square_canvas
     local row_count = (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].row) or 1
     local col_count = (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].col) or 1
     local sprite_width = drawable:getWidth() / col_count
@@ -153,6 +153,7 @@ end
 ---@field s number? Scale
 ---@field sx number? Scale across the X axis
 ---@field sy number? Scale across the Y axis
+---@field debug boolean? Draw a white rectangle of the same size as sprite instead of a sprite
 ---@field sprite string? Sprite
 ---@field sprite_t number? Sprite animation frame duration
 
