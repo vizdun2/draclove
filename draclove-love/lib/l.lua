@@ -8,6 +8,7 @@ local L = {
     cam_s = 0,
     dt = 0,
     setup_done = false,
+    released_keys = {},
     assets = {},
     fonts = {},
     setup = function() end,
@@ -271,6 +272,20 @@ function L.get_mouse(scale)
     local x, y = L.get_mouse_pos()
     local wx, wy = L.cam_x + x, L.cam_y + y
     return { x = wx, y = wy, s = (scale or 1) }
+end
+
+function L.key_down(key)
+    return love.keyboard.isDown(key)
+end
+
+function L.key_released(key)
+	local res = L.released_keys[key] or false
+    L.released_keys[key] = nil
+    return res
+end
+
+function love.keyreleased(key)
+	L.released_keys[key] = true
 end
 
 function L.time()

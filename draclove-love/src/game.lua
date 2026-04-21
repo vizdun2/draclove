@@ -5,19 +5,6 @@ local bullet_speed = 500
 local blob_size = 20
 local arena_size = 1200
 
-function love.keyreleased(key)
-	if key == "space" and not L.dead and not L.won then
-		local mx, my = L.get_mouse_pos()
-		local dx,dy = L.angle_vec(L.angle_look_at(0, 0, mx, my))
-		table.insert(L.bullets, {expire=L.time()+2, dx=dx, dy=dy, sprite="laser",sprite_t=0.15,s=1.5, x=L.player.x, y=L.player.y, r=L.angle_look_at(0, 0, dx, dy) + 90})
-		L.play("laser")
-	end
-
-	if key == "backspace" then
-		L.reset()
-	end
-end
-
 function L.setup()
 	L.player = {x=0, y=0,sprite="ship",sprite_t=0.15,s=2}
 	L.enemies = {}
@@ -84,10 +71,21 @@ local function update_enemies(dt)
 end
 
 local function update_player(dt)
-	if love.keyboard.isDown("w") then L.player.y = L.player.y - ship_speed * dt end
-	if love.keyboard.isDown("s") then L.player.y = L.player.y + ship_speed * dt end
-	if love.keyboard.isDown("a") then L.player.x = L.player.x - ship_speed * dt end
-	if love.keyboard.isDown("d") then L.player.x = L.player.x + ship_speed * dt end
+	if L.key_down("w") then L.player.y = L.player.y - ship_speed * dt end
+	if L.key_down("s") then L.player.y = L.player.y + ship_speed * dt end
+	if L.key_down("a") then L.player.x = L.player.x - ship_speed * dt end
+	if L.key_down("d") then L.player.x = L.player.x + ship_speed * dt end
+
+	if L.key_released("space") and not L.dead and not L.won then
+		local mx, my = L.get_mouse_pos()
+		local dx,dy = L.angle_vec(L.angle_look_at(0, 0, mx, my))
+		table.insert(L.bullets, {expire=L.time()+2, dx=dx, dy=dy, sprite="laser",sprite_t=0.15,s=1.5, x=L.player.x, y=L.player.y, r=L.angle_look_at(0, 0, dx, dy) + 90})
+		L.play("laser")
+	end
+
+	if L.key_released("backspace") then
+		L.reset()
+	end
 
 	local mx, my = L.get_mouse_pos()
 	L.player.r = L.angle_look_at(0, 0, mx, my) + 90
