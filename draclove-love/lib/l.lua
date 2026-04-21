@@ -9,6 +9,7 @@ local L = {
     dt = 0,
     setup_done = false,
     released_keys = {},
+    pressed_keys = {},
     assets = {},
     fonts = {},
     setup = function() end,
@@ -284,8 +285,18 @@ function L.key_released(key)
     return res
 end
 
+function L.key_pressed(key)
+	local res = L.pressed_keys[key] or false
+    L.pressed_keys[key] = nil
+    return res
+end
+
 function love.keyreleased(key)
 	L.released_keys[key] = true
+end
+
+function love.keypressed(key)
+	L.pressed_keys[key] = true
 end
 
 function L.time()
