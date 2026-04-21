@@ -249,7 +249,7 @@ function L.angle_vec(angle)
     return math.cos(math.rad(angle)), math.sin(math.rad(angle))
 end
 
-function L.getRatio()
+function L.get_ratio()
     local swidth, sheight = love.graphics.getDimensions()
     local ratioX, ratioY = swidth / L.width, sheight / L.height
     local ratio = ((ratioX <= ratioY) and ratioX) or ratioY
@@ -257,9 +257,9 @@ function L.getRatio()
     return ratio
 end
 
-function L.getMousePos()
+function L.get_mouse_pos()
     local nx, ny = love.mouse.getPosition()
-    local ratio = L.getRatio()
+    local ratio = L.get_ratio()
     local swidth, sheight = love.graphics.getDimensions()
     return (((nx - ((swidth - L.width * ratio) / 2)) / ratio) - L.width / 2),
         (((ny - ((sheight - L.height * ratio) / 2)) / ratio) - L.height / 2)
@@ -267,8 +267,8 @@ end
 
 --- @param scale number?
 --- @return Obj
-function L.getMouse(scale)
-    local x, y = L.getMousePos()
+function L.get_mouse(scale)
+    local x, y = L.get_mouse_pos()
     local wx, wy = L.cam_x + x, L.cam_y + y
     return { x = wx, y = wy, s = (scale or 1) }
 end
@@ -336,7 +336,7 @@ function love.draw()
     L.set_cam()
 
     love.graphics.setCanvas()
-    local ratio = L.getRatio()
+    local ratio = L.get_ratio()
     love.graphics.draw(canvas, swidth / 2, sheight / 2, 0, ratio, ratio, L.width / 2, L.height / 2)
 end
 
