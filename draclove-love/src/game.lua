@@ -16,15 +16,10 @@ local function change_plane_velocity(dt)
 		else
 			L.plane.velocity = L.plane.velocity + dt * downspeed_const 
 		end
-		L.print(""..L.plane.velocity)	
 	end
 	if L.key_pressed("space")  then
 		L.plane.velocity = upspeed_const
 	end
-
-
-	
-
 end
 
 local function move_plane(dt)
@@ -42,11 +37,10 @@ end
 function L.render(dt)
 	change_plane_velocity(dt)
 	move_plane(dt)
-	-- L.draw({text="Dt: " .. dt, font="pixelifysans",font_size=42,align="mm",x=0,y=0})
 	L.draw(L.plane)
-	if L.key_released("backspace") then 
+	L.print(L.plane)
+	if L.key_released("backspace") then
 		L.reset()
 	end
-
 end
 

@@ -1,4 +1,5 @@
 local rotated_rect_collision = require("lib/aibs")
+local inspect = require("lib/inspect")
 
 local L = {
     width = 1280,
@@ -329,7 +330,8 @@ function L.reset()
 end
 
 local prev_text
-function L.print(text)
+function L.print(...)
+    local text = inspect(...)
     L.draw({text=text,c="#FF0000", x=-L.width/2, y=-L.height/2, s=2})
     if prev_text ~= text then
         print(text)
