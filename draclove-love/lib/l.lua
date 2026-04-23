@@ -369,7 +369,7 @@ end
 function L.uid()
     local uid = L.next_uid
     L.next_uid = L.next_uid + 1
-    return uid
+    return tostring(uid)
 end
 
 local last_mod_time = nil
