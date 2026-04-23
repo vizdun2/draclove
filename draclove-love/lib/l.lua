@@ -15,6 +15,7 @@ local L = {
     fonts = {},
     setup = function() end,
     render = function(dt) end,
+    next_uid = 1,
 }
 
 local square_size = 32
@@ -363,6 +364,12 @@ function L.patch(a, b)
     end
 
     return c
+end
+
+function L.uid()
+    local uid = L.next_uid
+    L.next_uid = L.next_uid + 1
+    return uid
 end
 
 local last_mod_time = nil
