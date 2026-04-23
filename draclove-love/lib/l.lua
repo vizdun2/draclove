@@ -323,7 +323,7 @@ function L.reset()
     L.prev_text = nil
     local status, err = xpcall(function() L.setup() end, debug.traceback)
     if err then
-        L.print(err)
+        L.print("Error setuping:", err)
     else
         L.setup_done = true
     end
@@ -378,10 +378,10 @@ function love.update(dt)
     if not last_mod_time or (mod_time > last_mod_time) then
         local contents, _size = love.filesystem.read("src/game.lua")
         local status, err = xpcall(function() loadstring(contents)() end, debug.traceback)
-        print(mod_time, last_mod_time)
+        print("Reloaded, new:", mod_time, "old:", last_mod_time)
 
         if err then
-            L.print(err)
+            L.print("Error reloading:", err)
         end
 
         load_assets()
@@ -402,7 +402,7 @@ function love.draw()
     L.set_cam()
     local status, err = xpcall(function() L.render(L.dt) end, debug.traceback)
     if err then
-        L.print(err)
+        L.print("Error rendering/updating:", err)
     end
     L.set_cam()
     if L.prev_text then
