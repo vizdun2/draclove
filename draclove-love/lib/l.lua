@@ -50,8 +50,6 @@ local function load_assets_rec(dir)
                     end
                 end
 
-                print(dirwithoutassets .. texture_name)
-
                 L.assets.textures[dirwithoutassets .. texture_name] = {
                     row = r,
                     col = c,
@@ -251,7 +249,7 @@ function L.collide(a, b)
         return false
     end
 
-    print("collision, collision!", i)
+    -- print("collision, collision!", i)
     i = i + 1
 
     return true
