@@ -321,6 +321,7 @@ function L.pasttime(t)
 end
 
 function L.reset()
+    L.prev_text = nil
     local status, err = xpcall(function() L.setup() end, debug.traceback)
     if err then
         L.print(err)
@@ -329,14 +330,25 @@ function L.reset()
     end
 end
 
-local prev_text
+local function time_fmt(s)
+    local h = math.floor(s / 3600)
+    local m = math.floor((s % 3600) / 60)
+    local s = s % 60
+    return string.format("%02d:%02d:%06.3f", h, m, s)
+end
+
 function L.print(...)
-    local text = inspect(...)
-    L.draw({text=text,c="#FF0000", x=-L.width/2, y=-L.height/2, s=2})
-    if prev_text ~= text then
-        print(text)
+    local text = ""
+    local print_text = time_fmt(L.time()) .. ":"
+
+    for i = 1, select("#", ...) do
+        local v = select(i, ...)
+        print_text = print_text .. " " .. inspect(v, {newline = "", indent = ""})
+        text = text .. inspect(v) .. "\n"
     end
-    prev_text = text
+
+    print(print_text)
+    L.prev_text = text
 end
 
 function L.patch(a, b)
@@ -388,6 +400,9 @@ function love.draw()
         L.print(err)
     end
     L.set_cam()
+    if L.prev_text then
+        L.draw({text=L.prev_text,c="#FF0000", x=-L.width/2, y=-L.height/2, s=2})
+    end
 
     love.graphics.setCanvas()
     local ratio = L.get_ratio()
