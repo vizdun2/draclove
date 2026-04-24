@@ -209,14 +209,19 @@ function L.draw(obj)
         local drawable, sprite_width, sprite_height, r, c = get_obj_sprite_stuffs(obj)
         local sprite_i = (obj.sprite_t and (math.floor((L.time() - (obj.sprite_start or 0)) / obj.sprite_t) % (r * c) + 1)) or 1
 
+        local x = ((not obj.debug) and (obj.x or 0)) or ((sprite_width + (obj.pl or 0) + (obj.pr or 0)) / sprite_width)
+        local y = obj.y or 0
+        local dx = ((not obj.debug) and 1) or ((sprite_width + (obj.pl or 0) + (obj.pr or 0)) / sprite_width)
+        local dy = ((not obj.debug) and 1) or ((sprite_height + (obj.pt or 0) + (obj.pb or 0)) / sprite_height)
+
         love.graphics.draw(
             drawable,
             (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].quads[sprite_i]) or square_quad,
-            (((obj.x or 0) - L.cam_x) * L.cam_s) + L.width / 2,
-            (((obj.y or 0) - L.cam_y) * L.cam_s) + L.height / 2,
+            ((x - L.cam_x) * L.cam_s) + L.width / 2,
+            ((y - L.cam_y) * L.cam_s) + L.height / 2,
             math.rad(obj.r or 0),
-            (obj.sx or 1) * (obj.s or 1) * L.cam_s,
-            (obj.sy or 1) * (obj.s or 1) * L.cam_s,
+            dx * (obj.sx or 1) * (obj.s or 1) * L.cam_s,
+            dy * (obj.sy or 1) * (obj.s or 1) * L.cam_s,
             sprite_width / 2,
             sprite_height / 2
         )
@@ -411,7 +416,7 @@ function L.move(obj, x, y, mult)
 end
 
 function L.move_vel(obj, mult)
-    return L.move(obj, obj.vel_x or 0, obj.vel_y or 0, mult)
+    return L.move(obj, (obj.vel_x or 0) * L.dt, (obj.vel_y or 0) * L.dt, mult)
 end
 
 local last_mod_time = nil

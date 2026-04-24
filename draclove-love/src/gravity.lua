@@ -2,20 +2,17 @@ local L = require("lib/l")
 
 local gravity = {}
 
-function gravity.change_vel(obj, dt)
+function gravity.change_vel(obj)
     if not obj.vel_y then
         return
     end
     
 	local downspeed_const = 100
-	local upspeed_const = -300
 	local down_velocity_min = 1000
 	local cap_const_down = 20
-	-- local cap_const_down = -50
-    local ground_y = 200
 
 	if obj.vel_y < down_velocity_min then
-        obj.vel_y = obj.vel_y + dt * downspeed_const
+        obj.vel_y = obj.vel_y + downspeed_const
         if obj.vel_y > cap_const_down then
             obj.vel_y = cap_const_down
         end
