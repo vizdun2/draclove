@@ -5,13 +5,8 @@ local CB = loadfile("draclove-love/src/chairBoss.lua")()
 
 
 function L.setup()
-	L.plane = {x=0, y=0, dead=false, velocity=0}
 	CB.newBoss()
-<<<<<<< HEAD
-	L.player = {x=0,y=0, speed = 8, vel_x = 0, vel_y=0, hunger = 0, dodging = false}
-=======
-	L.player = {x=0,y=0, speed = 8, vel_x = 0, vel_y=0, hunger = 0, dodging = false, sprite="idle"}
->>>>>>> c12145ed5529253f6a0d4fdd54179a6ae44d01cc
+	L.player = {x=0,y=0, speed = 8, vel_x = 0, vel_y=0, hunger = 0,dead = false, dodging = false, sprite="idle"}
 end
 
 local ground = {x=0, y=300, sx=100}
@@ -26,13 +21,14 @@ end
 
 local movement_const = 60
 
-<<<<<<< HEAD
-function obj_live(obj)
-	
-end
-=======
 
->>>>>>> c12145ed5529253f6a0d4fdd54179a6ae44d01cc
+function L.player.take_damage()
+	local hunger_limit = 3
+	L.player.hunger = L.player.hunger + 1
+	if L.player.hunger > hunger_limit then
+		L.player.dead = true
+	end
+end
 
 
 function level_1.interact_with(obj) 
