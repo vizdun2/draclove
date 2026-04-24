@@ -6,36 +6,36 @@ local CB = loadfile("draclove-love/src/chairBoss.lua")()
 
 function L.setup()
 	CB.newBoss()
-	L.player = {x=0,y=0, speed = 8, vel_x = 0, vel_y=0, hunger = 0,dead = false, dodging = false, sprite="idle"}
+	L.player = { x = 0, y = 0, speed = 8, s=2, vel_x = 0, vel_y = 0, hunger = 0, dead = false, dodging = false, sprite =
+	"idle" }
+	function L.player.take_damage()
+		local hunger_limit = 3
+		L.player.hunger = L.player.hunger + 1
+		if L.player.hunger > hunger_limit then
+			L.player.dead = true
+		end
+	end
 end
 
-local ground = {x=0, y=300, sx=100}
+local ground = { x = 0, y = 300, sx = 100 }
 local level_1 = {
-	boss = {x=0,y=0,phase="start"},
+	boss = { x = 0, y = 0, phase = "start" },
 	np_objects = {}, -- non player objects
 }
 
 function level_1.init()
-	
+
 end
 
 local movement_const = 60
 
 
-function L.player.take_damage()
-	local hunger_limit = 3
-	L.player.hunger = L.player.hunger + 1
-	if L.player.hunger > hunger_limit then
-		L.player.dead = true
-	end
-end
 
 
-function level_1.interact_with(obj) 
+
+function level_1.interact_with(obj)
 	-- for the given tag of obj, run the specific interaction
-	
 end
-
 
 local function player_action()
 	if L.key_pressed("c") then
@@ -63,7 +63,7 @@ local function player_movement()
 		L.player.sprite_t = 0.1
 		L.player.sx = 1
 		L.player.sprite = "runnin"
-	elseif L.key_down("a") then  
+	elseif L.key_down("a") then
 		L.player.vel_x = -player_speed * movement_const
 		L.player.sprite_t = 0.1
 		L.player.sx = -1
@@ -96,22 +96,20 @@ function level_1.loop(dt)
 	L.player.on_ground = gravity.ground_collide(L.player, ground)
 	L.draw(L.player)
 	L.draw(ground)
-	
+
 
 	CB.renderBoss()
 	CB.bossLoopLogic(dt)
 
 	for np_obj in ipairs(level_1.np_objects) do
 		L.move_vel(np_obj)
-		if L.collide(L.player,np_obj) and L.key_pressed("x") then
+		if L.collide(L.player, np_obj) and L.key_pressed("x") then
 			level_1.interact_with(np_obj)
 		end
 		L.draw(np_obj)
 	end
 end
 
-
 function L.render(dt)
 	level_1.loop(dt)
 end
-
