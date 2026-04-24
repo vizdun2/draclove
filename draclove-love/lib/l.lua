@@ -105,7 +105,8 @@ function L.play(audio_name, volume)
 end
 
 local function get_obj_sprite_stuffs(obj)
-    local drawable = (obj.debug and square_canvas) or (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].image) or square_canvas
+    local drawable = (obj.debug and square_canvas) or
+        (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].image) or square_canvas
     local row_count = (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].row) or 1
     local col_count = (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].col) or 1
     local sprite_width = drawable:getWidth() / col_count
@@ -156,6 +157,7 @@ end
 ---@field debug boolean? Draw a white rectangle of the same size as sprite instead of a sprite
 ---@field sprite string? Sprite
 ---@field sprite_t number? Sprite animation frame duration
+---@field sprite_start number? Sprite animation start timestamp
 
 ---@param obj Obj
 function L.draw(obj)
@@ -201,11 +203,12 @@ function L.draw(obj)
         )
     else
         local drawable, sprite_width, sprite_height, r, c = get_obj_sprite_stuffs(obj)
-        local sprite_i = (obj.sprite_t and (math.floor(L.time() / obj.sprite_t) % (r * c) + 1)) or 1
+        local sprite_i = (obj.sprite_t and (math.floor((L.time() - (obj.sprite_start or 0)) / obj.sprite_t) % (r * c) + 1)) or 1
 
         love.graphics.draw(
             drawable,
-            (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].quads[sprite_i]) or square_quad,
+            (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].quads[sprite_i]) or
+            square_quad,
             (((obj.x or 0) - L.cam_x) * L.cam_s) + L.width / 2,
             (((obj.y or 0) - L.cam_y) * L.cam_s) + L.height / 2,
             math.rad(obj.r or 0),
@@ -219,16 +222,28 @@ function L.draw(obj)
     love.graphics.setColor(255, 255, 255, 1)
 end
 
+---@param obj Obj
+function L.sprite_cycle_count(obj)
+    local drawable, sprite_width, sprite_height, r, c = get_obj_sprite_stuffs(obj)
+    return ((L.time() - (obj.sprite_start or 0)) / obj.sprite_t) / (r * c)
+end
+
+---@param obj Obj
+function L.sprite_finished(obj)
+    return L.sprite_cycle_count(obj) > 0
+end
+
+function L.obj_dims(obj)
+    local drawable, sprite_width, sprite_height, _r, _c = get_obj_sprite_stuffs(obj)
+    return sprite_width * (obj.sx or 1) * (obj.s or 1), sprite_height * (obj.sy or 1) * (obj.s or 1)
+end
+
 local i = 0
 ---@param a Obj
 ---@param b Obj
 function L.collide(a, b)
-    local _, uaw, uah = get_obj_sprite_stuffs(a)
-    local _, ubw, ubh = get_obj_sprite_stuffs(b)
-    local aw = uaw * (a.sx or 1) * (a.s or 1)
-    local ah = uah * (a.sy or 1) * (a.s or 1)
-    local bw = ubw * (b.sx or 1) * (b.s or 1)
-    local bh = ubh * (b.sy or 1) * (b.s or 1)
+    local aw, ah = L.obj_dims(a)
+    local bw, bh = L.obj_dims(b)
 
     local sa = math.sqrt(aw * aw + ah * ah)
     local sb = math.sqrt(bw * bw + bh * bh)
@@ -292,23 +307,23 @@ function L.key_down(key)
 end
 
 function L.key_released(key)
-	local res = L.released_keys[key] or false
+    local res = L.released_keys[key] or false
     L.released_keys[key] = nil
     return res
 end
 
 function L.key_pressed(key)
-	local res = L.pressed_keys[key] or false
+    local res = L.pressed_keys[key] or false
     L.pressed_keys[key] = nil
     return res
 end
 
 function love.keyreleased(key)
-	L.released_keys[key] = true
+    L.released_keys[key] = true
 end
 
 function love.keypressed(key)
-	L.pressed_keys[key] = true
+    L.pressed_keys[key] = true
 end
 
 function L.time()
@@ -336,18 +351,34 @@ local function time_fmt(s)
     return string.format("%02d:%02d:%06.3f", h, m, s)
 end
 
-function L.print(...)
+function L.printF(f, g, ...)
     local text = ""
     local print_text = time_fmt(L.time()) .. ":"
 
     for i = 1, select("#", ...) do
         local v = select(i, ...)
-        print_text = print_text .. " " .. inspect(v, {newline = "", indent = ""})
-        text = text .. inspect(v) .. "\n"
+        print_text = print_text .. " " .. f(v)
+        text = text .. g(v) .. "\n"
     end
 
     print(print_text)
     L.prev_text = text
+end
+
+function L.print(...)
+    return L.printF(function(v)
+        return inspect(v, { newline = "", indent = "" })
+    end, function(v)
+        return inspect(v)
+    end, ...)
+end
+
+function L.printNoBs(...)
+    return L.printF(function(v)
+        return v
+    end, function(v)
+        return v
+    end, ...)
 end
 
 function L.patch(a, b)
@@ -370,28 +401,34 @@ function L.uid()
     return tostring(uid)
 end
 
-function L.move(obj, x, y)
-	obj.x = obj.x + (x or 0)
-	obj.y = obj.y + (y or 0)
-	return obj
+function L.move(obj, x, y, mult)
+    obj.x = obj.x + (x or 0) * (mult or 1)
+    obj.y = obj.y + (y or 0) * (mult or 1)
+    return obj
 end
 
-function L.move_vel(obj)
-	return L.move(obj, obj.vel_x or 0, obj.vel_y or 0)
+function L.move_vel(obj, mult)
+    return L.move(obj, obj.vel_x or 0, obj.vel_y or 0, mult)
 end
 
 local last_mod_time = nil
 function love.update(dt)
     L.dt = dt
 
-    local mod_time = love.filesystem.getInfo("src/game.lua").modtime
-    if not last_mod_time or (mod_time > last_mod_time) then
+    local newest_mod_time = 0
+    for _, file in ipairs(love.filesystem.getDirectoryItems("src")) do
+        local mod_time = love.filesystem.getInfo("src/" .. file).modtime
+        if newest_mod_time < mod_time then
+            newest_mod_time = mod_time
+        end
+    end
+    if not last_mod_time or (newest_mod_time > last_mod_time) then
         local contents, _size = love.filesystem.read("src/game.lua")
         local status, err = xpcall(function() loadstring(contents)() end, debug.traceback)
-        print("Reloaded, new:", mod_time, "old:", last_mod_time)
+        print("Reloaded, new:", newest_mod_time, "old:", last_mod_time)
 
         if err then
-            L.print("Error reloading:", err)
+            L.printNoBs("Error reloading:", err)
         end
 
         load_assets()
@@ -400,11 +437,15 @@ function love.update(dt)
             L.reset()
         end
 
-        last_mod_time = mod_time
+        last_mod_time = newest_mod_time
     end
 end
 
 function love.draw()
+    if L.key_released("backspace") then
+		L.reset()
+	end
+
     local swidth, sheight = love.graphics.getDimensions()
     local canvas = love.graphics.newCanvas(L.width, L.height)
     love.graphics.setCanvas(canvas)
@@ -412,11 +453,11 @@ function love.draw()
     L.set_cam()
     local status, err = xpcall(function() L.render(L.dt) end, debug.traceback)
     if err then
-        L.print("Error rendering/updating:", err)
+        L.printNoBs("Error rendering/updating:", err)
     end
     L.set_cam()
     if L.prev_text then
-        L.draw({text=L.prev_text,c="#FF0000", x=-L.width/2, y=-L.height/2, s=2})
+        L.draw({ text = L.prev_text, c = "#FF0000", x = -L.width / 2, y = -L.height / 2, s = 2 })
     end
 
     love.graphics.setCanvas()
