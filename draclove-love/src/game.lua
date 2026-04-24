@@ -40,18 +40,21 @@ function level_1.init()
 	
 end
 
+local movement_const = 60
+
 function level_1.player_movement(dt)
 	local player_speed = L.player.speed
+	local jump_speed = -30
 	if L.key_down("d") then
-		L.player.vel_x = player_speed
-	elseif L.key_down("a") then
-		L.player.vel_x = -player_speed
+		L.player.vel_x = player_speed * movement_const
+	elseif L.key_down("a") then  
+		L.player.vel_x = -player_speed * movement_const
 	else
 		L.player.vel_x = 0
 	end
 
-	if L.key_pressed("space") and L.player.on_ground then
-		L.player.vel_y = -25
+	if L.key_down("space") and L.player.on_ground then
+		L.player.vel_y = jump_speed * movement_const
 	end
 end
 
@@ -188,7 +191,7 @@ end
 function level_1.loop(dt)
 	level_1.player_movement(dt)
 	
-	gravity.change_vel(L.player, dt)
+	gravity.change_vel(L.player)
 	L.move_vel(L.player)
 	L.player.on_ground = gravity.ground_collide(L.player, ground)
 	L.draw(L.player)
