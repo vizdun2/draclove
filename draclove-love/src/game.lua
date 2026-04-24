@@ -1,10 +1,21 @@
 local L = require("lib/l")
 
 function L.setup()
-	L.plane = {x=0, y=0, dead=false, velocity=0}
+	L.player = {x=0,y=0,vel_x = 0, vel_y=0, hunger = 0, crouching = true}
 end
 
-local function change_plane_velocity(dt)
+
+
+local level_1 = {
+	boss = {x=0,y=0,phase="start"},
+	np_objects = {}, -- non player objects
+}
+
+function level_1.init()
+	
+end
+
+local function change_player_vel(dt)
 	local downspeed_const = 300
 	local upspeed_const = -300
 	local down_velocity_min = 1000
@@ -22,6 +33,33 @@ local function change_plane_velocity(dt)
 	end
 end
 
+
+
+function level_1.player_movement(dt)
+	local player_speed = 8
+	if L.key_down("d") then
+		L.player.vel_x = player_speed
+	elseif L.key_down("a") then
+		L.player.vel_x = -player_speed
+	else
+		L.player.vel_x = 0
+	end
+	change_player_vel(dt)
+end
+
+
+function level_1.loop(dt)
+	level_1.player_movement(dt)
+	L.move_vel(L.player)
+	L.draw(L.player)
+	for np_obj in ipairs(level_1.np_objects) do
+		L.move_vel(np_obj)
+		L.draw(np_obj)
+	end
+end
+
+
+
 local function move_plane(dt)
 	local updated_coords = L.plane.y + L.plane.velocity * dt
 
@@ -35,10 +73,7 @@ local function move_plane(dt)
 end
 
 function L.render(dt)
-	change_plane_velocity(dt)
-	move_plane(dt)
-	L.draw(L.plane)
-	L.print(L.plane)
+	level_1.loop(dt)
 	if L.key_released("backspace") then
 		L.reset()
 	end
