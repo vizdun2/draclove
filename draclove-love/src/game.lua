@@ -1,11 +1,12 @@
 local L = require("lib/l")
 local gravity = loadfile("draclove-love/src/gravity.lua")()
 
-local function newWheel(initialX, initialY)
+local function newWheel(initialX, initialY, offX)
     return {
 		tag = "wheel",
         x = initialX,
         y = initialY,
+		offsetX = offX,
         dead = false,
 		sprite = nil
     }
@@ -16,9 +17,9 @@ function L.setup()
 	
 	L.boss = {
 		tag = "boss",
-		wheels={wheel1 = newWheel(L.width/2-10, 10), 
-				wheel2 = newWheel(L.width/2, 10), 
-				wheel3 = newWheel(L.width/2+10,10)},
+		wheels={wheel1 = newWheel(L.width/2-10, 10, -10), 
+				wheel2 = newWheel(L.width/2, 10, 0), 
+				wheel3 = newWheel(L.width/2+10,10, 10)},
 		x=L.width/2, y=0, 
 		velocity=0, dead=false, 
 		dashSpeed=700, inAction=false, dashingLeft=false,
@@ -123,15 +124,21 @@ local function bossLoopLogic(dt)
 			local boundries = outOfBounds(L.boss.x, L.boss.y, L.boss)
 			if boundries[1] then
 				L.boss.x = (L.boss.x >= 0 and L.width/2) or -L.width/2
+				for _, wheel in pairs(L.boss.wheels) do
+					wheel.x = (wheel.x >= 0 and L.width/2-wheel.offsetX) or -L.width/2-wheel.offsetX 
+				end
 				resetBoss()
 			end
 			if boundries[2] then
 				L.boss.y = (L.boss.y >= 0 and L.height/2) or -L.height/2
+				for _, wheel in pairs(L.boss.wheels) do
+					wheel.y = (wheel.y >= 0 and L.height/2) or -L.height/2
+				end
 				resetBoss()
 			end
 		if L.boss.lastAttack == "stun" then
 			-- play anim .. 
-		end
+		end 
 	end
 	else
 			getNextAttack()
