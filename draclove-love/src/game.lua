@@ -2,7 +2,10 @@ local L = require("lib/l")
 local gravity = loadfile("draclove-love/src/gravity.lua")()
 local CB = loadfile("draclove-love/src/chairBoss.lua")()
 
-
+local level_1 = {
+	-- boss = { x = 0, y = 0, phase = "start" },
+	-- np_objects = {}, -- non player objects
+}
 
 function L.setup()
 	CB.newBoss()
@@ -15,13 +18,14 @@ function L.setup()
 			L.player.dead = true
 		end
 	end
+
+	L.level_1 = L.patch({
+		boss = { x = 0, y = 0, phase = "start" },
+		np_objects = {}, -- non player objects
+	}, level_1)
 end
 
 local ground = { x = 0, y = 300, sx = 100 }
-local level_1 = {
-	boss = { x = 0, y = 0, phase = "start" },
-	np_objects = {}, -- non player objects
-}
 
 function level_1.init()
 
@@ -89,6 +93,7 @@ local function base_player_loop()
 	player_state_handler()
 end
 
+
 function level_1.loop(dt)
 	base_player_loop()
 	gravity.change_vel(L.player)
@@ -101,7 +106,7 @@ function level_1.loop(dt)
 	CB.renderBoss()
 	CB.bossLoopLogic(dt)
 
-	for np_obj in ipairs(level_1.np_objects) do
+	for np_obj in ipairs(L.level_1.np_objects) do
 		L.move_vel(np_obj)
 		if L.collide(L.player, np_obj) and L.key_pressed("x") then
 			level_1.interact_with(np_obj)
