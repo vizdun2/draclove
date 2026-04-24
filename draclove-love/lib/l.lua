@@ -114,6 +114,10 @@ local function get_obj_sprite_stuffs(obj)
     return drawable, sprite_width, sprite_height, row_count, col_count
 end
 
+local function padding_adjusted(obj)
+    
+end
+
 local default_font = love.graphics.getFont()
 default_font:setFilter("nearest", "nearest")
 local function lazy_get_font(name, size)
@@ -276,6 +280,13 @@ function L.collide(a, b)
     i = i + 1
 
     return true
+end
+
+function L.vec_to(a, b)
+    local x = (a.x or 0) - (b.x or 0)
+    local y = (a.y or 0) - (b.y or 0)
+    local max = (x > y and x) or y
+    return x/max,y/max
 end
 
 function L.angle_look_at(x1, y1, x2, y2)
