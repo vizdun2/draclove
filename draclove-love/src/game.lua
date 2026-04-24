@@ -114,10 +114,6 @@ local function base_player_loop()
 	player_state_handler()
 end
 
-
-
-
-
 function level_1.loop(dt)
 	base_player_loop()
 	gravity.change_vel(L.player)
