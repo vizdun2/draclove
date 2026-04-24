@@ -1,16 +1,28 @@
 local L = require("lib/l")
 local gravity = loadfile("draclove-love/src/gravity.lua")()
 
+local function newWheel(initialX, initialY)
+    return {
+		tag = "wheel",
+        x = initialX,
+        y = initialY,
+        dead = false,
+		sprite = nil
+    }
+end
+
 function L.setup()
 	L.plane = {x=0, y=0, dead=false, velocity=0}
-	L.wheel = {x=0, y=0, dead=false}
+	
 	L.boss = {
-		wheels={L.wheel, L.wheel, L.wheel, L.wheel},
+		tag = "boss",
+		wheels={wheel1 = newWheel(0, 0), wheel2 = newWheel(0, 0), wheel3 = newWheel(0, 0)},
 		x=L.width/2, y=0, 
 		velocity=0, dead=false, 
 		dashSpeed=200, inAction=false, 
 		currentCooldown=0, lastActionTime=0,
-		lastAttack=""
+		lastAttack="",
+		sprite = nil
 	}
 	L.player = {x=0,y=0, speed = 8, vel_x = 0, vel_y=0, hunger = 0, dodging = true}
 end
@@ -44,6 +56,7 @@ local function dashAttack()
 	L.boss.inAction = true
 	L.boss.currentCooldown = 2
 	L.boss.lastAttack = "dash"
+	L.boss.lastActionTime = L.time()
 end
 local function resetBoss()
 	L.boss.inAction = false
@@ -56,14 +69,16 @@ local function handleDashMovement(dt)
 	end
 end
 local function outOfBounds(x, y, obj)
-	return {L.obj.x >= L.width/2 or L.obj.x <= -L.width/2, 
-			L.obj.y >= L.height/2 or L.obj.y <= -L.height/2}
+	return {obj.x >= L.width/2 or obj.x <= -L.width/2, 
+			obj.y >= L.height/2 or obj.y <= -L.height/2}
 end
 
 local function stunPhase()
 	local stunCooldown = 5
 	L.boss.lastAttack = "stun"
 	L.boss.currentCooldown = stunCooldown
+	L.boss.inAction = true
+	L.boss.lastActionTime = L.time()
 end
 -- gets next attack -> the automat logic
 local function getNextAttack()
@@ -77,7 +92,7 @@ end
 
 -- called in each loop
 local function bossLoopLogic(dt)
-	if L.pasttime(L.boss.lastActionTime + L.boss.currentCooldown and L.boss.inAction) then
+	if L.pasttime(L.boss.lastActionTime + L.boss.currentCooldown ) and L.boss.inAction then
 		resetBoss()
 	end
 	if L.boss.inAction then
@@ -137,6 +152,9 @@ function level_1.loop(dt)
 	L.player.on_ground = gravity.ground_collide(L.player, ground)
 	L.draw(L.player)
 	L.draw(ground)
+
+	L.draw(L.boss)
+	bossLoopLogic(dt)
 
 	for np_obj in ipairs(level_1.np_objects) do
 		L.move_vel(np_obj)
