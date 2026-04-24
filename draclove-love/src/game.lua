@@ -181,7 +181,7 @@ function level_1.player_action()
 	if L.key_pressed("c") then
 		L.player.dodging = true
 		L.player.sprite = "matrix"
-		L.player.sprite_t = 0.1
+		L.player.sprite_t = 0.05
 		L.player.sprite_start = L.time()
 	end
 end
