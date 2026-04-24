@@ -16,10 +16,12 @@ function L.setup()
 	
 	L.boss = {
 		tag = "boss",
-		wheels={wheel1 = newWheel(0, 0), wheel2 = newWheel(0, 0), wheel3 = newWheel(0, 0)},
+		wheels={wheel1 = newWheel(L.width/2-10, 10), 
+				wheel2 = newWheel(L.width/2, 10), 
+				wheel3 = newWheel(L.width/2+10,10)},
 		x=L.width/2, y=0, 
 		velocity=0, dead=false, 
-		dashSpeed=200, inAction=false, 
+		dashSpeed=700, inAction=false, dashingLeft=false,
 		currentCooldown=0, lastActionTime=0,
 		lastAttack="",
 		sprite = nil
@@ -54,19 +56,33 @@ end
 
 local function dashAttack()
 	L.boss.inAction = true
-	L.boss.currentCooldown = 2
+	L.boss.currentCooldown = 4
 	L.boss.lastAttack = "dash"
 	L.boss.lastActionTime = L.time()
+	if L.boss.x >= 0 then
+		L.boss.dashingLeft = true
+	else
+		L.boss.dashingLeft = false
+	end
 end
 local function resetBoss()
 	L.boss.inAction = false
 	L.boss.currentCooldown = 0
 end
 local function handleDashMovement(dt)
-	L.boss.x = L.boss.x - L.boss.dashSpeed * dt
-	if L.boss.x <= 0 then
-		resetBoss()
-	end
+    local moveDistance = L.boss.dashSpeed * dt
+    
+    if L.boss.dashingLeft then
+        L.boss.x = L.boss.x - moveDistance
+        for _, wheel in pairs(L.boss.wheels) do
+            wheel.x = wheel.x - moveDistance
+        end
+    else
+        L.boss.x = L.boss.x + moveDistance
+        for _, wheel in pairs(L.boss.wheels) do
+            wheel.x = wheel.x + moveDistance
+        end
+    end
 end
 local function outOfBounds(x, y, obj)
 	return {obj.x >= L.width/2 or obj.x <= -L.width/2, 
@@ -91,6 +107,12 @@ end
 -- (A and B) or C -> B if A true, otherwise C
 
 -- called in each loop
+local function renderBoss()
+	L.draw(L.boss)
+	for _, wheel in pairs(L.boss.wheels) do
+		L.draw(wheel)
+	end
+end
 local function bossLoopLogic(dt)
 	if L.pasttime(L.boss.lastActionTime + L.boss.currentCooldown ) and L.boss.inAction then
 		resetBoss()
@@ -153,7 +175,7 @@ function level_1.loop(dt)
 	L.draw(L.player)
 	L.draw(ground)
 
-	L.draw(L.boss)
+	renderBoss()
 	bossLoopLogic(dt)
 
 	for np_obj in ipairs(level_1.np_objects) do
