@@ -209,8 +209,8 @@ function L.draw(obj)
         local drawable, sprite_width, sprite_height, r, c = get_obj_sprite_stuffs(obj)
         local sprite_i = (obj.sprite_t and (math.floor((L.time() - (obj.sprite_start or 0)) / obj.sprite_t) % (r * c) + 1)) or 1
 
-        local x = ((not obj.debug) and (obj.x or 0)) or ((sprite_width + (obj.pl or 0) + (obj.pr or 0)) / sprite_width)
-        local y = obj.y or 0
+        local x = ((not obj.debug) and (obj.x or 0)) or ((obj.x or 0) + ((obj.pl or 0) - (obj.pr or 0)) / 2)
+        local y = ((not obj.debug) and (obj.y or 0)) or ((obj.y or 0) + ((obj.pt or 0) - (obj.pb or 0)) / 2)
         local dx = ((not obj.debug) and 1) or ((sprite_width + (obj.pl or 0) + (obj.pr or 0)) / sprite_width)
         local dy = ((not obj.debug) and 1) or ((sprite_height + (obj.pt or 0) + (obj.pb or 0)) / sprite_height)
 
@@ -233,7 +233,7 @@ end
 ---@param obj Obj
 function L.sprite_cycle_count(obj)
     local drawable, sprite_width, sprite_height, r, c = get_obj_sprite_stuffs(obj)
-    return ((L.time() - (obj.sprite_start or 0)) / obj.sprite_t) / (r * c)
+    return math.floor(((L.time() - (obj.sprite_start or 0)) / obj.sprite_t) / (r * c))
 end
 
 ---@param obj Obj
