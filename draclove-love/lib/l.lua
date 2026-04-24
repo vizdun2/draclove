@@ -370,6 +370,16 @@ function L.uid()
     return tostring(uid)
 end
 
+function L.move(obj, x, y)
+	obj.x = obj.x + (x or 0)
+	obj.y = obj.y + (y or 0)
+	return obj
+end
+
+function L.move_vel(obj)
+	return L.move(obj, obj.vel_x or 0, obj.vel_y or 0)
+end
+
 local last_mod_time = nil
 function love.update(dt)
     L.dt = dt
