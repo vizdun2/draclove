@@ -27,7 +27,7 @@ function L.setup()
 		lastAttack="",
 		sprite = nil
 	}
-	L.player = {x=0,y=0, speed = 8, vel_x = 0, vel_y=0, hunger = 0, dodging = true}
+	L.player = {x=0,y=0, speed = 8, vel_x = 0, vel_y=0, hunger = 0, dodging = false, sprite="idle"}
 end
 
 local ground = {x=0, y=300, sx=100}
@@ -43,6 +43,9 @@ end
 local movement_const = 60
 
 function level_1.player_movement(dt)
+	if L.player.dodging then
+		return
+	end
 	local player_speed = L.player.speed
 	local jump_speed = -30
 	if L.key_down("d") then
@@ -173,36 +176,41 @@ function level_1.interact_with(obj)
 	
 end
 
-local function player_dodge(obj)
-	
-end
 
-
-local function player_action()
+function level_1.player_action()
 	if L.key_pressed("c") then
-		player_dodge()
+		L.player.dodging = true
+		L.player.sprite = "matrix"
+		L.player.sprite_t = 0.1
+		L.player.sprite_start = L.time()
 	end
 end
 
-local function player_state()
-
+function level_1.player_state_handler()
+	if L.player.dodging and L.sprite_finished(L.player) then
+		L.player.dodging = false
+		L.player.sprite = "idle"
+	end
 end
+
 
 function level_1.loop(dt)
 	level_1.player_movement(dt)
-	
+	level_1.player_action()
+	level_1.player_state_handler()
 	gravity.change_vel(L.player)
 	L.move_vel(L.player)
 	L.player.on_ground = gravity.ground_collide(L.player, ground)
 	L.draw(L.player)
 	L.draw(ground)
+	
 
 	renderBoss()
 	bossLoopLogic(dt)
 
 	for np_obj in ipairs(level_1.np_objects) do
 		L.move_vel(np_obj)
-		if L.collide(L.player,np_obj) and L.player.interacting then
+		if L.collide(L.player,np_obj) and L.key_pressed("x") then
 			level_1.interact_with(np_obj)
 		end
 		L.draw(np_obj)
