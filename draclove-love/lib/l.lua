@@ -114,8 +114,12 @@ local function get_obj_sprite_stuffs(obj)
     return drawable, sprite_width, sprite_height, row_count, col_count
 end
 
-local function padding_adjusted(obj)
-    
+local function padding_adjusted(obj, sw, sh)
+    local x = ((not obj.debug) and (obj.x or 0)) or ((obj.x or 0) + ((obj.pl or 0) - (obj.pr or 0)) / 2)
+    local y = ((not obj.debug) and (obj.y or 0)) or ((obj.y or 0) + ((obj.pt or 0) - (obj.pb or 0)) / 2)
+    local dx = ((not obj.debug) and 1) or ((sw + (obj.pl or 0) + (obj.pr or 0)) / sw)
+    local dy = ((not obj.debug) and 1) or ((sh + (obj.pt or 0) + (obj.pb or 0)) / sh)
+    return x, y, dx, dy
 end
 
 local default_font = love.graphics.getFont()
@@ -157,7 +161,7 @@ end
 ---@field pt number? Top side padding
 ---@field pb number? Bottom side padding
 ---@field pl number? Left side padding
----@field pr number? Right side padding 
+---@field pr number? Right side padding
 ---@field r number? Rotation in degrees
 ---@field s number? Scale
 ---@field sx number? Scale across the X axis
@@ -213,14 +217,12 @@ function L.draw(obj)
         local drawable, sprite_width, sprite_height, r, c = get_obj_sprite_stuffs(obj)
         local sprite_i = (obj.sprite_t and (math.floor((L.time() - (obj.sprite_start or 0)) / obj.sprite_t) % (r * c) + 1)) or 1
 
-        local x = ((not obj.debug) and (obj.x or 0)) or ((obj.x or 0) + ((obj.pl or 0) - (obj.pr or 0)) / 2)
-        local y = ((not obj.debug) and (obj.y or 0)) or ((obj.y or 0) + ((obj.pt or 0) - (obj.pb or 0)) / 2)
-        local dx = ((not obj.debug) and 1) or ((sprite_width + (obj.pl or 0) + (obj.pr or 0)) / sprite_width)
-        local dy = ((not obj.debug) and 1) or ((sprite_height + (obj.pt or 0) + (obj.pb or 0)) / sprite_height)
+        local x, y, dx, dy = padding_adjusted(obj, sprite_width, sprite_height)
 
         love.graphics.draw(
             drawable,
-            (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].quads[sprite_i]) or square_quad,
+            (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].quads[sprite_i]) or
+            square_quad,
             ((x - L.cam_x) * L.cam_s) + L.width / 2,
             ((y - L.cam_y) * L.cam_s) + L.height / 2,
             math.rad(obj.r or 0),
@@ -237,7 +239,7 @@ end
 ---@param obj Obj
 function L.sprite_cycle_count(obj)
     local drawable, sprite_width, sprite_height, r, c = get_obj_sprite_stuffs(obj)
-    return math.floor(((L.time() - (obj.sprite_start or 0)) / obj.sprite_t) / (r * c))
+    return obj.sprite_t and (math.floor(((L.time() - (obj.sprite_start or 0)) / obj.sprite_t) / (r * c))) or 0
 end
 
 ---@param obj Obj
@@ -286,7 +288,7 @@ function L.vec_to(a, b)
     local x = (a.x or 0) - (b.x or 0)
     local y = (a.y or 0) - (b.y or 0)
     local max = (x > y and x) or y
-    return x/max,y/max
+    return x / max, y / max
 end
 
 function L.angle_look_at(x1, y1, x2, y2)
@@ -462,8 +464,8 @@ end
 
 function love.draw()
     if L.key_released("backspace") then
-		L.reset()
-	end
+        L.reset()
+    end
 
     local swidth, sheight = love.graphics.getDimensions()
     local canvas = love.graphics.newCanvas(L.width, L.height)
