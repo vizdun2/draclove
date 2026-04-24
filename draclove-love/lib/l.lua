@@ -150,6 +150,10 @@ end
 ---@field align Alignment? Text alignment
 ---@field x number? X position
 ---@field y number? Y position
+---@field pt number? Top side padding
+---@field pb number? Bottom side padding
+---@field pl number? Left side padding
+---@field pr number? Right side padding 
 ---@field r number? Rotation in degrees
 ---@field s number? Scale
 ---@field sx number? Scale across the X axis
@@ -207,8 +211,7 @@ function L.draw(obj)
 
         love.graphics.draw(
             drawable,
-            (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].quads[sprite_i]) or
-            square_quad,
+            (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].quads[sprite_i]) or square_quad,
             (((obj.x or 0) - L.cam_x) * L.cam_s) + L.width / 2,
             (((obj.y or 0) - L.cam_y) * L.cam_s) + L.height / 2,
             math.rad(obj.r or 0),
