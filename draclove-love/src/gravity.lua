@@ -8,8 +8,8 @@ function gravity.change_vel(obj)
     end
     
 	local downspeed_const = 100
-	local down_velocity_min = 1000
-	local cap_const_down = 20
+	local down_velocity_min = 1000*20
+	local cap_const_down = 20 * 50
 
 	if obj.vel_y < down_velocity_min then
         obj.vel_y = obj.vel_y + downspeed_const
