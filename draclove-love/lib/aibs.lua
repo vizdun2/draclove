@@ -86,7 +86,7 @@ local function rotatedRectCollision(a, b)
             return false -- Separating axis found
         end
     end
-
+    
     return true -- No separating axis → collision
 end
 
