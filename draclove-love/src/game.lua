@@ -17,10 +17,10 @@ function L.setup()
 	
 	L.boss = {
 		tag = "boss",
-		wheels={wheel1 = newWheel(L.width/2-10, 10, -10), 
-				wheel2 = newWheel(L.width/2, 10, 0), 
-				wheel3 = newWheel(L.width/2+10,10, 10)},
-		x=L.width/2, y=0, 
+		wheels={wheel1 = newWheel(L.width/2-60, 10, -10), 
+				wheel2 = newWheel(L.width/2-50, 10, 0), 
+				wheel3 = newWheel(L.width/2-40,10, 10)},
+		x=L.width/2-50, y=0, sideOffset=50,
 		velocity=0, dead=false, 
 		dashSpeed=700, inAction=false, dashingLeft=false,
 		currentCooldown=0, lastActionTime=0,
@@ -76,22 +76,23 @@ local function handleDashMovement(dt)
     if L.boss.dashingLeft then
         L.boss.x = L.boss.x - moveDistance
         for _, wheel in pairs(L.boss.wheels) do
-            wheel.x = wheel.x - moveDistance
+			L.move(wheel, -moveDistance, 0)
         end
     else
         L.boss.x = L.boss.x + moveDistance
         for _, wheel in pairs(L.boss.wheels) do
-            wheel.x = wheel.x + moveDistance
+			L.move(wheel, moveDistance, 0)
         end
     end
 end
+-- returns list where [1] is whether x is out of bounds, [2] is whether y is out of bounds
 local function outOfBounds(x, y, obj)
 	return {obj.x >= L.width/2 or obj.x <= -L.width/2, 
 			obj.y >= L.height/2 or obj.y <= -L.height/2}
 end
 
 local function stunPhase()
-	local stunCooldown = 5
+	local stunCooldown = 3
 	L.boss.lastAttack = "stun"
 	L.boss.currentCooldown = stunCooldown
 	L.boss.inAction = true
@@ -107,13 +108,14 @@ local function getNextAttack()
 end
 -- (A and B) or C -> B if A true, otherwise C
 
--- called in each loop
+
 local function renderBoss()
 	L.draw(L.boss)
 	for _, wheel in pairs(L.boss.wheels) do
 		L.draw(wheel)
 	end
 end
+-- called in each loop
 local function bossLoopLogic(dt)
 	if L.pasttime(L.boss.lastActionTime + L.boss.currentCooldown ) and L.boss.inAction then
 		resetBoss()
@@ -121,19 +123,29 @@ local function bossLoopLogic(dt)
 	if L.boss.inAction then
 		if L.boss.lastAttack == "dash" then
 			handleDashMovement(dt)
-			local boundries = outOfBounds(L.boss.x, L.boss.y, L.boss)
-			if boundries[1] then
-				L.boss.x = (L.boss.x >= 0 and L.width/2) or -L.width/2
+			local xLimit = (L.width / 2) - L.boss.sideOffset
+			local yLimit = L.height / 2
+
+			if math.abs(L.boss.x) >= xLimit then
+				local isRight = L.boss.x >= 0 
+				
+				L.move(L.boss, isRight and xLimit - L.boss.x or -xLimit - L.boss.x, 0)
+				
+				
 				for _, wheel in pairs(L.boss.wheels) do
-					wheel.x = (wheel.x >= 0 and L.width/2-wheel.offsetX) or -L.width/2-wheel.offsetX 
+					wheel.x = L.boss.x - wheel.offsetX
 				end
 				resetBoss()
 			end
-			if boundries[2] then
-				L.boss.y = (L.boss.y >= 0 and L.height/2) or -L.height/2
+
+			if math.abs(L.boss.y) >= yLimit then
+				local isBottom = L.boss.y >= 0
+				L.boss.y = isBottom and yLimit or -yLimit
+				
 				for _, wheel in pairs(L.boss.wheels) do
-					wheel.y = (wheel.y >= 0 and L.height/2) or -L.height/2
+					wheel.y = L.boss.y
 				end
+				
 				resetBoss()
 			end
 		if L.boss.lastAttack == "stun" then
