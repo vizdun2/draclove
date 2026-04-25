@@ -38,27 +38,27 @@ function CB.newBoss()
     L.boss.wheels = {
         wheelm = {
             tag = "wheel",
-            x = 0,
-            y = 65,
-            s = 0.6,
+            x = -10,
+            y = 28.5 * L.boss.s,
+            s = 1.3,
             dead = false,
             sprite = nil,
             parent = L.boss
         },
         wheell = {
             tag = "wheel",
-            x = -40,
-            y = 60,
-            s = 0.6,
+            x = -18.5 * L.boss.s,
+            y = 26.5 * L.boss.s,
+            s = 1.3,
             dead = false,
             sprite = nil,
             parent = L.boss
         },
         wheelr = {
             tag = "wheel",
-            x = 40,
-            y = 60,
-            s = 0.6,
+            x = 18.5 * L.boss.s,
+            y = 26.5 * L.boss.s,
+            s = 1.3,
             dead = false,
             sprite = nil,
             parent = L.boss
@@ -214,7 +214,8 @@ function CB.bossLoopLogic(dt, player)
     end
 
     if L.boss.inAction then
-        if L.boss.lastAttack == "dash" then
+        
+        if false and L.boss.lastAttack == "dash" then
             L.boss.sprite = "chair/flight"
             L.boss.sx = L.boss.dashingLeft and -1 or 1
             L.boss.r = L.boss.dashingLeft and 90 or -90
