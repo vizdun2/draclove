@@ -54,6 +54,7 @@ function lvl3.setup()
         pl = -12,
         pr = -8,
         pb = 0,
+        last_burped = L.time(),
     }
     Player.setup()
     L.pipes = {}
@@ -62,7 +63,7 @@ function lvl3.setup()
     L.water_level = nil
 end
 
-local toilet_speed = 500
+local toilet_speed = 100
 local proj_speed = 200
 local pellet_count = 4
 local pellet_angle = 30
@@ -74,17 +75,28 @@ local function shoot_water()
     for i = 0, pellet_count do
         local cr = r + original_angle + i * each_angle
         local vx, vy = L.angle_vec(cr)
-        L.water_projs[L.uid()] = { x = L.boss.x, y = L.boss.y, vel_x = vx * proj_speed, vel_y = vy * proj_speed, born = L
-        .time() }
+        L.water_projs[L.uid()] = { x = L.boss.x, y = L.boss.y, vel_x = vx * proj_speed, vel_y = vy * proj_speed, born = L.time(), sprite_t=0.1, sprite="idibiks/water_projectile" }
     end
 end
 
-local prep_rot_speed = 50
-local flow_speed = 10
+local prep_rot_speed = 25
+local flow_speed = 8
 local magic_y = 540 / 2
+local desired_water_level = 290
 
 local function do_toilet()
     if L.boss.state == states.moving_around then
+        if L.time() > L.boss.last_burped + 4 then
+            shoot_water()
+            L.boss.last_burped = L.time()
+            return
+        elseif L.time() > L.boss.last_burped + 3.5 then
+            L.boss.sprite = "idibiks/attack"
+            return
+        elseif L.time() > L.boss.last_burped + 0.5 then
+            L.boss.sprite = "idibiks/idle"
+        end
+        
         if not L.boss.target then
             L.boss.target = { x = L.boss.x, y = L.boss.y }
             while L.dist(L.boss, L.boss.target) < 200 or math.abs(L.boss.y - L.boss.target.y) < 100 or math.abs(L.boss.x - L.boss.target.x) < 100 do
@@ -104,7 +116,6 @@ local function do_toilet()
             L.boss.vel_x, L.boss.vel_y = 0, 0
             L.boss.target = nil
             L.boss.state = states.spilling_prep
-            shoot_water()
         end
 
         L.move_vel(L.boss)
@@ -117,19 +128,21 @@ local function do_toilet()
             L.boss.r = 180 * r_mod
             L.boss.state = states.spilling
             L.boss.state_start = L.time()
+            L.boss.sprite = "idibiks/attack"
         end
     end
 
     local xoff, yoff = L.boss.sx > 0 and -40 or 40,-5
+    local spill_mult = 2
 
     if L.boss.state == states.spilling then
         if not L.spill then
-            L.spill = {}
+            L.spill = {sprite="idibiks/water_column", sx=3.5}
         end
         local d = L.time() - L.boss.state_start
         L.spill.x = L.boss.x + xoff
-        L.spill.y = L.boss.y + 32 * d * flow_speed / 2 + yoff
-        L.spill.sy = d * flow_speed
+        L.spill.y = L.boss.y + 64 * d * flow_speed * spill_mult / 2 + yoff
+        L.spill.sy = d * flow_speed * spill_mult
         if L.spill.y >= (L.boss.y + magic_y) / 2 then
             -- L.spill.y = (L.boss.y + magic_y) / 2
             -- L.spill.sy = (L.boss.y + magic_y) / 13
@@ -138,28 +151,31 @@ local function do_toilet()
         end
     end
 
+    local origin = L.height/2 + 64 * 8 / 2 - 80
     if L.boss.state == states.spilling_hard then
         if not L.water_level then
-            L.water_level = {x=0,y=L.height/2, sx=40, sy=8}
+            L.water_level = {x=0,y=L.height/2, sprite="idibiks/water", sprite_t=0.1, sx=20, sy=8, pt=-18}
         end
         local d = L.time() - L.boss.state_start
-        L.water_level.sy = d * flow_speed
-        if L.water_level.sy > 13 then
-            L.water_level.sy = 13
-             L.boss.state = states.spilling_finishing
+        L.water_level.y = origin - d * flow_speed * 32
+        if L.water_level.y <= desired_water_level then
+            L.water_level.y = L.water_level.desired_water_level
+            L.boss.state = states.spilling_finishing
             L.boss.state_start = L.time()
         end
     end
 
     if L.boss.state == states.spilling_finishing then
         local d = L.time() - L.boss.state_start
-        L.water_level.sy = 13 - d * flow_speed * 0.5
-        L.spill.y = (L.boss.y + magic_y) / 2 + 32 * d * flow_speed / 2 + yoff
-        L.spill.sy = math.max((magic_y - L.boss.y) / 32 - d * flow_speed, 0)
-        if L.water_level.sy < 0 then
-            L.water_level.sy = 0
+        L.water_level.y = desired_water_level + d * flow_speed * 32
+        L.spill.y = (L.boss.y + magic_y) / 2 + 64 * d * flow_speed * spill_mult / 2 + yoff
+        L.spill.sy = math.max((magic_y - L.boss.y) / 64 - d * flow_speed * spill_mult, 0)
+        if L.spill.sy <= 0 and L.water_level.y >= origin then
+            L.spill.sy = 0
+            L.water_level.y = origin
             L.boss.state = states.spilling_recover
             L.boss.state_start = L.time()
+            L.boss.sprite = "idibiks/idle"
         end
     end
 
@@ -169,6 +185,7 @@ local function do_toilet()
             L.boss.r = 0
             L.boss.state = states.moving_around
             L.boss.state_start = nil
+            L.boss.last_burped = L.time()
         end
     end
 end
@@ -213,13 +230,17 @@ function lvl3.loop(dt)
         end
     end
 
+    if L.spill and L.collide(L.spill, L.player) or L.water_level and L.collide(L.water_level, L.player) then
+        L.player.take_damage()
+    end
+
     L.draw({ sprite = "scenes/3", s = 6.66 })
 
     for _i, pipe in ipairs(pipes) do
         L.draw(pipe)
     end
 
-    L.draw(L.patch(L.boss, { sprite = "idibiks/attack", sy = 1 }))
+    L.draw(L.boss)
 
     for _, proj in pairs(L.water_projs) do
         L.draw(proj)
@@ -232,7 +253,8 @@ function lvl3.loop(dt)
         L.draw(L.spill)
     end
     if L.water_level then
-        L.draw(L.water_level)
+        L.draw(L.patch(L.water_level, {debug=true}))
+        L.draw(L.patch(L.water_level, {debug=false}))
     end
 
     -- L.draw(ground_bot)
