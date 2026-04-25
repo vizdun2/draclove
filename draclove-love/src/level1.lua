@@ -3,11 +3,11 @@ local CB = require("src/chairBoss")
 local gravity = require("src/gravity")
 
 L1 = {}
-L1.platform = { x = 0, y = 0, sx = 10, tag = "ground" }
+
 L1.ground = { x = 0, y = 300, sx = 100, tag = "ground" }
-L1.ground1 = { x = 0, y = -300, sx = 100, tag = "ground" }
+L1.ground1 = { x = 0, y = -300, sx = 100, tag = "ceiling" }
 L1.level = {
-	np_objects = { L1.ground, L1.ground1, L1.platform }, -- non player objects
+	np_objects = { L1.ground, L1.ground1 }, -- non player objects
 }
 function L1.setup()
     CB.newBoss()

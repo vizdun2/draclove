@@ -262,7 +262,7 @@ function L.onCollisionWithPlayer()
         if colidedWheel then
             loseAWheel(colidedWheel)
         end
-    else
+    elseif L.boss.inAction and L.boss.lastAttack == "dash" then
         L.player.take_damage()
     end
 end
