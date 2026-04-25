@@ -187,7 +187,7 @@ local function resetBoss()
     L.boss.currentCooldown = 0
     L.boss.chargingUp = false
     L.boss.lostWheelThisPhase = false
-    L.boss.sprite = "chair/zidle_idle"
+    L.boss.sprite = "chair/idle"
     L.boss.r = 0
 end
 local function handleDashMovement(dt)
@@ -206,7 +206,7 @@ local function projectileAttack(player)
 end
 local function stunAttack()
     enterAction("stun", 2)
-    L.boss.sprite = "chair/zidle_idle"
+    L.boss.sprite = "chair/idle"
 end
 
 -- gets next attack -> the automat logic
@@ -259,8 +259,30 @@ function L.onCollisionWithPlayer()
         --L.player.take_damage()
     end
 end
+local function whatWheelToUse()
+    if L.boss.lastAttack == "dash" then
+        return
+    elseif L.boss.lastAttack == "stun" then
+        L.draw(L.patch(L.boss, {sprite = "chair/wheel_middle"}))
+        L.draw(L.patch(L.boss, {sprite = "chair/wheel_left"}))
+        L.draw(L.patch(L.boss, {sprite = "chair/wheel_right"}))
+    elseif L.boss.lastAttack == "charge" then
+        if L.boss.wheels.wheelm then
+            L.draw(L.patch(L.boss, {sprite = "chair/wheel_middle_lift_off"}))
+        end
+        if L.boss.wheels.wheell then
+            L.draw(L.patch(L.boss, {sprite = "chair/wheel_left_lift_off"}))
+        end
+        if L.boss.wheels.wheelr then
+            L.draw(L.patch(L.boss, {sprite = "chair/wheel_right_lift_off"}))
+        end
+    end
+
+end
 function CB.renderBoss()
     L.draw(L.boss)
+
+    whatWheelToUse()
     for _, wheel in pairs(L.boss.wheels) do
         L.draw(L.patch(wheel, { debug = true }))
     end
