@@ -190,6 +190,7 @@ end
 ---@field sprite_t number? Sprite animation frame duration
 ---@field sprite_start number? Sprite animation start timestamp
 ---@field parent Obj? Parent, works for position and nothing else rn
+---@field rainbow boolean?
 
 ---@param obj Obj
 function L.draw(obj)
