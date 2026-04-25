@@ -45,9 +45,10 @@ function lvl2.setup()
         r = 0,
         hp = 5,
         sprite = "door/door",
-        pl = -14,
-        pr = -19,
-        pb = 0,
+        pl = -18,
+        pr = -24,
+        pb = -5,
+        pt = -5,
         dead=false,
         
         state = "tracking", 
@@ -272,7 +273,7 @@ function lvl2.loop(dt)
     end
 
     updateDebris(dt)
-    --L.draw(L.patch(L.boss, {debug=true}))
+    L.draw(L.patch(L.boss, {debug=true}))
     L.draw(L.boss)
     L.draw(L.player)
     --L.draw(groundBot)
