@@ -18,6 +18,8 @@ local L = {
     setup = function() end,
     render = function(dt) end,
     next_uid = 1,
+    stopped_since = nil,
+    skipped_secs = 0,
 }
 
 local square_size = 32
@@ -108,7 +110,7 @@ end
 
 local function get_obj_sprite_stuffs(obj)
     local drawable = (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].image) or
-    square_canvas
+        square_canvas
     local row_count = (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].row) or 1
     local col_count = (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].col) or 1
     local sprite_width = drawable:getWidth() / col_count
@@ -119,15 +121,15 @@ end
 local function rotateAround(x, y, pivotX, pivotY, angle)
     local cos_a = math.cos(angle)
     local sin_a = math.sin(angle)
-    
+
     -- Translate point to origin
     local dx = x - pivotX
     local dy = y - pivotY
-    
+
     -- Rotate and translate back
     local newX = dx * cos_a - dy * sin_a + pivotX
     local newY = dx * sin_a + dy * cos_a + pivotY
-    
+
     return newX, newY
 end
 
@@ -190,6 +192,41 @@ end
 ---@field sprite_t number? Sprite animation frame duration
 ---@field sprite_start number? Sprite animation start timestamp
 ---@field parent Obj? Parent, works for position and nothing else rn
+---@field rainbow boolean?
+
+local magicbg = love.image.newImageData("assets/UI/background_1x1.png")
+local function colorizeImage(hue, saturation)
+    saturation = saturation or 1.0
+
+    local imageData = magicbg
+    local width = imageData:getWidth()
+    local height = imageData:getHeight()
+    local newData = love.image.newImageData(width, height)
+
+    local function hslToRgb(h, s, l)
+        if s == 0 then return l, l, l end
+        local function hue2rgb(p, q, t)
+            if t < 0 then t = t + 1 end
+            if t > 1 then t = t - 1 end
+            if t < 1 / 6 then return p + (q - p) * 6 * t end
+            if t < 1 / 2 then return q end
+            if t < 2 / 3 then return p + (q - p) * (2 / 3 - t) * 6 end
+            return p
+        end
+        local q = l < 0.5 and l * (1 + s) or l + s - l * s
+        local p = 2 * l - q
+        return hue2rgb(p, q, h + 1 / 3), hue2rgb(p, q, h), hue2rgb(p, q, h - 1 / 3)
+    end
+
+    newData:mapPixel(function(x, y, r, g, b, a)
+        local r, g, b, a = imageData:getPixel(x, y)
+        local lightness = 0.299 * r + 0.587 * g + 0.114 * b
+        local nr, ng, nb = hslToRgb(hue, saturation, lightness)
+        return nr, ng, nb, a
+    end)
+
+    return love.graphics.newImage(newData)
+end
 
 ---@param obj Obj
 function L.draw(obj)
@@ -236,7 +273,7 @@ function L.draw(obj)
     else
         local drawable, sprite_width, sprite_height, r, c = get_obj_sprite_stuffs(obj)
         local sprite_i = (obj.sprite_t and (math.floor((L.time() - (obj.sprite_start or 0)) / obj.sprite_t) % (r * c) + 1)) or
-        1
+            1
 
         local x, y, dx, dy = L.padding_adjusted(obj)
 
@@ -253,6 +290,7 @@ function L.draw(obj)
         -- end
 
         love.graphics.draw(
+            (obj.rainbow and colorizeImage(L.time() / 15 % 1, 0.6)) or
             (not obj.debug and drawable) or square_canvas,
             (obj.debug and square_quad) or
             ((obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].quads[sprite_i]) or square_quad),
@@ -297,8 +335,8 @@ function L.collide(a, b)
     local a_parent_y = (a.parent and a.parent.y) or 0
     local b_parent_x = (b.parent and b.parent.x) or 0
     local b_parent_y = (b.parent and b.parent.y) or 0
-    ax,ay = ax + a_parent_x, ay + a_parent_y
-    bx,by = bx + b_parent_x, by + b_parent_y
+    ax, ay = ax + a_parent_x, ay + a_parent_y
+    bx, by = bx + b_parent_x, by + b_parent_y
     aw, ah = aw * adx, ah * ady
     bw, bh = bw * bdx, bh * bdy
 
@@ -389,11 +427,11 @@ function L.mouse_pressed(button)
     return res
 end
 
-function love.mousereleased(x,y,key)
+function love.mousereleased(x, y, key)
     L.released_mbuttons[key] = true
 end
 
-function love.mousepressed(x,y,key)
+function love.mousepressed(x, y, key)
     L.pressed_mbuttons[key] = true
 end
 
@@ -422,7 +460,7 @@ function love.keypressed(key)
 end
 
 function L.time()
-    return love.timer.getTime()
+    return L.stopped_since or love.timer.getTime() - L.skipped_secs
 end
 
 function L.pasttime(t)
@@ -514,8 +552,18 @@ function L.clear_pck_cache()
     end
 end
 
-function L.dist(a,b)
-    return math.sqrt((a.x - b.x)*(a.x - b.x) + (a.y - b.y)*(a.y - b.y)) 
+function L.dist(a, b)
+    return math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y))
+end
+
+function L.stop_time()
+    L.stopped_since = L.stopped_since or L.time()
+end
+
+function L.start_time()
+    local now = L.time()
+    L.skipped_secs = L.skipped_secs + now - L.stopped_since
+    L.stopped_since = nil
 end
 
 local last_mod_time = nil

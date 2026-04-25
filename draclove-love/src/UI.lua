@@ -116,7 +116,7 @@ function UI.render(buttonList)
             L.draw(L.patch(btn, { debug = true })) 
         else
             L.draw(btn)
-            L.draw({text=btn.buttonText, font="pixelifysans", font_size=36, align="mm", x=btn.x+btn.xOffset, y=btn.y})
+            L.draw({c="#000000", text=btn.buttonText, font="pixelifysans", font_size=36, align="mm", x=btn.x+btn.xOffset, y=btn.y})
         end
     end
 end
