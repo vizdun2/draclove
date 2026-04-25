@@ -3,7 +3,7 @@ local L = require("lib/l")
 local UI = {}
 
 -- Create the button with width and height
-function UI.newButton(xCord, yCord, btnWidth, btnHeight, tag, buttonList, sprite, scale, hoverAnim, pressAnim)
+function UI.newButton(xCord, yCord, btnWidth, btnHeight, tag, buttonList, sprite, scale, hoverAnim, pressAnim, hoveredAnim)
     local newBtn = {
         x = xCord,
         y = yCord,
@@ -15,7 +15,9 @@ function UI.newButton(xCord, yCord, btnWidth, btnHeight, tag, buttonList, sprite
         sprite = sprite,
         s = scale or 1,
         hoverAnimation = hoverAnim,
-        pressAnim = pressAnim
+        pressAnim = pressAnim,
+        hoveredAnim = hoveredAnim,
+        isAnimating = false,
     }
 
     if newBtn.sprite then
@@ -27,6 +29,12 @@ function UI.newButton(xCord, yCord, btnWidth, btnHeight, tag, buttonList, sprite
     table.insert(buttonList, newBtn)
     
     return newBtn
+end
+local function button_anime(sprite, t, btn)
+    btn.sprite = sprite
+    btn.sprite_t = t
+    btn.sprite_start = L.time()
+    btn.isAnimating = true
 end
 
 -- Update loop 
@@ -47,6 +55,9 @@ function UI.update(buttonList)
         else
             btn.isHovered = false
             btn.isPressed = false
+        end
+        if btn.isHovered and not btn.isAnimating then
+            button_anime(btn.hoverAnimation, 0.1, btn)
         end
     end
 end

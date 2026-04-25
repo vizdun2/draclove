@@ -4,7 +4,7 @@ local OS = {}
 
 local buttons = {}
 function OS.setup()
-    UI.newButton(0,-250,40,20,"restart", buttons, "UI/restart_button", 1)
+    UI.newButton(0,-250,40,20,"restart", buttons, "UI/button_idle", 1, "UI/button_hover", "UI/button_click","UI/button_idle")
 end
 function OS.loop()
     UI.update(buttons)

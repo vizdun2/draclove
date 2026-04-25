@@ -6,9 +6,8 @@ local Player = require("src/player")
 L1 = {}
 
 L1.ground = { x = 0, y = 300, sx = 100, tag = "ground" }
-L1.ground1 = { x = 0, y = -300, sx = 100, tag = "ceiling" }
 L1.level = {
-	np_objects = { L1.ground, L1.ground1 }, -- non player objects
+	np_objects = { L1.ground}, -- non player objects
 }
 L1.lines = {}
 L1.player_lines = { { text = "Stoner: She got a screw loose brother!", audio = "audio/chair/screw_loose.wav" }, {text="Stoner: That girl falling head over wheels for me!",audio=""}, {text="Stoner: I need to take the her wheels man, maybe they edible, like them gummy bears or smth"}}
@@ -79,7 +78,7 @@ function L1.loop(dt)
 		if L.collide(L.player, np_obj) and L.player.is_punching() then
 			L1.interact_with(np_obj)
 		end
-		L.draw(np_obj)
+		--L.draw(np_obj)
 	end
 	for _, projectile in pairs(L.boss.projectiles) do
 		for i, np_obj in ipairs(L1.level.np_objects) do
