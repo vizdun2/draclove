@@ -115,6 +115,8 @@ function L1.loop(dt)
 		CB.handleWallBounce(projectile, L.width / 2, L.height / 2)
 		L.draw(projectile)
 	end
+
+	L.draw_hud()
 end
 
 
