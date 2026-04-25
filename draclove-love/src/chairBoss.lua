@@ -309,7 +309,7 @@ function CB.bossLoopLogic(dt, player)
     if L.pasttime(L.boss.lastActionTime + L.boss.currentCooldown) and L.boss.inAction then
         resetBoss()
     end
-
+    
     if L.boss.inAction then
         if true and L.boss.lastAttack == "dash" then
             L.boss.sprite = "chair/flight"

@@ -7,7 +7,7 @@ L.levels = {L1}
 L.hunger_limit = 3
 
 function L.setup()
-	L1.setup()
+	LM.setup(L.levels, 1)
 	
 	-- dialogue event = {text="text", audio="path_to_my_audio_file"}
 	L.dialogue_manager = {events = {que={}, next_pop_i = 1, next_add_i = 1}, next_dialogue_at = nil}
@@ -166,5 +166,8 @@ function L.base_dialogue_loop()
 end
 
 function L.render(dt)
-	L.levels[1].loop(dt)
+	LM.loop(dt)
+	if L.boss.lastAttack == "dash" then
+		LM.nextLevel()
+	end
 end

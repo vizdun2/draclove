@@ -25,6 +25,7 @@ function LM.nextLevel()
     if currentIndex and currentIndex < #L.levels then
         startNewLevel(L.levels[currentIndex + 1])
     else
+        L.active_level = nil
         L.printNoBs("Congratulations! You've completed the game!")
     end
 end
