@@ -16,6 +16,7 @@ function CB.newProjectile(initialX, initialY, velX, velY)
     }
 end
 function CB.resetBossHealth()
+    L.boss.dead = false
     L.boss.wheels = {
         wheelm = {
             tag = "wheel",
