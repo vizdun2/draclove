@@ -9,7 +9,7 @@ function CB.newProjectile(initialX, initialY, velX, velY)
         vel_x = velX * projectile_speed,
         vel_y = velY * projectile_speed,
         dead = false,
-        sprite = nil,
+        sprite = "chair/wheel",
         spawnTime = L.time(),
         lifeTime = 1000
     }
@@ -138,7 +138,7 @@ end
 local function chargePhase()
     enterAction("charge", 3)
     L.boss.chargingUp = true
-    L.boss.sprite = "chair/lift_off"
+    L.boss.sprite = "chair/chair_lift_off"
     L.boss.r = (L.boss.x>0 and 90) or -90
     turnWheelsVulnerable()
 end
@@ -263,18 +263,25 @@ local function whatWheelToUse()
     if L.boss.lastAttack == "dash" then
         return
     elseif L.boss.lastAttack == "stun" then
-        L.draw(L.patch(L.boss, {sprite = "chair/wheel_middle"}))
-        L.draw(L.patch(L.boss, {sprite = "chair/wheel_left"}))
-        L.draw(L.patch(L.boss, {sprite = "chair/wheel_right"}))
-    elseif L.boss.lastAttack == "charge" then
-        if L.boss.wheels.wheelm then
-            L.draw(L.patch(L.boss, {sprite = "chair/wheel_middle_lift_off"}))
+        if L.boss.wheels.wheell then
+            L.draw(L.patch(L.boss, {sprite = "chair/wheel_left"}))
         end
+        if L.boss.wheels.wheelr then
+            L.draw(L.patch(L.boss, {sprite = "chair/wheel_right"}))
+        end
+        if L.boss.wheels.wheelm then
+            L.draw(L.patch(L.boss, {sprite = "chair/wheel_middle"}))
+        end
+    elseif L.boss.lastAttack == "charge" then
+        
         if L.boss.wheels.wheell then
             L.draw(L.patch(L.boss, {sprite = "chair/wheel_left_lift_off"}))
         end
         if L.boss.wheels.wheelr then
             L.draw(L.patch(L.boss, {sprite = "chair/wheel_right_lift_off"}))
+        end
+        if L.boss.wheels.wheelm then
+            L.draw(L.patch(L.boss, {sprite = "chair/wheel_middle_lift_off"}))
         end
     end
 
