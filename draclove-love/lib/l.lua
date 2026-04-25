@@ -170,6 +170,7 @@ end
 ---@field sprite string? Sprite
 ---@field sprite_t number? Sprite animation frame duration
 ---@field sprite_start number? Sprite animation start timestamp
+---@field parent Obj? Parent, works for position and nothing else rn
 
 ---@param obj Obj
 function L.draw(obj)
@@ -224,6 +225,9 @@ function L.draw(obj)
         local debug_sx = (not obj.debug and 1) or (sprite_width / square_size * dx)
         local debug_sy = (not obj.debug and 1) or (sprite_height / square_size * dy)
 
+        local parent_x = (obj.parent and obj.parent.x) or 0
+        local parent_y = (obj.parent and obj.parent.y) or 0
+
         -- if obj.debug then
         --     L.print(obj)
         -- end
@@ -232,8 +236,8 @@ function L.draw(obj)
             (not obj.debug and drawable) or square_canvas,
             (obj.debug and square_quad) or
             ((obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].quads[sprite_i]) or square_quad),
-            ((debug_x - L.cam_x) * L.cam_s) + L.width / 2,
-            ((debug_y - L.cam_y) * L.cam_s) + L.height / 2,
+            ((debug_x + parent_x - L.cam_x) * L.cam_s) + L.width / 2,
+            ((debug_y + parent_x - L.cam_y) * L.cam_s) + L.height / 2,
             math.rad(obj.r or 0),
             debug_sx * (obj.sx or 1) * (obj.s or 1) * L.cam_s,
             debug_sy * (obj.sy or 1) * (obj.s or 1) * L.cam_s,
