@@ -275,6 +275,12 @@ function L.collide(a, b)
     local bw, bh = L.obj_dims(b)
     local ax, ay, adx, ady = L.padding_adjusted(a)
     local bx, by, bdx, bdy = L.padding_adjusted(b)
+    local a_parent_x = (a.parent and a.parent.x) or 0
+    local a_parent_y = (a.parent and a.parent.y) or 0
+    local b_parent_x = (b.parent and b.parent.x) or 0
+    local b_parent_y = (b.parent and b.parent.y) or 0
+    ax,ay = ax + a_parent_x, ay + a_parent_y
+    bx,by = bx + b_parent_x, by + b_parent_y
     aw, ah = aw * adx, ah * ady
     bw, bh = bw * bdx, bh * bdy
 
