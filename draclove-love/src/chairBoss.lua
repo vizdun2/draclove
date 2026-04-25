@@ -79,7 +79,7 @@ function CB.newBoss()
         pr=-10,
         dashCount = 0,
         projectileCount = 0,
-        deathCOunt = 0,
+        deathCount = 0,
     }
 
     CB.resetBossHealth()
