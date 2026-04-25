@@ -77,16 +77,20 @@ local movement_const = 60
 local dodge_cooldown = 0.5
 local function player_action()
 	if L.key_pressed("c") and L.time() - L.player.last_dodged > dodge_cooldown then
-		player_anime("player/matrix", 0.06)
+		if L.player.on_ground then
+			player_anime("player/matrix_from_idle", 0.06)
+		else
+			player_anime("player/matrix_from_air", 0.05)
+		end
 		L.player.pr, L.player.pl = 0, 0
 		L.player.pt = -30
 		L.player.last_dodged = L.time()
-	end
-	if L.key_pressed("x") then
+	elseif L.key_pressed("x") then
+		print("punched")
 		if L.player.on_ground then
-			player_anime("player/punch_from_idle", 0.05)
+			player_anime("player/punch_from_idle", 0.1)
 		else
-			player_anime("player/punch_from_air", 0.05)
+			player_anime("player/punch_from_air", 0.1)
 		end
 		L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
 	end
@@ -112,11 +116,13 @@ local function player_state_handler()
 		L.player.jumped_midair = false
 		L.player.vel_y = jump_speed * movement_const
 		L.player.sprite = "player/in_air"
+	elseif L.player.is_jump_from_air() and L.sprite_finished(L.player) then
+		L.player.sprite = "player/in_air"
 	end
 end
 
 local function player_movement()
-	if not L.player.on_ground and not L.player.is_inair() and not L.player.is_dodging() and not L.player.is_punching() then
+	if not L.player.on_ground and not L.player.is_inair() and not L.player.is_dodging() and not L.player.is_punching() and not L.player.is_jump_from_air() then
 		L.player.sprite = "player/in_air"
 		L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
 	end
@@ -128,28 +134,27 @@ local function player_movement()
 		if L.player.on_ground and not L.player.is_jump_from_idle() then
 			player_anime("player/jump_from_idle", 0.03)
 			-- reset this
-			L.key_pressed("space")
 		elseif L.key_pressed("space") and not L.player.jumped_midair then
+			player_anime("player/jump_from_air", 0.03)
 			L.player.vel_y = jump_speed * movement_const
 			L.player.jumped_midair = true
-			L.printNoBs("Double jumped")
 		end
 	end
 
 
 	if L.key_down("d") then
 		L.player.vel_x = player_speed * movement_const
-		if not L.player.is_jump_from_idle() and L.player.on_ground and not L.player.is_dodging() then
+		L.player.sx = 1
+		if not L.player.is_jump_from_idle() and L.player.on_ground and not L.player.is_dodging() and not L.player.is_punching() then
 			L.player.sprite_t = 0.1
-			L.player.sx = 1
 			L.player.sprite = "player/runnin"
 			L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
 		end
 	elseif L.key_down("a") then
 		L.player.vel_x = -player_speed * movement_const
-		if not L.player.is_jump_from_idle() and L.player.on_ground and not L.player.is_dodging() then
+		L.player.sx = -1
+		if not L.player.is_jump_from_idle() and L.player.on_ground and not L.player.is_dodging() and not L.player.is_punching() then
 			L.player.sprite_t = 0.1
-			L.player.sx = -1
 			L.player.sprite = "player/runnin"
 			L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
 		end

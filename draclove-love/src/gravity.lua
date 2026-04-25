@@ -7,7 +7,7 @@ function gravity.change_vel(obj)
         return
     end
     
-	local downspeed_const = 100
+	local downspeed_const = 80
 	local down_velocity_min = 1000*20
 	local cap_const_down = 20 * 50
 
