@@ -37,7 +37,9 @@ function L.play_dialogue()
 	if L.dialogue_manager.next_dialogue_at == nil or L.time() < L.dialogue_manager.next_dialogue_at then
 		local dialogue = L.pop_dialogue()
 		if dialogue ~= nil then
-			-- L.play(dialogue.audio)
+			if dialogue.audio ~= "" then
+				L.play(dialogue.audio)
+			end
 			table.insert(L.active_level().level.np_objects,
 				{
 					x = -5 * string.len(dialogue.text),
@@ -66,7 +68,7 @@ local function player_action()
 		if L.player.on_ground then
 			player_anime("player/matrix_from_idle", 0.06)
 		else
-			player_anime("player/matrix_from_air", 0.05)
+			player_anime("player/matrix_from_air", 0.06)
 		end
 		L.player.pr, L.player.pl = 0, 0
 		L.player.pt = -30
@@ -82,7 +84,7 @@ local function player_action()
 	end
 end
 
-local jump_speed = -25
+local jump_speed = -28
 
 local function player_state_handler()
 	if L.player.is_dodging() and L.sprite_finished(L.player) then

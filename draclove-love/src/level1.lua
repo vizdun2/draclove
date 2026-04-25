@@ -15,7 +15,7 @@ function L1.setup()
 		x = 0,
 		y = 0,
 		speed = 15,
-		s = 2,
+		s = 3,
 		vel_x = 0,
 		vel_y = 0,
 		hunger = 0,
