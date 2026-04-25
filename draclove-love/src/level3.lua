@@ -79,7 +79,7 @@ local function shoot_water()
     end
 end
 
-local prep_rot_speed = 25
+local prep_rot_speed = 50
 local flow_speed = 8
 local magic_y = 540 / 2
 local desired_water_level = 290
@@ -162,6 +162,7 @@ local function do_toilet()
             L.water_level.y = L.water_level.desired_water_level
             L.boss.state = states.spilling_finishing
             L.boss.state_start = L.time()
+            L.boss.sprite = "idibiks/idle"
         end
     end
 
@@ -175,7 +176,6 @@ local function do_toilet()
             L.water_level.y = origin
             L.boss.state = states.spilling_recover
             L.boss.state_start = L.time()
-            L.boss.sprite = "idibiks/idle"
         end
     end
 
