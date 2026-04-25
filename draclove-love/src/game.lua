@@ -3,8 +3,9 @@ L.clear_pck_cache()
 local LM = require("src/levelManager")
 local L1 = require("src/level1")
 local L2 = require("src/level2")
+local L3 = require("src/level3")
 -- as of now, all levels MUST have a .setup function and a .loop function
-L.levels = { L1, L2 }
+L.levels = { L1, L2, L3 }
 L.hunger_limit = 3
 
 
