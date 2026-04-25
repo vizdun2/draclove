@@ -35,7 +35,7 @@ function L.pop_dialogue()
 end
 
 function L.play_dialogue()
-	if last_dialogue_active_uid ~= nil and L.dialogue_manager.next_dialogue_at < L.time() then
+	if last_dialogue_active_uid ~= nil and (L.dialogue_manager.next_dialogue_at == nil or L.dialogue_manager.next_dialogue_at < L.time()) then
 		L.active_level().lines[last_dialogue_active_uid] = nil
 	end
 	if (L.dialogue_manager.next_dialogue_at == nil or L.time() > L.dialogue_manager.next_dialogue_at) and L.dialogue_manager.events.next_add_i > L.dialogue_manager.events.next_pop_i then
