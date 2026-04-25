@@ -1,5 +1,6 @@
 local L = require("lib/l")
 local gravity = require("src/gravity")
+local Player = require("src/player")
 local lvl3 = {}
 
 local ground_bot = { x = 0, y = 300, sx = 100, tag = "ground" }
@@ -44,63 +45,20 @@ function lvl3.setup()
         pr = -8,
         pb = 0,
     }
-    L.player = {
-        x = 0,
-        y = 0,
-        speed = 15,
-        s = 2,
-        vel_x = 0,
-        vel_y = 0,
-        hunger = 0,
-        last_dodged = 0,
-        dead = false,
-        jumped_midair = true,
-        sprite =
-        "player/idle"
-    }
-
-    function L.player.is_dodging()
-        return L.player.sprite == "player/matrix_from_air" or L.player.sprite == "player/matrix_from_idle"
-    end
-
-    function L.player.is_punching()
-        return L.player.sprite == "player/punch_from_idle" or L.player.sprite == "player/punch_from_air"
-    end
-
-    function L.player.is_inair()
-        return L.player.sprite == "player/in_air"
-    end
-
-    function L.player.is_jump_from_idle()
-        return L.player.sprite == "player/jump_from_idle"
-    end
-
-    function L.player.is_jump_from_air()
-        return L.player.sprite == "player/jump_from_air"
-    end
-
-    function L.player.take_damage()
-        if L.player.is_dodging() then
-            return false
-        end
-        if L.player.hurt_time ~= nil and L.time() - L.player.hurt_time < 1 then
-            return false
-        end
-        L.player.hurt_time = L.time()
-        L.player.hunger = L.player.hunger + 1
-        if L.player.hunger > L.hunger_limit then
-            L.player.dead = true
-            --L.printNoBs("You died. Rip bozo.")
-        end
-        return true
-    end
-
+    Player.setup()
     L.pipes = {}
-
-    -- generate_pipes()
+    L.water_projs = {}
 end
 
 local toilet_speed = 50
+local proj_speed = 200
+
+local function shoot_water()
+    -- for i = 1, 3 do
+    local vx, vy = L.vec_to(L.player, L.boss)
+    L.water_projs[L.uid()] = {x=L.boss.x, y=L.boss.y, vel_x = vx * proj_speed, vel_y = vy * proj_speed}
+    -- end
+end
 
 local function do_toilet()
     if not L.boss.target then
@@ -116,31 +74,20 @@ local function do_toilet()
         else
             L.boss.sx = 1
         end
-        L.print(L.boss)
     end
 
     if L.dist(L.boss, L.boss.target) < 10 then
         L.boss.vel_x, L.boss.vel_y = 0, 0
         L.boss.target = nil
+        shoot_water()
     end
 
     L.move_vel(L.boss)
 end
 
 function lvl3.loop(dt)
-    gravity.change_vel(L.player)
-    L.base_player_loop()
+    Player.loop()
     L.player.on_ground = gravity.ground_collide(L.player, L1.ground)
-
-    -- local collide, from_above, _ = gravity.check_collide(L.player, L.boss)
-    -- if collide then
-    --     if from_above then
-    --         L.boss.hp = L.boss.hp - 1
-    --         L.print("jumped on", L.boss.hp)
-    --     else
-    --         L.player.take_damage()
-    --     end
-    -- end
 
     do_toilet()
 
