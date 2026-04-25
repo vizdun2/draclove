@@ -34,9 +34,11 @@ function lvl2.setup()
         next_state = 1,
         hp = 3,
         sprite = "door/door",
+        pl=-14,
+        pr=-19,
+        pb=0,
     }
     L.player = {
-		debug=true,
 		x = 0,
 		y = 0,
 		speed = 15,
@@ -198,8 +200,9 @@ function lvl2.loop(dt)
 
     door_move()
 
-    L.draw(L.patch(L.boss, {debug=true, pl=-13, pr=-23, pb=-40}))
+    L.draw(L.patch(L.boss, {debug=true}))
     L.draw(L.boss)
+    L.draw(L.patch(L.player, {debug=true}))
     L.draw(L.player)
     L.draw(ground_bot)
     L.draw(ground_top)

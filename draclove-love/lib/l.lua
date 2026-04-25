@@ -114,13 +114,29 @@ local function get_obj_sprite_stuffs(obj)
     return drawable, sprite_width, sprite_height, row_count, col_count
 end
 
+local function rotateAround(x, y, pivotX, pivotY, angle)
+    local cos_a = math.cos(angle)
+    local sin_a = math.sin(angle)
+    
+    -- Translate point to origin
+    local dx = x - pivotX
+    local dy = y - pivotY
+    
+    -- Rotate and translate back
+    local newX = dx * cos_a - dy * sin_a + pivotX
+    local newY = dx * sin_a + dy * cos_a + pivotY
+    
+    return newX, newY
+end
+
 function L.padding_adjusted(obj)
     local drawable, sw, sh, _r, _c = get_obj_sprite_stuffs(obj)
-    local x = (obj.x or 0) + ((obj.pr or 0) - (obj.pl or 0))
-    local y = (obj.y or 0) + ((obj.pb or 0) - (obj.pt or 0))
+    local x = (obj.x or 0) + ((obj.pr or 0) - (obj.pl or 0)) * (obj.s or 1) * (obj.sx or 1) / 2
+    local y = (obj.y or 0) + ((obj.pb or 0) - (obj.pt or 0)) * (obj.s or 1) * (obj.sy or 1) / 2
     local dx = (sw + (obj.pl or 0) + (obj.pr or 0)) / sw
     local dy = (sh + (obj.pt or 0) + (obj.pb or 0)) / sh
-    return x, y, dx, dy
+    local fx, fy = rotateAround(x, y, obj.x or 0, obj.y or 0, math.rad(obj.r or 0))
+    return fx, fy, dx, dy
 end
 
 local default_font = love.graphics.getFont()
