@@ -19,20 +19,21 @@ local door_states = {
     unrot = 10,
 };
 
-local normal_y = 90
+local normal_y = 60
 
 function lvl2.setup()
     L.boss = {
         x=0,
         y=normal_y,
-        sy=3,
-        sx=2,
-        s=2,
+        -- sy=3,
+        -- sx=2,
+        s=4.5,
         r=0,
         state = door_states.staying,
         state_begin = L.time(),
         next_state = 1,
         hp = 3,
+        sprite = "door/door",
     }
 end
 
@@ -135,15 +136,14 @@ function lvl2.loop(dt)
 	L.move_vel(L.player)
 	L.player.on_ground = gravity.ground_collide(L.player, L1.ground)
 
-    if L.collide(L.boss, L.player) then
-        L.move(L.player, 0, -L.player.vel_y * L.dt)
-        if not L.collide(L.boss, L.player) then
+    local collide, from_above, _ = gravity.check_collide(L.player, L.boss)
+    if collide then
+        if from_above then
             L.boss.hp = L.boss.hp - 1
             L.print("jumped on", L.boss.hp)
         else
             L.player.take_damage()
         end
-        L.move(L.player, 0, L.player.vel_y * L.dt)
     end
 
     door_move()
