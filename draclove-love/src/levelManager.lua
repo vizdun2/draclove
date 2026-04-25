@@ -1,14 +1,11 @@
 local L = require("lib/l")
 
 local LM = {}
-function LM.setup(levelsList, startingLevel)
-    L.levels = levelsList
-    L.active_level = L.levels[startingLevel]
-    L.active_level.setup()
-    
+function LM.setup()
+    L.levels[L.active_level_i].setup()
 end
 
-local function startNewLevel(level)
+function LM.startNewLevel(level)
     L.active_level = level
     if L.active_level.setup then
         L.active_level.setup()

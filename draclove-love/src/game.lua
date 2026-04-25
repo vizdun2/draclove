@@ -1,36 +1,20 @@
 local L = require("lib/l")
-local LM = require("src/levelManager")
 L.clear_pck_cache()
+local LM = require("src/levelManager")
 local L1 = require("src/level1")
 local L2 = require("src/level2")
 -- as of now, all levels MUST have a .setup function and a .loop function
-L.levels = {L1, L2}
+L.levels={L1, L2}
 L.hunger_limit = 3
 
 
 function L.setup()
-	LM.setup(L.levels, 1)
+	L.active_level_i = L.active_level_i or 1
+	L.active_level().setup()
 	
 	-- dialogue event = {text="text", audio="path_to_my_audio_file"}
 	L.dialogue_manager = { events = { que = {}, next_pop_i = 1, next_add_i = 1 }, next_dialogue_at = nil }
-	function L.player.take_damage()
-		if L.player.is_dodging() then
-			return false
-		end
-		if L.player.hurt_time ~= nil and L.time() - L.player.hurt_time < 1 then
-			return false
-		end
-		L.player.hurt_time = L.time()
-		L.player.hunger = L.player.hunger + 1
-		if L.player.hunger > L.hunger_limit then
-			L.player.dead = true
-			--L.printNoBs("You died. Rip bozo.")
-		end
-		return true
-	end
 
-	-- set the level variable for this file
-	L.active_level = L1
 	L.push_dialogue({ text = "Hello idiot, how are you doing??", audio = nil })
 end
 
@@ -53,7 +37,7 @@ function L.play_dialogue()
 		local dialogue = L.pop_dialogue()
 		if dialogue ~= nil then
 			-- L.play(dialogue.audio)
-			table.insert(L.active_level.level.np_objects,
+			table.insert(L.active_level().level.np_objects,
 				{
 					x = -5 * string.len(dialogue.text),
 					y = 310,
@@ -186,12 +170,16 @@ function L.base_player_loop()
 	player_movement()
 end
 
+function L.active_level()
+	return L.levels[L.active_level_i]
+end
+
 function L.base_dialogue_loop()
 	L.play_dialogue()
-	for k, obj in ipairs(L.active_level.level.np_objects) do
+	for k, obj in ipairs(L.active_level().level.np_objects) do
 		if obj.tag == "text" then
 			if obj.is_dead_at < L.time() then
-				L.active_level.level.np_objects[k] = nil
+				L.active_level().level.np_objects[k] = nil
 			end
 		end
 	end
@@ -206,13 +194,10 @@ end
 function L.render(dt)
 	for i = 1, #L.levels do
 		if L.key_released(tostring(i)) then
-			L.current_lvl = i
+			L.active_level_i = i
 			L.reset()
 		end
 	end
 
-	LM.loop(dt)
-	if L.boss.lastAttack == "dash" then
-		LM.nextLevel()
-	end
+	L.active_level().loop(dt)
 end
