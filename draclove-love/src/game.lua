@@ -21,6 +21,8 @@ function L.setup()
 		sprite =
 		"player/idle"
 	}
+	-- dialogue event = {text="text", audio="path_to_my_audio_file"}
+	L.dialogue_manager = {events = {que={}, next_pop_i = 1, next_add_i = 1}, next_dialogue_at = nil}
 	function L.player.take_damage()
 		if L.player.is_dodging() then
 			return false
@@ -49,8 +51,38 @@ function L.setup()
 		return L.player.sprite == "player/inair"
 	end
 	-- set the level variable for this file
-	L.level_1 = L1
+	L.active_level = L1
+	L.push_dialogue({text="Hello idiot, how are you doing??",audio=nil})
 end
+
+
+
+function L.push_dialogue(dialogue_event)
+	local add = L.dialogue_manager.events.next_add_i
+	L.dialogue_manager.events.que[add] = dialogue_event 
+	L.dialogue_manager.events.next_add_i = L.dialogue_manager.events.next_add_i + 1
+
+end
+
+function L.pop_dialogue()
+	local pop = L.dialogue_manager.events.next_pop_i
+	local to_pop = L.dialogue_manager.events.que[pop]
+	L.dialogue_manager.events.next_pop_i = L.dialogue_manager.events.next_pop_i + 1
+	L.dialogue_manager.events.que[pop] = nil
+	return to_pop
+end
+
+function L.play_dialogue()
+	if L.dialogue_manager.next_dialogue_at == nil or L.time() < L.dialogue_manager.next_dialogue_at then
+		local dialogue = L.pop_dialogue()
+		if dialogue ~= nil then
+			-- L.play(dialogue.audio)
+			table.insert(L.active_level.level.np_objects,{x = -5 * string.len(dialogue.text) ,y=310,is_dead_at = L.time() + string.len(dialogue.text) * 0.05, text=dialogue.text ,tag = "text", font="pixelifysans", font_size = 30})
+		end
+	end
+	
+end
+
 
 local movement_const = 60
 local dodge_cooldown = 0.5
@@ -145,6 +177,16 @@ end
 
 
 
+function L.base_dialogue_loop()
+	L.play_dialogue()
+	for k,obj in ipairs(L.active_level.level.np_objects) do
+		if obj.tag == "text" then
+			if obj.is_dead_at < L.time() then
+				L.active_level.level.np_objects[k] = nil
+			end
+		end
+	end
+end
 
 function L.render(dt)
 	L.levels[1].loop(dt)

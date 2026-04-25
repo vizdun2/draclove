@@ -18,6 +18,7 @@ end
 
 function L1.loop(dt)
 	L.base_player_loop()
+	L.base_dialogue_loop()
 	gravity.change_vel(L.player)
 	L.move_vel(L.player)
 	L.player.on_ground = gravity.ground_collide(L.player, L1.ground)
