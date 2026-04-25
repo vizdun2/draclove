@@ -91,10 +91,6 @@ function L1.loop(dt)
 		CB.handleWallBounce(projectile, L.width / 2, L.height / 2)
 		L.draw(projectile)
 	end
-
-	for i = 1, L.hunger_limit, 1 do
-		L.draw({ sprite = "icons/hunger", s = 3, x = -600 + (i - 1) * 60, y = 250, c = (i > L.player.hunger and "FFFFFF" or "606060") })
-	end
 end
 
 
