@@ -136,6 +136,7 @@ function lvl2.loop(dt)
     L.draw(L.player)
     L.draw(ground_bot)
     L.draw(ground_top)
+    L.draw_hud()
 end
 
 return lvl2

@@ -2,21 +2,36 @@ local L = require("lib/l")
 local LM = require("src/levelManager")
 L.clear_pck_cache()
 local L1 = require("src/level1")
+local L2 = require("src/level2")
 -- as of now, all levels MUST have a .setup function and a .loop function
-L.levels = { L1 }
+L.levels = {L1, L2}
 L.hunger_limit = 3
 
 
 function L.setup()
-	L1.setup()
-	
+	L.current_lvl = L.current_lvl or 1
+	L.levels[L.current_lvl].setup()
+	L.player = {
+		x = 0,
+		y = 0,
+		speed = 8,
+		s = 2,
+		vel_x = 0,
+		vel_y = 0,
+		hunger = 0,
+		last_dodged = 0,
+		dead = false,
+		jumped_midair = true,
+		sprite =
+		"player/idle"
+	}
 	-- dialogue event = {text="text", audio="path_to_my_audio_file"}
 	L.dialogue_manager = { events = { que = {}, next_pop_i = 1, next_add_i = 1 }, next_dialogue_at = nil }
 	function L.player.take_damage()
 		if L.player.is_dodging() then
 			return false
 		end
-		if L.player.hurt_time ~= nil and L.time() - L.player.hurt_time < 0.2 then
+		if L.player.hurt_time ~= nil and L.time() - L.player.hurt_time < 1 then
 			return false
 		end
 		L.player.hurt_time = L.time()
@@ -162,8 +177,8 @@ local function player_movement()
 		if not L.player.is_punching() and not L.player.is_dodging() and not L.player.is_jump_from_idle() then
 			L.player.sprite = "player/idle"
 			L.player.sprite_t = 0.1
-			L.player.pr = (L.player.sx == -1) and -30 or -3
-			L.player.pl = (L.player.sx == -1) and -3 or -30
+			L.player.pr = (L.player.sx == -1) and -15 or -15
+			L.player.pl = (L.player.sx == -1) and -15 or -15
 			L.player.pt = 0
 		end
 		L.player.vel_x = 0
@@ -196,6 +211,19 @@ function L.base_dialogue_loop()
 	end
 end
 
+function L.draw_hud()
+	for i = 1, L.hunger_limit, 1 do
+		L.draw({ sprite = "icons/hunger", s = 3, x = -600 + (i - 1) * 60, y = 250, c = (i > L.player.hunger and "FFFFFF" or "606060") })
+	end
+end
+
 function L.render(dt)
-	L.levels[1].loop(dt)
+	for i = 1, #L.levels do
+		if L.key_released(tostring(i)) then
+			L.current_lvl = i
+			L.reset()
+		end
+	end
+
+	L.levels[L.current_lvl].loop(dt)
 end
