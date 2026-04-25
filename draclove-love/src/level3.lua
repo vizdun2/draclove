@@ -110,9 +110,9 @@ function lvl3.loop(dt)
         L.draw(pipe)
     end
 
-    L.draw({ sprite = "idibiks/pipe", r=90, x = (origin_x + L.boss.x) / 2, y = L.boss.y, sy = math.abs(origin_x - L.boss.x) / 64, sx = -1 })
+    L.draw({ sprite = "idibiks/pipe", r=90, x = (origin_x + L.boss.x) / 2, y = L.boss.y, sy = math.abs(origin_x - L.boss.x) / 64, sx=L.boss.x > 0 and -1 or 1 })
     L.draw({ sprite = "idibiks/pipe", x = origin_x, y = (origin_y + L.boss.y) / 2, sy = math.abs(origin_y - L.boss.y) / 64 })
-    L.draw({ sprite = L.boss.x > 0 and "idibiks/joint" or "idibiks/joint", x = origin_x, y = L.boss.y, sx=L.boss.x < 0 and -1 or 1 })
+    L.draw({ sprite = L.boss.x > 0 and "idibiks/joint_right" or "idibiks/joint_left", x = origin_x, y = L.boss.y })
 
     L.draw(L.patch(L.boss, {sprite="idibiks/attack", sy=-1}))
 
