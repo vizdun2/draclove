@@ -55,7 +55,7 @@ function CB.newBoss()
         wheell = {
             tag = "wheel",
             x = -25 * L.boss.s,
-            y = -10 * L.boss.s,
+            y = 10 * L.boss.s,
             s = 1.3,
             dead = false,
             sprite = nil,
@@ -65,7 +65,7 @@ function CB.newBoss()
         wheelr = {
             tag = "wheel",
             x = -25 * L.boss.s,
-            y = 10 * L.boss.s,
+            y = -10 * L.boss.s,
             s = 1.3,
             dead = false,
             sprite = nil,

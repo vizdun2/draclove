@@ -20,14 +20,14 @@ function LM.nextLevel()
         end
     end
     if currentIndex and currentIndex < #L.levels then
-        startNewLevel(L.levels[currentIndex + 1])
+        LM.startNewLevel(L.levels[currentIndex + 1])
     else
         L.active_level = nil
         L.printNoBs("Congratulations! You've completed the game!")
     end
 end
 function LM.restartLevel()
-    startNewLevel(L.active_level)
+    LM.startNewLevel(L.active_level)
 end
 function LM.loop(dt)
     if L.active_level and L.active_level.loop then
