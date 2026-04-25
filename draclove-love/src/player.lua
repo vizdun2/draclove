@@ -13,15 +13,16 @@ local movement_const = 60
 local dodge_cooldown = 0.5
 local base_jump_speed = -25
 
-local function newDJEffect()
+local function newDJEffect(sprite)
     local newDJEffect = {
         x=L.player.x,
         y=L.player.y,
-        sprite="particles/1/jump_burst",
+        sprite=sprite,
         sprite_t=0.1,
         s=3,
         sprite_start = L.time(),
-        tag="tempEffect"
+        tag="tempEffect",
+        currentDJSprite="particles/1/jump_burst",
     }
     table.insert(L.player.particles, newDJEffect)
 end
@@ -130,7 +131,7 @@ local function player_movement()
 			L.player.vel_y = Player.jump_speed * movement_const
 			L.player.jumped_midair = true
 			L.player.sprite = "player/in_air"
-            newDJEffect()
+            newDJEffect(L.player.currentDJSprite)
 		end
 	end
 

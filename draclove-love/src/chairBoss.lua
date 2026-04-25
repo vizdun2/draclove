@@ -86,6 +86,8 @@ function CB.newBoss()
         dashCount = 0,
         projectileCount = 0,
         deathCount = 0,
+        health=6,
+        maxHealth=6,
     }
 
     CB.resetBossHealth()
@@ -297,8 +299,12 @@ local function loseAWheel(wheel)
     L.boss.wheels[wheelKey] = nil
 
     L.boss.lostWheelThisPhase = true
-
-    if L.table_length(L.boss.wheels) <= 0 then
+    L.boss.health=L.boss.health-1
+    if L.boss.health==3 then
+        CB.resetBossHealth()
+		L.push_dialogue({ text = "Chair: That is what I call, regeneration!", audio = "audio/chair/regeneration.wav" })
+    end
+    if L.boss.health <= 0 then
         L.boss.dead = true
         return
     end

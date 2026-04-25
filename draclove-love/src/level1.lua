@@ -19,6 +19,7 @@ L1.player_next_line = player_next_line_offset + math.random(5)
 function L1.setup()
 	CB.newBoss()
 	Player.setup()
+	L.player.currentDJSprite="particles/1/jump_burst"
 end
 
 function L1.interact_with(obj)
@@ -35,19 +36,22 @@ local function isGrounded()
 	end
 	return false
 end
+local function draw_hud()
+	for i = 1, L.boss.maxHealth, 1 do
+		L.draw({ sprite = "chair/wheel", s = 5, x = -600 + (i - 1) * 60, y = -L.height/2+30, c = (i <= L.boss.health and "FFFFFF" or "606060") })
+	end
+end
 function L1.loop(dt)
 	L.draw({ x = 0, y = 0, sprite = "scenes/1", s = 6.66, sprite_t = 0.1 })
-	if L.boss.dead and L.boss.deathCount == 1 then
+	if L.boss.dead then
 		L.nextLevel = 2
 		L.active_level_i = L.transition
 		L.reset()
 		return
-	elseif L.boss.dead then
-		L.boss.deathCount = L.boss.deathCount + 1
-		CB.resetBossHealth()
-		L.push_dialogue({ text = "Chair: That is what I call, regeneration!", audio = "audio/chair/regeneration.wav" })
+	
 	end
 	Player.loop()
+	draw_hud()
 	L.base_dialogue_loop()
 
 	if L1.player_next_line < L.time() then

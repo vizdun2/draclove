@@ -70,6 +70,7 @@ function lvl2.setup()
     }
     Player.setup()
     L.player.x=-L.width/2+100   
+    L.player.currentDJSprite="particles/2/jump_burst"
 end
 
 local function updateBossDirection(boss, player)

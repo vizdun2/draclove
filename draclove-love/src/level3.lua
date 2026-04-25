@@ -61,6 +61,7 @@ function lvl3.setup()
     L.water_projs = {}
     L.spill = nil
     L.water_level = nil
+    L.player.currentDJSprite="particles/3/jump_burst"
 end
 
 local toilet_speed = 100
@@ -199,7 +200,6 @@ function lvl3.loop(dt)
         L.active_level_i=L.transition
         L.reset()
     end
-    Player.loop()
     L.player.on_ground = gravity.ground_collide(L.player, L1.ground)
 
     for id, proj in pairs(L.water_projs) do
@@ -248,14 +248,14 @@ function lvl3.loop(dt)
     for _i, pipe in ipairs(pipes) do
         L.draw(pipe)
     end
-
+    Player.loop()
     L.draw(L.boss)
 
     for _, proj in pairs(L.water_projs) do
         L.draw(proj)
     end
 
-    L.draw(L.patch(L.player, { debug = true }))
+    --L.draw(L.patch(L.player, { debug = true }))
     L.draw(L.player)
 
     if L.spill then

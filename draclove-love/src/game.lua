@@ -108,7 +108,7 @@ end
 
 function L.draw_hud()
 	for i = 1, L.hunger_limit, 1 do
-		L.draw({ sprite = "icons/hunger", s = 3, x = -600 + (i - 1) * 60, y = 250, c = (i > L.player.hunger and "FFFFFF" or "606060") })
+		L.draw({ sprite = "icons/hunger", s = 3, x = 600 - (i - 1) * 60, y = -L.height/2+30, c = (i > L.player.hunger and "FFFFFF" or "606060") })
 	end
 end
 
