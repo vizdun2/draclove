@@ -389,6 +389,14 @@ function L.mouse_pressed(button)
     return res
 end
 
+function love.mousereleased(x,y,key)
+    L.released_mbuttons[key] = true
+end
+
+function love.mousepressed(x,y,key)
+    L.pressed_mbuttons[key] = true
+end
+
 function L.key_down(key)
     return love.keyboard.isDown(key)
 end
