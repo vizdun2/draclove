@@ -11,6 +11,8 @@ local L = {
     setup_done = false,
     released_keys = {},
     pressed_keys = {},
+    pressed_mbuttons = {},
+    released_mbuttons = {},
     assets = {},
     fonts = {},
     setup = function() end,
@@ -371,6 +373,22 @@ function L.get_mouse(scale)
     return { x = wx, y = wy, s = (scale or 1) }
 end
 
+function L.mouse_down(button)
+    return love.mouse.isDown(button)
+end
+
+function L.mouse_released(button)
+    local res = L.released_mbuttons[button] or false
+    L.released_mbuttons[button] = nil
+    return res
+end
+
+function L.mouse_pressed(button)
+    local res = L.pressed_mbuttons[button] or false
+    L.pressed_mbuttons[button] = nil
+    return res
+end
+
 function L.key_down(key)
     return love.keyboard.isDown(key)
 end
@@ -533,6 +551,10 @@ function love.draw()
 
     L.set_cam()
     local status, err = xpcall(function() L.render(L.dt) end, debug.traceback)
+    L.released_keys = {}
+    L.pressed_keys = {}
+    L.pressed_mbuttons = {}
+    L.released_mbuttons = {}
     if err then
         L.printNoBs("Error rendering/updating:", err)
     end
