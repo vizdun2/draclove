@@ -9,8 +9,20 @@ local level_1 = {
 
 function L.setup()
 	CB.newBoss()
-	L.player = { x = 0, y = 0, speed = 8, s=2, vel_x = 0, vel_y = 0, hunger = 0, dead = false, dodging = false, sprite =
-	"idle" }
+	L.player = {
+		x = 0,
+		y = 0,
+		speed = 8,
+		s = 2,
+		vel_x = 0,
+		vel_y = 0,
+		hunger = 0,
+		dead = false,
+		dodging = false,
+		punching = false,
+		sprite =
+		"player/idle"
+	}
 	function L.player.take_damage()
 		local hunger_limit = 3
 		L.player.hunger = L.player.hunger + 1
@@ -44,7 +56,13 @@ end
 local function player_action()
 	if L.key_pressed("c") then
 		L.player.dodging = true
-		L.player.sprite = "matrix"
+		L.player.sprite = "player/matrix"
+		L.player.sprite_t = 0.05
+		L.player.sprite_start = L.time()
+	end
+	if L.key_pressed("x") then
+		L.player.sprite = "player/punch"
+		L.player.punching = true
 		L.player.sprite_t = 0.05
 		L.player.sprite_start = L.time()
 	end
@@ -53,11 +71,18 @@ end
 local function player_state_handler()
 	if L.player.dodging and L.sprite_finished(L.player) then
 		L.player.dodging = false
-		L.player.sprite = "idle"
+		L.player.sprite = "player/idle"
+	elseif L.player.punching and L.sprite_finished(L.player) then
+		L.player.sprite = "player/idle"
+		L.player.punching = false
 	end
 end
 local function player_movement()
-	if L.player.dodging then
+	if not L.player.on_ground and not L.player.punching then
+		L.player.sprite = "player/inair"
+	end
+
+	if L.player.dodging or not L.player.on_ground then
 		return
 	end
 	local player_speed = L.player.speed
@@ -66,24 +91,22 @@ local function player_movement()
 		L.player.vel_x = player_speed * movement_const
 		L.player.sprite_t = 0.1
 		L.player.sx = 1
-		L.player.sprite = "runnin"
+		L.player.sprite = "player/runnin"
 	elseif L.key_down("a") then
 		L.player.vel_x = -player_speed * movement_const
 		L.player.sprite_t = 0.1
 		L.player.sx = -1
-		L.player.sprite = "runnin"
+		L.player.sprite = "player/runnin"
 	else
-		L.player.sprite = "idle"
-		L.player.sprite_t = 0.1
+		if not L.player.punching then
+			L.player.sprite = "player/idle"
+			L.player.sprite_t = 0.1
+		end
 		L.player.vel_x = 0
 	end
 
 	if L.key_down("space") and L.player.on_ground then
 		L.player.vel_y = jump_speed * movement_const
-	end
-
-	if not L.player.on_ground then
-		L.player.sprite = "inair"
 	end
 end
 
