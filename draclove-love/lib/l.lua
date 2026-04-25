@@ -18,6 +18,8 @@ local L = {
     setup = function() end,
     render = function(dt) end,
     next_uid = 1,
+    stopped_since = nil,
+    skipped_secs = 0,
 }
 
 local square_size = 32
@@ -458,7 +460,7 @@ function love.keypressed(key)
 end
 
 function L.time()
-    return love.timer.getTime()
+    return L.stopped_since or love.timer.getTime() - L.skipped_secs
 end
 
 function L.pasttime(t)
@@ -552,6 +554,16 @@ end
 
 function L.dist(a, b)
     return math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y))
+end
+
+function L.stop_time()
+    L.stopped_since = L.stopped_since or L.time()
+end
+
+function L.start_time()
+    local now = L.time()
+    L.skipped_secs = L.skipped_secs + now - L.stopped_since
+    L.stopped_since = nil
 end
 
 local last_mod_time = nil
