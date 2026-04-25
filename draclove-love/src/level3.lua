@@ -48,7 +48,7 @@ function lvl3.setup()
         state = states.moving_around,
         -- state_begin = L.time(),
         -- next_state = 1,
-        hp = 3,
+        hp = 20,
         sprite = "idibiks/idle",
         sprite_t = 0.1,
         pl = -12,
@@ -191,6 +191,14 @@ local function do_toilet()
 end
 
 function lvl3.loop(dt)
+    if L.boss.hp <= 0 then
+        L.boss.dead=true
+    end
+    if L.boss.dead==true then
+        L.nextLevel=L.gameOverScreen
+        L.active_level_i=L.transition
+        L.reset()
+    end
     Player.loop()
     L.player.on_ground = gravity.ground_collide(L.player, L1.ground)
 
@@ -224,6 +232,7 @@ function lvl3.loop(dt)
         for _i, pipe in ipairs(pipes) do
             if L.collide(L.player, pipe) and not L.hit_time then
                 L.hit_time = L.time()
+                L.boss.hp = L.boss.hp-1
                 L.print("hit")
                 break
             end

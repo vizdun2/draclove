@@ -38,7 +38,8 @@ end
 function L1.loop(dt)
 	L.draw({ x = 0, y = 0, sprite = "scenes/1", s = 6.66, sprite_t = 0.1 })
 	if L.boss.dead and L.boss.deathCount == 1 then
-		L.active_level_i = 2
+		L.nextLevel = 2
+		L.active_level_i = L.transition
 		L.reset()
 		return
 	elseif L.boss.dead then

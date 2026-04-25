@@ -13,19 +13,33 @@ local jumpSpeeds = {-15, -35}
 local function newCrack()
     local crack = {
         x=L.boss.x,
-        y=L.boss.y+50,
-        spawnTime=L.time(),
-        lifeTime=10,
-        sprite=""
+        y=L.boss.y+100,
+        sprite="particles/crack",
+        tag="tempEffect",
+        sprite_t=0.3,
+        sprite_start = L.time(),
+        s=2,
     }
-    table.insert(L.boss.cracks, crack)
+    table.insert(L.player.particles, crack)
     
 end
-
+local function newImpact()
+    local impact = {
+        x=L.boss.x,
+        y=L.boss.y-230,
+        sprite="particles/impact",
+        tag="tempEffect",
+        sprite_t=0.1,
+        sprite_start = L.time(),
+        s=8,
+    }
+    table.insert(L.player.particles, impact)
+    
+end
 function lvl2.setup()
     L.boss = {
         tag = "boss",
-        x = 0,
+        x = L.width/2-100,
         y = hoverY,
         s = 4.5,
         r = 0,
@@ -161,26 +175,7 @@ local function calculateJumpSpeed(currentX, minX, maxX, jumpRange)
     progress = math.max(0, math.min(1, progress))
     return minJump + ((maxJump - minJump) * progress)
 end
-local function updateCracks()
-    for _,crack in ipairs(L.boss.cracks) do
-        if L.time - crack.spawnTime > crack.lifeTime then
-            table.remove(L.boss.cracks, _)
-        end
-    end
-end
-function lvl2.loop(dt)
-    L.draw({ x = 0, y = 0, sprite = "scenes/2", s = 6.66, sprite_t = 0.1 })
-    local leftEdge = -L.width / 2
-    local rightEdge = L.width / 2
-    
-    -- Player Lerp Updates
-    L.player.s = calculatePlayerScale(L.player.x, leftEdge, rightEdge, scales)
-    Player.jump_speed = calculateJumpSpeed(L.player.x, leftEdge, rightEdge, jumpSpeeds)
-    
-    Player.loop()
-    L.player.on_ground = gravity.ground_collide(L.player, groundBot)
-
-    -- Boss State Machine
+local function bossStateMachine(dt)
     if L.boss.state == "tracking" then
         updateBossDirection(L.boss, L.player)
         L.boss.x = L.boss.x + (L.boss.velX * dt)
@@ -208,6 +203,7 @@ function lvl2.loop(dt)
             L.boss.state = "grounded"
             L.boss.timeHitGround = L.time()
             
+            newImpact()
             newCrack()
             spawnDebris(L.boss.x, groundY)
         end
@@ -233,6 +229,29 @@ function lvl2.loop(dt)
             L.boss.lastTimeAttacked = L.time() 
         end
     end
+end
+function lvl2.loop(dt)
+    if L.boss.hp <= 0 then
+        L.boss.dead=true
+    end
+    if L.boss.dead==true then
+        L.nextLevel=3
+        L.active_level_i=L.transition
+        L.reset()
+    end
+    L.draw({ x = 0, y = 0, sprite = "scenes/2", s = 6.66, sprite_t = 0.1 })
+    local leftEdge = -L.width / 2
+    local rightEdge = L.width / 2
+    
+    -- Player Lerp Updates
+    L.player.s = calculatePlayerScale(L.player.x, leftEdge, rightEdge, scales)
+    Player.jump_speed = calculateJumpSpeed(L.player.x, leftEdge, rightEdge, jumpSpeeds)
+    
+    Player.loop()
+    L.player.on_ground = gravity.ground_collide(L.player, groundBot)
+
+    -- Boss State Machine
+    bossStateMachine(dt)
 
     -- Collision & Damage Logic
     local collide, fromAbove, _ = gravity.check_collide(L.player, L.boss)
@@ -252,11 +271,10 @@ function lvl2.loop(dt)
     end
 
     updateDebris(dt)
-    updateCracks()
     --L.draw(L.patch(L.boss, {debug=true}))
     L.draw(L.boss)
     L.draw(L.player)
-    L.draw(groundBot)
+    --L.draw(groundBot)
     L.draw_hud()
 end
 
