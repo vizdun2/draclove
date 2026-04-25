@@ -10,8 +10,8 @@ function CB.newProjectile(initialX, initialY, velX, velY)
         vel_y = velY * projectile_speed,
         dead = false,
         sprite = "chair/wheel_projectile",
-        spawnTime = L.time(),
-        lifeTime = 1000,
+        sprite_t = 0.1,
+        lifeTime = 4,
         s=6
     }
 end
@@ -28,7 +28,7 @@ function CB.newBoss()
         sideOffset = 90,
         velocity = 0,
         dead = false,
-        dashSpeed = 700,
+        dashSpeed = 1500,
         inAction = false,
         dashingLeft = false,
         chargingUp = false,
@@ -92,6 +92,7 @@ function CB.projectileNPCollision(proj, npObj, dt)
     if not stillCollidingY then
         proj.vel_y = -proj.vel_y
     end
+    proj.lifeTime = proj.lifeTime - 1
 end
 
 function CB.handleWallBounce(obj, xLimit, yLimit)
@@ -116,7 +117,9 @@ function CB.handleWallBounce(obj, xLimit, yLimit)
         obj.vel_y = -obj.vel_y
         hasBounced = true
     end
-
+    if hasBounced then
+        obj.lifeTime = obj.lifeTime - 1
+    end
     return hasBounced
 end
 local function turnWheelsVulnerable()
@@ -137,7 +140,7 @@ local function enterAction(attack, cooldown)
     L.boss.lastActionTime = L.time()
 end
 local function chargePhase()
-    enterAction("charge", 3)
+    enterAction("charge", 2)
     L.boss.chargingUp = true
     L.boss.sprite = "chair/chair_lift_off"
     L.boss.r = (L.boss.x>0 and 90) or -90
@@ -165,7 +168,7 @@ local function updateProjectiles(dt)
                 if L.player.take_damage() then
                     despawnProjectile(i)
                 end
-            elseif L.time() - proj.spawnTime >= proj.lifeTime then
+            elseif proj.lifeTime <= 0 then
                 despawnProjectile(i)
             end
         else
@@ -209,7 +212,7 @@ local function projectileAttack(player)
     spawnProjectile(L.boss.x, L.boss.y, speed * -x, speed * -y)
 end
 local function stunAttack()
-    enterAction("stun", 2)
+    enterAction("stun", 1.5)
     L.boss.sprite = "chair/idle"
 end
 
@@ -260,7 +263,7 @@ function L.onCollisionWithPlayer()
             loseAWheel(colidedWheel)
         end
     else
-        --L.player.take_damage()
+        L.player.take_damage()
     end
 end
 local function whatWheelToUse()

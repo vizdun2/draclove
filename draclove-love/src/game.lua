@@ -1,4 +1,5 @@
 local L = require("lib/l")
+local LM = require("src/levelManager")
 L.clear_pck_cache()
 local L1 = require("src/level1")
 -- as of now, all levels MUST have a .setup function and a .loop function
@@ -7,20 +8,7 @@ L.hunger_limit = 3
 
 function L.setup()
 	L1.setup()
-	L.player = {
-		x = 0,
-		y = 0,
-		speed = 8,
-		s = 2,
-		vel_x = 0,
-		vel_y = 0,
-		hunger = 0,
-		last_dodged = 0,
-		dead = false,
-		jumped_midair = true,
-		sprite =
-		"player/idle"
-	}
+	
 	-- dialogue event = {text="text", audio="path_to_my_audio_file"}
 	L.dialogue_manager = {events = {que={}, next_pop_i = 1, next_add_i = 1}, next_dialogue_at = nil}
 	function L.player.take_damage()
@@ -39,17 +27,6 @@ function L.setup()
 		return true
 	end
 
-	function L.player.is_dodging()
-		return L.player.sprite == "player/matrix"
-	end
-
-	function L.player.is_punching()
-		return L.player.sprite == "player/punch"
-	end
-
-	function L.player.is_inair()
-		return L.player.sprite == "player/inair"
-	end
 	-- set the level variable for this file
 	L.active_level = L1
 	L.push_dialogue({text="Hello idiot, how are you doing??",audio=nil})
