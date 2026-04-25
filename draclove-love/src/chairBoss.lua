@@ -9,9 +9,10 @@ function CB.newProjectile(initialX, initialY, velX, velY)
         vel_x = velX * projectile_speed,
         vel_y = velY * projectile_speed,
         dead = false,
-        sprite = "chair/wheel",
+        sprite = "chair/wheel_projectile",
         spawnTime = L.time(),
-        lifeTime = 1000
+        lifeTime = 1000,
+        s=6
     }
 end
 -- charge state - player can punch the wheels
@@ -43,8 +44,8 @@ function CB.newBoss()
     L.boss.wheels = {
         wheelm = {
             tag = "wheel",
-            x = -10,
-            y = 28.5 * L.boss.s,
+            x = -25* L.boss.s,
+            y = 0 * L.boss.s,
             s = 1.3,
             dead = false,
             sprite = nil,
@@ -53,8 +54,8 @@ function CB.newBoss()
         },
         wheell = {
             tag = "wheel",
-            x = -18.5 * L.boss.s,
-            y = 26.5 * L.boss.s,
+            x = -25 * L.boss.s,
+            y = -10 * L.boss.s,
             s = 1.3,
             dead = false,
             sprite = nil,
@@ -63,8 +64,8 @@ function CB.newBoss()
         },
         wheelr = {
             tag = "wheel",
-            x = 18.5 * L.boss.s,
-            y = 26.5 * L.boss.s,
+            x = -25 * L.boss.s,
+            y = 10 * L.boss.s,
             s = 1.3,
             dead = false,
             sprite = nil,
@@ -175,6 +176,9 @@ end
 
 local function dashAttack()
     turnWheelsInvulnerable()
+    for _, wheel in pairs(L.boss.wheels) do
+        wheel.x = wheel.x * -1
+    end
     enterAction("dash", 4)
     if L.boss.x >= 0 then
         L.boss.dashingLeft = true
