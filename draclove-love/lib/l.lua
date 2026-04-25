@@ -302,6 +302,14 @@ function L.collide(a, b)
     return true
 end
 
+function L.table_length(t)
+    local count = 0
+    for _ in pairs(t) do
+        count = count + 1
+    end
+    return count
+end
+
 function L.vec_to(a, b)
     local x = (a.x or 0) - (b.x or 0)
     local y = (a.y or 0) - (b.y or 0)

@@ -29,8 +29,11 @@ function L1.loop(dt)
 	L.draw(L.patch(L.player, {debug=true}))
 	L.draw(L.player)
 
+    if L.collide(L.player, L.boss) then
+        L.onCollisionWithPlayer()
+    end
 
-	CB.renderBoss()
+    CB.renderBoss()
 	CB.bossLoopLogic(dt, L.player)
 
 	for _, np_obj in ipairs(L1.level.np_objects) do

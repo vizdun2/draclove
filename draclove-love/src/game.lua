@@ -27,7 +27,7 @@ function L.setup()
 		L.player.hunger = L.player.hunger + 1
 		if L.player.hunger > L.hunger_limit then
 			L.player.dead = true
-			L.printNoBs("You died. Rip bozo.")
+			--L.printNoBs("You died. Rip bozo.")
 		end
 	end
 	-- set the level variable for this file
