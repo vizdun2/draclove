@@ -4,14 +4,14 @@ local LM = require("src/levelManager")
 local L1 = require("src/level1")
 local L2 = require("src/level2")
 -- as of now, all levels MUST have a .setup function and a .loop function
-L.levels={L1, L2}
+L.levels = { L1, L2 }
 L.hunger_limit = 3
 
 
 function L.setup()
 	L.active_level_i = L.active_level_i or 1
 	L.active_level().setup()
-	
+
 	-- dialogue event = {text="text", audio="path_to_my_audio_file"}
 	L.dialogue_manager = { events = { que = {}, next_pop_i = 1, next_add_i = 1 }, next_dialogue_at = nil }
 
@@ -73,9 +73,9 @@ local function player_action()
 	elseif L.key_pressed("x") then
 		print("punched")
 		if L.player.on_ground then
-			player_anime("player/punch_from_air", 0.1)
+			player_anime("player/punch_from_air", 0.03)
 		else
-			player_anime("player/punch_from_air", 0.1)
+			player_anime("player/punch_from_air", 0.03)
 		end
 		L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
 	end
@@ -98,9 +98,6 @@ local function player_state_handler()
 		end
 	elseif L.player.is_jump_from_idle() and L.sprite_finished(L.player) then
 		L.print("jumpfromidle")
-		L.player.jumped_midair = false
-		L.player.vel_y = jump_speed * movement_const
-		L.player.sprite = "player/in_air"
 	elseif L.player.is_jump_from_air() and L.sprite_finished(L.player) then
 		L.player.sprite = "player/in_air"
 	end
@@ -117,12 +114,14 @@ local function player_movement()
 
 	if L.key_down("space") then
 		if L.player.on_ground and not L.player.is_jump_from_idle() then
-			player_anime("player/jump_from_idle", 0.03)
-			-- reset this
+			L.player.jumped_midair = false
+			L.player.vel_y = jump_speed * movement_const
+			L.player.sprite = "player/in_air" -- reset this
+			L.key_pressed("space")
 		elseif L.key_pressed("space") and not L.player.jumped_midair then
-			player_anime("player/jump_from_air", 0.03)
 			L.player.vel_y = jump_speed * movement_const
 			L.player.jumped_midair = true
+			L.player.sprite = "player/in_air"
 		end
 	end
 
@@ -158,8 +157,8 @@ local function player_movement()
 		L.hurt_time = nil
 		L.player.c = "#FFFFFF"
 	elseif L.player.hurt_time then
-		L.player.sprite = "player/damage"
-		L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
+		-- L.player.sprite = "player/damage"
+		-- L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
 		L.player.c = "#FF4040"
 	end
 end
