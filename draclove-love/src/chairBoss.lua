@@ -252,10 +252,8 @@ local function loseAWheel(wheel)
         return
     end
     
-    projectileAttack(L.player)
-    local x, y = L.vec_to(L.player, L.boss)
-    L.player.vel_x = L.player.vel_x + (x * 20)
-    L.player.vel_y = L.player.vel_y + 2000
+    projectileAttack(L.player) 
+    L.player.vel_y = -1500
 
     L.boss.lostWheelThisPhase = true
 end
