@@ -231,7 +231,7 @@ function L.draw(obj)
         local parent_y = (obj.parent and obj.parent.y) or 0
 
         -- if obj.debug then
-        --     L.print(obj)
+        --     L.print(debug_x, parent_x)
         -- end
 
         love.graphics.draw(
@@ -239,7 +239,7 @@ function L.draw(obj)
             (obj.debug and square_quad) or
             ((obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].quads[sprite_i]) or square_quad),
             ((debug_x + parent_x - L.cam_x) * L.cam_s) + L.width / 2,
-            ((debug_y + parent_x - L.cam_y) * L.cam_s) + L.height / 2,
+            ((debug_y + parent_y - L.cam_y) * L.cam_s) + L.height / 2,
             math.rad(obj.r or 0),
             debug_sx * (obj.sx or 1) * (obj.s or 1) * L.cam_s,
             debug_sy * (obj.sy or 1) * (obj.s or 1) * L.cam_s,

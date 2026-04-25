@@ -15,26 +15,10 @@ function CB.newProjectile(initialX, initialY, velX, velY)
     }
 end
 
-function CB.newWheel(initialX, initialY, offX)
-    return {
-        tag = "wheel",
-        x = initialX,
-        y = initialY,
-        offsetX = offX,
-        dead = false,
-        sprite = nil
-    }
-end
-
 function CB.newBoss()
     L.boss = {
         tag = "boss",
         projectiles = {},
-        wheels = {
-            wheel1 = CB.newWheel(L.width / 2 - 60, 10, -10),
-            wheel2 = CB.newWheel(L.width / 2 - 50, 10, 0),
-            wheel3 = CB.newWheel(L.width / 2 - 40, 10, 10)
-        },
         x = L.width / 2 - 90,
         y = -120,
         sideOffset = 90,
@@ -49,6 +33,36 @@ function CB.newBoss()
         sprite = "chair/zidle_idle",
         sprite_t = 0.1,
         s = 2.3,
+    }
+
+    L.boss.wheels = {
+        wheelm = {
+            tag = "wheel",
+            x = 0,
+            y = 65,
+            s = 0.6,
+            dead = false,
+            sprite = nil,
+            parent = L.boss
+        },
+        wheell = {
+            tag = "wheel",
+            x = -40,
+            y = 60,
+            s = 0.6,
+            dead = false,
+            sprite = nil,
+            parent = L.boss
+        },
+        wheelr = {
+            tag = "wheel",
+            x = 40,
+            y = 60,
+            s = 0.6,
+            dead = false,
+            sprite = nil,
+            parent = L.boss
+        },
     }
 end
 
@@ -156,14 +170,8 @@ local function handleDashMovement(dt)
 
     if L.boss.dashingLeft then
         L.boss.x = L.boss.x - moveDistance
-        for _, wheel in pairs(L.boss.wheels) do
-            L.move(wheel, -moveDistance, 0)
-        end
     else
         L.boss.x = L.boss.x + moveDistance
-        for _, wheel in pairs(L.boss.wheels) do
-            L.move(wheel, moveDistance, 0)
-        end
     end
 end
 local function projectileAttack(player)
@@ -195,7 +203,7 @@ end
 function CB.renderBoss()
     L.draw(L.boss)
     for _, wheel in pairs(L.boss.wheels) do
-        -- L.draw(wheel)
+        L.draw(L.patch(wheel, { debug = true }))
     end
 end
 
@@ -218,20 +226,12 @@ function CB.bossLoopLogic(dt, player)
                 local isRight = L.boss.x >= 0
 
                 L.move(L.boss, isRight and xLimit - L.boss.x or -xLimit - L.boss.x, 0)
-
-                for _, wheel in pairs(L.boss.wheels) do
-                    wheel.x = L.boss.x - wheel.offsetX
-                end
                 resetBoss()
             end
 
             if math.abs(L.boss.y) >= yLimit then
                 local isBottom = L.boss.y >= 0
                 L.boss.y = isBottom and yLimit or -yLimit
-
-                for _, wheel in pairs(L.boss.wheels) do
-                    wheel.y = L.boss.y
-                end
 
                 resetBoss()
             end
