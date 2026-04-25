@@ -15,8 +15,6 @@ function L.setup()
 
 	-- dialogue event = {text="text", audio="path_to_my_audio_file"}
 	L.dialogue_manager = { events = { que = {}, next_pop_i = 1, next_add_i = 1 }, next_dialogue_at = nil }
-
-	L.push_dialogue({ text = "Hello idiot, how are you doing??", audio = nil })
 end
 
 function L.push_dialogue(dialogue_event)
@@ -34,23 +32,26 @@ function L.pop_dialogue()
 end
 
 function L.play_dialogue()
-	if L.dialogue_manager.next_dialogue_at == nil or L.time() < L.dialogue_manager.next_dialogue_at then
+	if (L.dialogue_manager.next_dialogue_at == nil or L.time() < L.dialogue_manager.next_dialogue_at) and L.dialogue_manager.events.next_add_i > L.dialogue_manager.events.next_pop_i then
 		local dialogue = L.pop_dialogue()
+		print(dialogue)
 		if dialogue ~= nil then
 			if dialogue.audio ~= "" then
-				L.play(dialogue.audio)
+				-- L.play(dialogue.audio)
 			end
+			local next_at = L.time() + string.len(dialogue.text) * 0.1
 			table.insert(L.active_level().level.np_objects,
 				{
 					x = -5 * string.len(dialogue.text),
 					y = 310,
-					is_dead_at = L.time() + string.len(dialogue.text) * 0.05,
+					is_dead_at = next_at,
 					text =
 						dialogue.text,
 					tag = "text",
 					font = "pixelifysans",
 					font_size = 30
 				})
+			L.dialogue_manager.next_dialogue_at = next_at
 		end
 	end
 end
@@ -170,31 +171,33 @@ end
 function L.active_level()
 	return L.levels[L.active_level_i]
 end
+
 function L.getSafeCoordinates(obj, offsetX, offsetY)
-    -- Calculate the absolute limits
-    local limitX = L.width / 2
-    local limitY = L.height / 2
+	-- Calculate the absolute limits
+	local limitX = L.width / 2
+	local limitY = L.height / 2
 
-    -- Calculate the exact allowed boundaries
-    local maxX = limitX - offsetX
-    local minX = -limitX + offsetX
-    local maxY = limitY - offsetY
-    local minY = -limitY + offsetY
+	-- Calculate the exact allowed boundaries
+	local maxX = limitX - offsetX
+	local minX = -limitX + offsetX
+	local maxY = limitY - offsetY
+	local minY = -limitY + offsetY
 
-    -- Clamp the X and Y coordinates
-    local safeX = math.max(minX, math.min(maxX, obj.x))
-    local safeY = math.max(minY, math.min(maxY, obj.y))
+	-- Clamp the X and Y coordinates
+	local safeX = math.max(minX, math.min(maxX, obj.x))
+	local safeY = math.max(minY, math.min(maxY, obj.y))
 
-    return safeX, safeY
+	return safeX, safeY
 end
+
 function L.base_player_loop()
 	player_action()
 	player_state_handler()
 	player_movement()
 	L.move_vel(L.player)
 	L.player.x, L.player.y = L.getSafeCoordinates(L.player, 15 * L.player.s, 15 * L.player.s)
-	
 end
+
 function L.base_dialogue_loop()
 	L.play_dialogue()
 	for k, obj in ipairs(L.active_level().level.np_objects) do

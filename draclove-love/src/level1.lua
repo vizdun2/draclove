@@ -83,7 +83,7 @@ function L1.loop(dt)
     elseif L.boss.dead then
         L.boss.deathCount = L.boss.deathCount + 1 
         CB.resetBossHealth()
-		L.pushDialogue({text="Chair: That is what I call, regeneration!", audio="audio/chair/regeneration.wav"})
+		L.push_dialogue({text="Chair: That is what I call, regeneration!", audio="audio/chair/regeneration.wav"})
     end
 	L.base_player_loop()
 	L.base_dialogue_loop()

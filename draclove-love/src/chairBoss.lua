@@ -12,15 +12,16 @@ function CB.newProjectile(initialX, initialY, velX, velY)
         sprite = "chair/wheel_projectile",
         sprite_t = 0.1,
         lifeTime = 4,
-        s=6
+        s = 6
     }
 end
+
 function CB.resetBossHealth()
     L.boss.dead = false
     L.boss.wheels = {
         wheelm = {
             tag = "wheel",
-            x = -25* L.boss.s,
+            x = -25 * L.boss.s,
             y = 0 * L.boss.s,
             s = 1.3,
             dead = false,
@@ -50,10 +51,11 @@ function CB.resetBossHealth()
         },
     }
 end
+
 -- charge state - player can punch the wheels
 -- take damage on collision
 
-CB.oneliners = {{text="I will crush you like a pringle",audio="pringle.wav"},{text="*Rolls her wheels*",audio=""},{text="Suck my wheels, stoner",audio="suck.wav"},{text="Are you going to the shower? I know you have to.",audio="shower.wav"}}
+CB.oneliners = { { text = "I will crush you like a pringle", audio = "pringle.wav" }, { text = "*Rolls her wheels*", audio = "" }, { text = "Suck my wheels, stoner", audio = "suck.wav" }, { text = "Are you going to the shower? I know you have to.", audio = "shower.wav" } }
 
 function CB.newBoss()
     L.boss = {
@@ -78,8 +80,8 @@ function CB.newBoss()
         s = 7,
         speedMultiplier = 0.1,
         currentMultiplier = 0.1,
-        pl=-10,
-        pr=-10,
+        pl = -10,
+        pr = -10,
         dashCount = 0,
         projectileCount = 0,
         deathCount = 0,
@@ -135,6 +137,7 @@ function CB.handleWallBounce(obj, xLimit, yLimit)
     end
     return hasBounced
 end
+
 local function turnWheelsVulnerable()
     for _, wheel in pairs(L.boss.wheels) do
         wheel.canBeHit = true
@@ -156,7 +159,7 @@ local function chargePhase()
     enterAction("charge", 2.5)
     L.boss.chargingUp = true
     L.boss.sprite = "chair/chair_lift_off"
-    L.boss.r = (L.boss.x>0 and 90) or -90
+    L.boss.r = (L.boss.x > 0 and 90) or -90
     turnWheelsVulnerable()
 end
 local function spawnProjectile(x, y, velX, velY)
@@ -203,7 +206,17 @@ local function dashAttack()
         L.boss.dashingLeft = false
     end
 end
+
+local function bossLine()
+    L.print("Said boss line!")
+    local oneliner = CB.oneliners[math.random(4)]
+    oneliner.audio = "audio/chair/" .. oneliner.audio
+    oneliner.text = "Chair:" .. oneliner.text
+    L.push_dialogue(oneliner)
+end
+
 local function resetBoss()
+    bossLine()
     L.boss.inAction = false
     L.boss.currentCooldown = 0
     L.boss.chargingUp = false
@@ -215,15 +228,15 @@ local function handleDashMovement(dt)
     local moveDistance = L.boss.dashSpeed * dt
     L.boss.currentMultiplier = L.boss.currentMultiplier + (L.boss.currentMultiplier * L.boss.speedMultiplier)
     if L.boss.dashingLeft then
-        L.boss.x = L.boss.x - moveDistance*L.boss.currentMultiplier
+        L.boss.x = L.boss.x - moveDistance * L.boss.currentMultiplier
     else
-        L.boss.x = L.boss.x + moveDistance*L.boss.currentMultiplier
+        L.boss.x = L.boss.x + moveDistance * L.boss.currentMultiplier
     end
 end
 local function projectileAttack(player, extrax, extray)
     local speed = 150
-    local x, y = L.vec_to(player, L.boss) 
-    spawnProjectile(L.boss.x, L.boss.y, speed * -x * extrax , speed * -y * extray)
+    local x, y = L.vec_to(player, L.boss)
+    spawnProjectile(L.boss.x, L.boss.y, speed * -x * extrax, speed * -y * extray)
 end
 local function stunAttack()
     enterAction("stun", 2)
@@ -238,34 +251,31 @@ local function projecAttack()
     projectileAttack(L.player, -1, 1)
 end
 
+
 -- gets next attack -> the automat logic
 -- charge -> dash -> stun -> repeat
 local function getNextAttack(player)
+    -- the boss first sends a string of vicious mockery towards the player
+
+
     if L.boss.currentCooldown <= 0 then
-        
         if L.boss.lastAttack == "charge" then
             dashAttack()
-            
         elseif L.boss.lastAttack == "dash" or L.boss.lastAttack == "projectile" then
             stunAttack()
-            
         elseif L.boss.lastAttack == "stun" then
-            
-            
-            
             if L.boss.projectileCount < 2 then
                 L.boss.projectileCount = L.boss.projectileCount + 1
                 L.boss.dashCount = 0
-                
-                projecAttack() 
+
+                projecAttack()
             else
                 L.boss.dashCount = L.boss.dashCount + 1
                 L.boss.projectileCount = 0
-                
+
                 chargePhase()
             end
         end
-        
     end
 end
 -- (A and B) or C -> B if A true, otherwise C
@@ -290,15 +300,13 @@ local function loseAWheel(wheel)
         L.boss.dead = true
         return
     end
-    
+
     projectileAttack(L.player, 1, 1)
     L.player.vel_y = -1500
-
-    
 end
 function L.onCollisionWithPlayer()
     --L.printNoBs("Collided " .. L.boss.lastAttack .. " " .. tostring(L.boss.chargingUp) .. " " .. tostring(L.boss.lostWheelThisPhase))
-    if  L.boss.chargingUp and L.player.is_punching() and not L.boss.lostWheelThisPhase then
+    if L.boss.chargingUp and L.player.is_punching() and not L.boss.lostWheelThisPhase then
         local colidedWheel = playerWheelCollision()
         if colidedWheel then
             loseAWheel(colidedWheel)
@@ -307,32 +315,31 @@ function L.onCollisionWithPlayer()
         L.player.take_damage()
     end
 end
+
 local function whatWheelToUse()
     if L.boss.lastAttack == "dash" then
         return
     elseif L.boss.lastAttack == "stun" then
         if L.boss.wheels.wheell then
-            L.draw(L.patch(L.boss, {sprite = "chair/wheel_left"}))
+            L.draw(L.patch(L.boss, { sprite = "chair/wheel_left" }))
         end
         if L.boss.wheels.wheelr then
-            L.draw(L.patch(L.boss, {sprite = "chair/wheel_right"}))
+            L.draw(L.patch(L.boss, { sprite = "chair/wheel_right" }))
         end
         if L.boss.wheels.wheelm then
-            L.draw(L.patch(L.boss, {sprite = "chair/wheel_middle"}))
+            L.draw(L.patch(L.boss, { sprite = "chair/wheel_middle" }))
         end
     elseif L.boss.lastAttack == "charge" then
-        
         if L.boss.wheels.wheell then
-            L.draw(L.patch(L.boss, {sprite = "chair/wheel_left_lift_off"}))
+            L.draw(L.patch(L.boss, { sprite = "chair/wheel_left_lift_off" }))
         end
         if L.boss.wheels.wheelr then
-            L.draw(L.patch(L.boss, {sprite = "chair/wheel_right_lift_off"}))
+            L.draw(L.patch(L.boss, { sprite = "chair/wheel_right_lift_off" }))
         end
         if L.boss.wheels.wheelm then
-            L.draw(L.patch(L.boss, {sprite = "chair/wheel_middle_lift_off"}))
+            L.draw(L.patch(L.boss, { sprite = "chair/wheel_middle_lift_off" }))
         end
     end
-
 end
 function CB.renderBoss()
     --L.draw(L.patch(L.boss, { debug = true }))
@@ -351,7 +358,7 @@ function CB.bossLoopLogic(dt, player)
     if L.pasttime(L.boss.lastActionTime + L.boss.currentCooldown) and L.boss.inAction then
         resetBoss()
     end
-    
+
     if L.boss.inAction then
         if true and L.boss.lastAttack == "dash" then
             L.boss.sprite = "chair/flight"
