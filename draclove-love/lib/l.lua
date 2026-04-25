@@ -287,7 +287,7 @@ end
 function L.vec_to(a, b)
     local x = (a.x or 0) - (b.x or 0)
     local y = (a.y or 0) - (b.y or 0)
-    local max = (x > y and x) or y
+    local max = math.abs((x > y and x) or y)
     return x / max, y / max
 end
 

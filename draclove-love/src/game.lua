@@ -7,17 +7,14 @@ local CB = loadfile("draclove-love/src/chairBoss.lua")()
 function L.setup()
 	L.plane = {x=0, y=0, dead=false, velocity=0}
 	CB.newBoss()
-<<<<<<< HEAD
-	L.player = {x=0,y=0, speed = 8, vel_x = 0, vel_y=0, hunger = 0, dodging = false}
-=======
 	L.player = {x=0,y=0, speed = 8, vel_x = 0, vel_y=0, hunger = 0, dodging = false, sprite="idle"}
->>>>>>> c12145ed5529253f6a0d4fdd54179a6ae44d01cc
 end
 
-local ground = {x=0, y=300, sx=100}
+local ground = {x=0, y=300, sx=100, tag="ground"}
+local ground1 = {x=0, y=-300, sx=100, tag="ground"}
 local level_1 = {
 	boss = {x=0,y=0,phase="start"},
-	np_objects = {}, -- non player objects
+	np_objects = {ground, ground1}, -- non player objects
 }
 
 function level_1.init()
@@ -26,13 +23,6 @@ end
 
 local movement_const = 60
 
-<<<<<<< HEAD
-function obj_live(obj)
-	
-end
-=======
-
->>>>>>> c12145ed5529253f6a0d4fdd54179a6ae44d01cc
 
 
 function level_1.interact_with(obj) 
@@ -103,14 +93,24 @@ function level_1.loop(dt)
 	
 
 	CB.renderBoss()
-	CB.bossLoopLogic(dt)
+	CB.bossLoopLogic(dt, L.player)
 
-	for np_obj in ipairs(level_1.np_objects) do
+	for _,np_obj in ipairs(level_1.np_objects) do
 		L.move_vel(np_obj)
 		if L.collide(L.player,np_obj) and L.key_pressed("x") then
 			level_1.interact_with(np_obj)
 		end
 		L.draw(np_obj)
+	end
+	for _, projectile in pairs(L.boss.projectiles) do
+		for i, np_obj in ipairs(level_1.np_objects) do
+			if L.collide(projectile, np_obj) then
+				CB.projectileNPCollision(projectile, np_obj, dt)
+				break
+			end
+		end
+		CB.handleWallBounce(projectile, L.width/2, L.height/2)
+		L.draw(projectile)
 	end
 end
 
