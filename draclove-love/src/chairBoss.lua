@@ -20,7 +20,7 @@ function CB.newBoss()
         tag = "boss",
         projectiles = {},
         x = L.width / 2 - 90,
-        y = -120,
+        y = 50,
         sideOffset = 90,
         velocity = 0,
         dead = false,
@@ -32,7 +32,7 @@ function CB.newBoss()
         lastAttack = "",
         sprite = "chair/zidle_idle",
         sprite_t = 0.1,
-        s = 2.3,
+        s = 7,
     }
 
     L.boss.wheels = {
@@ -217,7 +217,7 @@ function CB.bossLoopLogic(dt, player)
         if L.boss.lastAttack == "dash" then
             L.boss.sprite = "chair/flight"
             L.boss.sx = L.boss.dashingLeft and -1 or 1
-            L.boss.r = L.boss.dashingLeft and -90 or 90
+            L.boss.r = L.boss.dashingLeft and 90 or -90
             handleDashMovement(dt)
             local xLimit = (L.width / 2) - L.boss.sideOffset
             local yLimit = L.height / 2
