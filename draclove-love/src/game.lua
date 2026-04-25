@@ -4,14 +4,20 @@ local L1 = require("src/level1")
 local L2 = require("src/level2")
 local L3 = require("src/level3")
 local GO = require("src/ItsJoeverScreen")
+local MM = require("src/mainMenu")
+local CO = require("src/controls")
 -- as of now, all levels MUST have a .setup function and a .loop function
-L.levels = { L1, L2, L3, GO }
-L.hunger_limit = 3
+L.levels = { L1, L2, L3, CO, MM, GO }
+L.hunger_limit = 5
 L.failedLevel = nil
 L.gameOverScreen = L.table_length(L.levels)
+L.mainMenu = L.table_length(L.levels)-1
+L.controls = L.table_length(L.levels)-2
+
+
 
 function L.setup()
-	L.active_level_i = L.active_level_i or 1
+	L.active_level_i = L.active_level_i or L.mainMenu
 	L.active_level().setup()
 
 	-- dialogue event = {text="text", audio="path_to_my_audio_file"}
@@ -104,6 +110,7 @@ function L.draw_hud()
 end
 
 function L.render(dt)
+	L.print(L.active_level_i)
 	for i = 1, #L.levels do
 		if L.key_released(tostring(i)) then
 			L.active_level_i = i

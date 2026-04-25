@@ -2,22 +2,23 @@ local L = require("lib/l")
 
 local UI = {}
 
--- Create the button with width and height
-function UI.newButton(xCord, yCord, btnWidth, btnHeight, tag, buttonList, sprite, scale, hoverAnim, pressAnim, hoveredAnim)
+function UI.newButton(xCord, yCord, btnWidth, btnHeight, tag, buttonList, sprite, scale, hoverAnim, pressAnim, hoveredAnim, buttonText, xOffset)
     local newBtn = {
         x = xCord,
         y = yCord,
         w = btnWidth,
         h = btnHeight,
         tag = tag,
-        isHovered = false,
         isPressed = false,
         sprite = sprite,
+        originalSprite = sprite, -- Remember the base sprite to return to
         s = scale or 1,
         hoverAnimation = hoverAnim,
         pressAnim = pressAnim,
         hoveredAnim = hoveredAnim,
-        isAnimating = false,
+        state = "idle",
+        buttonText = buttonText,
+        xOffset = xOffset or 50,
     }
 
     if newBtn.sprite then
@@ -30,18 +31,28 @@ function UI.newButton(xCord, yCord, btnWidth, btnHeight, tag, buttonList, sprite
     
     return newBtn
 end
-local function button_anime(sprite, t, btn)
+
+local function buttonAnime(sprite, t, btn)
+    if not sprite then return end
     btn.sprite = sprite
     btn.sprite_t = t
     btn.sprite_start = L.time()
-    btn.isAnimating = true
 end
 
--- Update loop 
+local function isAnimFinished(btn)
+    if not btn.sprite_t then return true end
+    
+    if btn.sprite_t > 0 then
+        return L.sprite_finished(btn)
+    else
+        -- When playing backwards, L.sprite_cycle_count drops to -2
+        return L.sprite_cycle_count(btn) <= -2 
+    end
+end
+
 function UI.update(buttonList)
     local mouse = L.get_mouse()
-    
-    local isClicking = L.mouse_down(1) 
+    local isClicking = L.mouse_pressed(1)
 
     for _, btn in ipairs(buttonList) do
         local leftEdge = btn.x - (btn.w / 2)
@@ -49,20 +60,47 @@ function UI.update(buttonList)
         local topEdge = btn.y - (btn.h / 2)
         local bottomEdge = btn.y + (btn.h / 2)
 
-        if mouse.x >= leftEdge and mouse.x <= rightEdge and mouse.y >= topEdge and mouse.y <= bottomEdge then
-            btn.isHovered = true
-            btn.isPressed = isClicking
-        else
-            btn.isHovered = false
-            btn.isPressed = false
+        -- Determine physical hover
+        local currentlyHovered = mouse.x >= leftEdge and mouse.x <= rightEdge and mouse.y >= topEdge and mouse.y <= bottomEdge
+        
+        btn.isPressed = currentlyHovered and isClicking
+        if btn.isPressed then
+            btn.sprite = btn.pressAnim
         end
-        if btn.isHovered and not btn.isAnimating then
-            button_anime(btn.hoverAnimation, 0.1, btn)
+        -- State Machine Logic
+        if currentlyHovered then
+            -- If we just entered the button (or are retreating from an unhover)
+            if btn.state == "idle" or btn.state == "unhovering" then
+                btn.state = "hovering"
+                buttonAnime(btn.hoverAnimation, 0.1, btn)
+                
+            -- If we are currently playing the enter animation
+            elseif btn.state == "hovering" then
+                if isAnimFinished(btn) then
+                    btn.state = "hovered"
+                    btn.sprite = btn.hoveredAnim
+                    btn.sprite_t = nil -- Stop the animation frame timer
+                end
+            end
+            
+        else
+            -- If we just left the button
+            if btn.state == "hovered" or btn.state == "hovering" then
+                btn.state = "unhovering"
+                buttonAnime(btn.hoverAnimation, -0.1, btn) -- Play backwards
+                
+            -- If we are waiting for the exit animation to finish
+            elseif btn.state == "unhovering" then
+                if isAnimFinished(btn) then
+                    btn.state = "idle"
+                    btn.sprite = btn.originalSprite
+                    btn.sprite_t = nil
+                end
+            end
         end
     end
 end
 
--- Check if a specific button is pressed
 function UI.isButtonPressed(buttonTag, buttonList)
     for _, btn in ipairs(buttonList) do
         if btn.tag == buttonTag then
@@ -72,13 +110,13 @@ function UI.isButtonPressed(buttonTag, buttonList)
     return false
 end
 
--- debug draw
 function UI.render(buttonList)
     for _, btn in ipairs(buttonList) do
         if not btn.sprite then
-        L.draw(L.patch(btn, { debug = true })) 
+            L.draw(L.patch(btn, { debug = true })) 
         else
             L.draw(btn)
+            L.draw({text=btn.buttonText, font="pixelifysans", font_size=36, align="mm", x=btn.x+btn.xOffset, y=btn.y})
         end
     end
 end

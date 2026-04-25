@@ -4,12 +4,21 @@ local OS = {}
 
 local buttons = {}
 function OS.setup()
-    UI.newButton(0,-250,40,20,"restart", buttons, "UI/button_idle", 1, "UI/button_hover", "UI/button_click","UI/button_idle")
+    buttons = {}
+    UI.newButton(-L.width/2+100,-250,40,20,"restart", buttons, "UI/button_idle", 1.5, "UI/button_hover", "UI/button_click","UI/button_hovering","Restart",140)
+    UI.newButton(-L.width/2+100,-130,40,20,"mainMenu", buttons, "UI/button_idle", 1.5, "UI/button_hover", "UI/button_click","UI/button_hovering","Main menu", 150)
 end
+
 function OS.loop()
     UI.update(buttons)
+    L.draw({text="Game Over", font="pixelifysans", font_size=100, align="mm", x=L.width/2-300, y=-L.height/2+80})
     if UI.isButtonPressed("restart", buttons) then
         L.active_level_i = L.failedLevel or 1
+        L.reset()
+        return
+    end
+    if UI.isButtonPressed("mainMenu", buttons) then
+        L.active_level_i = L.mainMenu
         L.reset()
         return
     end
