@@ -59,7 +59,7 @@ CB.oneliners = { { text = "I will crush you like a pringle", audio = "pringle.wa
 
 function CB.newBoss()
     L.boss = {
-        nextBossLineAt = 10 + math.random(5),
+        nextBossLineAt = 0 + math.random(5),
         tag = "boss",
         projectiles = {},
         wheels = {},
@@ -212,7 +212,7 @@ local function bossLine()
     if L.boss.nextBossLineAt < L.time() then
         local oneliner = L.patch(CB.oneliners[math.random(4)], {})
         oneliner.audio = "audio/chair/" .. oneliner.audio
-        oneliner.text = "Chair:" .. oneliner.text
+        oneliner.text = "Chair: " .. oneliner.text
         L.push_dialogue(oneliner)
         L.boss.nextBossLineAt = L.boss.nextBossLineAt + 20 + math.random(10)
     end

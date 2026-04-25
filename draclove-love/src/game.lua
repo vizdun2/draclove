@@ -18,6 +18,8 @@ function L.setup()
 	L.dialogue_manager = { events = { que = {}, next_pop_i = 1, next_add_i = 1 }, next_dialogue_at = nil }
 end
 
+local last_dialogue_active_uid = nil
+
 function L.push_dialogue(dialogue_event)
 	local add = L.dialogue_manager.events.next_add_i
 	L.dialogue_manager.events.que[add] = dialogue_event
@@ -33,35 +35,34 @@ function L.pop_dialogue()
 end
 
 function L.play_dialogue()
-	if (L.dialogue_manager.next_dialogue_at == nil or L.time() > L.dialogue_manager.next_dialogue_at) and L.dialogue_manager.events.next_add_i > L.dialogue_manager.events.next_pop_i  then
+	if last_dialogue_active_uid ~= nil and L.dialogue_manager.next_dialogue_at < L.time() then
+		L.active_level().lines[last_dialogue_active_uid] = nil
+	end
+	if (L.dialogue_manager.next_dialogue_at == nil or L.time() > L.dialogue_manager.next_dialogue_at) and L.dialogue_manager.events.next_add_i > L.dialogue_manager.events.next_pop_i then
 		local dialogue = L.pop_dialogue()
 		if dialogue ~= nil then
 			if dialogue.audio ~= "" then
 				-- L.play(dialogue.audio)
 			end
-			local next_at = L.time() + string.len(dialogue.text) * 0.5
-			table.insert(L.active_level().level.np_objects,
-				{
-					x = -10 * string.len(dialogue.text),
-					y = 310,
-					is_dead_at = next_at,
-					text =
-						dialogue.text,
-					tag = "text",
-					font = "pixelifysans",
-					font_size = 30
-				})
+
+			local next_at = L.time() + string.len(dialogue.text) * 0.1
+			local uid = L.uid()
+			L.active_level().lines[uid] =
+			{
+				x = -10 * string.len(dialogue.text),
+				y = 310,
+				is_dead_at = next_at,
+				text =
+					dialogue.text,
+				tag = "text",
+				font = "pixelifysans",
+				font_size = 30
+			}
+			last_dialogue_active_uid = uid
 			L.dialogue_manager.next_dialogue_at = next_at
 		end
 	end
 end
-
-
-
-
-
-
-
 
 function L.active_level()
 	return L.levels[L.active_level_i]
