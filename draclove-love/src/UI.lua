@@ -22,7 +22,7 @@ end
 function UI.update(buttonList)
     local mouse = L.get_mouse()
     
-    local isClicking = love.mouse.isDown(1) 
+    local isClicking = L.mouse_down(1) 
 
     for _, btn in ipairs(buttonList) do
         local leftEdge = btn.x - (btn.w / 2)
