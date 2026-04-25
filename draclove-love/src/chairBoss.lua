@@ -181,7 +181,6 @@ local function projectileAttack(player)
     spawnProjectile(L.boss.x, L.boss.y, speed * x, speed * y)
 end
 
--- returns list where [1] is whether x is out of bounds, [2] is whether y is out of bounds
 
 local function stunPhase()
     local stunCooldown = 3
@@ -215,7 +214,7 @@ function CB.bossLoopLogic(dt, player)
 
     if L.boss.inAction then
         
-        if false and L.boss.lastAttack == "dash" then
+        if true and L.boss.lastAttack == "dash" then
             L.boss.sprite = "chair/flight"
             L.boss.sx = L.boss.dashingLeft and -1 or 1
             L.boss.r = L.boss.dashingLeft and 90 or -90

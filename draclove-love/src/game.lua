@@ -1,19 +1,12 @@
 local L = require("lib/l")
 L.clear_pck_cache()
-local gravity = require("src/gravity")
-local CB = require("src/chairBoss")
-
-local ground = { x = 0, y = 300, sx = 100, tag = "ground" }
-local ground1 = { x = 0, y = -300, sx = 100, tag = "ground" }
-local level_1 = {
-	boss = { x = 0, y = 0, phase = "start" },
-	np_objects = { ground, ground1 }, -- non player objects
-}
-
-local hunger_limit = 3
+local L1 = require("src/level1")
+-- as of now, all levels MUST have a .setup function and a .loop function
+L.levels = {L1}
+L.hunger_limit = 3
 
 function L.setup()
-	CB.newBoss()
+	L1.setup()
 	L.player = {
 		x = 0,
 		y = 0,
@@ -32,23 +25,15 @@ function L.setup()
 	function L.player.take_damage()
 		L.player.hurt_time = L.time()
 		L.player.hunger = L.player.hunger + 1
-		if L.player.hunger > hunger_limit then
+		if L.player.hunger > L.hunger_limit then
 			L.player.dead = true
 			L.printNoBs("You died. Rip bozo.")
 		end
 	end
-
-	L.level_1 = L.patch({
-		boss = { x = 0, y = 0, phase = "start" },
-		np_objects = {}, -- non player objects
-	}, level_1)
+	-- set the level variable for this file
+	L.level_1 = L1
 end
 
-local ground = { x = 0, y = 300, sx = 100 }
-
-function level_1.init()
-
-end
 
 local movement_const = 60
 
@@ -56,9 +41,7 @@ local movement_const = 60
 
 
 
-function level_1.interact_with(obj)
-	-- for the given tag of obj, run the specific interaction
-end
+
 
 local function player_action()
 	if L.key_pressed("c") then
@@ -146,54 +129,15 @@ local function player_movement()
 	end
 end
 
-local function base_player_loop()
-	player_movement()
+function L.base_player_loop()
 	player_action()
 	player_state_handler()
+	player_movement()
 end
 
 
-function level_1.loop(dt)
-	base_player_loop()
-	gravity.change_vel(L.player)
-	L.move_vel(L.player)
-	L.player.on_ground = gravity.ground_collide(L.player, ground)
-	-- idle right
-	-- L.draw(L.patch(L.player, {debug=true, pl=-30, pr=-3}))
-	-- idle left
-	-- L.draw(L.patch(L.player, {debug=true, pr=-30, pl=-3}))
-	-- L.draw(L.patch(L.player, {debug=true, pt=-30}))
-	L.draw(L.patch(L.player, {debug=true}))
-	L.draw(L.player)
-	L.draw(ground)
 
-
-	CB.renderBoss()
-	CB.bossLoopLogic(dt, L.player)
-
-	for _, np_obj in ipairs(level_1.np_objects) do
-		L.move_vel(np_obj)
-		if L.collide(L.player, np_obj) and L.key_pressed("x") then
-			level_1.interact_with(np_obj)
-		end
-		L.draw(np_obj)
-	end
-	for _, projectile in pairs(L.boss.projectiles) do
-		for i, np_obj in ipairs(level_1.np_objects) do
-			if L.collide(projectile, np_obj) then
-				CB.projectileNPCollision(projectile, np_obj, dt)
-				break
-			end
-		end
-		CB.handleWallBounce(projectile, L.width / 2, L.height / 2)
-		L.draw(projectile)
-	end
-
-	for i = 1, hunger_limit, 1 do
-		L.draw({ sprite = "icons/hunger", s = 3, x = -600 + (i - 1) * 60, y = 250, c = (i > L.player.hunger and "FFFFFF" or "606060") })
-	end
-end
 
 function L.render(dt)
-	level_1.loop(dt)
+	L.levels[1].loop(dt)
 end
