@@ -1,6 +1,8 @@
 local L = require("lib/l")
 local CB = require("src/chairBoss")
 local gravity = require("src/gravity")
+local Player = require("src/player")
+local Player = require("src/player")
 
 L1 = {}
 
@@ -11,55 +13,7 @@ L1.level = {
 }
 function L1.setup()
     CB.newBoss()
-    L.player = {
-		x = 0,
-		y = 0,
-		speed = 15,
-		s = 2,
-		vel_x = 0,
-		vel_y = 0,
-		hunger = 0,
-		last_dodged = 0,
-		dead = false,
-		jumped_midair = true,
-		sprite =
-		"player/idle"
-	}
-    function L.player.is_dodging()
-		return L.player.sprite == "player/matrix_from_air" or L.player.sprite =="player/matrix_from_idle"
-	end
-
-	function L.player.is_punching()
-		return L.player.sprite == "player/punch_from_idle" or L.player.sprite=="player/punch_from_air"
-	end
-
-	function L.player.is_inair()
-		return L.player.sprite == "player/in_air"
-	end
-
-	function L.player.is_jump_from_idle()
-		return L.player.sprite=="player/jump_from_idle"
-	end
-
-	function L.player.is_jump_from_air()
-		return L.player.sprite == "player/jump_from_air"
-	end
-
-	function L.player.take_damage()
-		if L.player.is_dodging() then
-			return false
-		end
-		if L.player.hurt_time ~= nil and L.time() - L.player.hurt_time < 1 then
-			return false
-		end
-		L.player.hurt_time = L.time()
-		L.player.hunger = L.player.hunger + 1
-		if L.player.hunger > L.hunger_limit then
-			L.player.dead = true
-			--L.printNoBs("You died. Rip bozo.")
-		end
-		return true
-	end
+    Player.setup()
 end
 
 function L1.interact_with(obj)
