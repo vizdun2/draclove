@@ -10,6 +10,18 @@ local groundY = 220
 local scales = {1, 4}
 local jumpSpeeds = {-15, -35}
 
+local function newCrack()
+    local crack = {
+        x=L.boss.x,
+        y=L.boss.y+50,
+        spawnTime=L.time(),
+        lifeTime=10,
+        sprite=""
+    }
+    table.insert(L.boss.cracks, crack)
+    
+end
+
 function lvl2.setup()
     L.boss = {
         tag = "boss",
@@ -37,8 +49,10 @@ function lvl2.setup()
         riseSpeed = 500,
         groundedDuration = 2.0,
         timeHitGround = 0,
+        rotationSpeed = 400,
 
-        debris = {}
+        debris = {},
+        cracks = {},
     }
     Player.setup()
     L.player.x=-L.width/2+100   
@@ -76,7 +90,7 @@ local function spawnDebris(originX, originY)
         local direction = (i % 2 == 0) and 1 or -1
         
         local speedX = math.random(150, 400) * direction
-        local speedY = -math.random(800, 1700)
+        local speedY = -math.random(600, 1400)
 
         table.insert(L.boss.debris, {
             tag = "debris",
@@ -147,7 +161,13 @@ local function calculateJumpSpeed(currentX, minX, maxX, jumpRange)
     progress = math.max(0, math.min(1, progress))
     return minJump + ((maxJump - minJump) * progress)
 end
-
+local function updateCracks()
+    for _,crack in ipairs(L.boss.cracks) do
+        if L.time - crack.spawnTime > crack.lifeTime then
+            table.remove(L.boss.cracks, _)
+        end
+    end
+end
 function lvl2.loop(dt)
     L.draw({ x = 0, y = 0, sprite = "scenes/2", s = 6.66, sprite_t = 0.1 })
     local leftEdge = -L.width / 2
@@ -166,8 +186,16 @@ function lvl2.loop(dt)
         L.boss.x = L.boss.x + (L.boss.velX * dt)
         
         if checkForSlam(L.boss, L.player) then
+            L.boss.state = "prepSlam"
+            L.boss.velX = 0 
+        end
+
+    elseif L.boss.state == "prepSlam" then
+        L.boss.r = L.boss.r + (L.boss.rotationSpeed * dt)
+        
+        if L.boss.r >= 90 then
+            L.boss.r = 90
             L.boss.state = "slamming"
-            L.boss.velX = 0
             L.boss.velY = L.boss.slamSpeed
         end
 
@@ -179,7 +207,8 @@ function lvl2.loop(dt)
             L.boss.velY = 0
             L.boss.state = "grounded"
             L.boss.timeHitGround = L.time()
-
+            
+            newCrack()
             spawnDebris(L.boss.x, groundY)
         end
 
@@ -192,9 +221,14 @@ function lvl2.loop(dt)
     elseif L.boss.state == "rising" then
         L.boss.y = L.boss.y + (L.boss.velY * dt)
         
+        if L.boss.r > 0 then
+            L.boss.r = math.max(0, L.boss.r - (L.boss.rotationSpeed * dt))
+        end
+        
         if L.boss.y <= hoverY then
             L.boss.y = hoverY
             L.boss.velY = 0
+            L.boss.r = 0
             L.boss.state = "tracking"
             L.boss.lastTimeAttacked = L.time() 
         end
@@ -218,8 +252,8 @@ function lvl2.loop(dt)
     end
 
     updateDebris(dt)
-
-    L.draw(L.patch(L.boss, {debug=true}))
+    updateCracks()
+    --L.draw(L.patch(L.boss, {debug=true}))
     L.draw(L.boss)
     L.draw(L.player)
     L.draw(groundBot)
