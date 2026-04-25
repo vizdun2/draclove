@@ -84,7 +84,7 @@ local function player_action()
 	end
 end
 
-local jump_speed = -28
+local jump_speed = -25
 
 local function player_state_handler()
 	if L.player.is_dodging() and L.sprite_finished(L.player) then

@@ -53,7 +53,7 @@ end
 -- charge state - player can punch the wheels
 -- take damage on collision
 
-CB.oneliners = {{text="I will crush you like a pringle",audio="pringle.wav"},{text="*Roll her wheels*",audio=""},{text="Suck my wheels, stoner",audio="suck.wav"},{text="Are you going to the shower? I know you have to.",audio="shower.wav"}}
+CB.oneliners = {{text="I will crush you like a pringle",audio="pringle.wav"},{text="*Rolls her wheels*",audio=""},{text="Suck my wheels, stoner",audio="suck.wav"},{text="Are you going to the shower? I know you have to.",audio="shower.wav"}}
 
 function CB.newBoss()
     L.boss = {

@@ -15,7 +15,7 @@ function L1.setup()
 		x = 0,
 		y = 0,
 		speed = 15,
-		s = 3,
+		s = 2,
 		vel_x = 0,
 		vel_y = 0,
 		hunger = 0,
@@ -83,6 +83,7 @@ function L1.loop(dt)
     elseif L.boss.dead then
         L.boss.deathCount = L.boss.deathCount + 1 
         CB.resetBossHealth()
+		L.pushDialogue({text="Chair: That is what I call, regeneration!", audio="audio/chair/regeneration.wav"})
     end
 	L.base_player_loop()
 	L.base_dialogue_loop()
