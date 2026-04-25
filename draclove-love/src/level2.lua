@@ -3,160 +3,226 @@ local gravity = require("src/gravity")
 local Player = require("src/player")
 local lvl2 = {}
 
-local ground_bot = { x = 0, y = 300, sx = 100, tag = "ground" }
-local ground_top = { x = 0, y = -300, sx = 100, tag = "ground" }
+local groundBot = { x = 0, y = 300, sx = 100, tag = "ground" }
 
----@enum
-local door_states = {
-    going = 0,
-    staying = 1,
-    waiting_middle = 4,
-    slam_prep = 5,
-    about_to_slam = 7,
-    slam = 6,
-    slammed = 8,
-    unslam = 9,
-    unrot_prep = 11,
-    unrot = 10,
-};
-
-local normal_y = 60
+local hoverY = 20
+local groundY = 220
+local scales = {1, 4}
+local jumpSpeeds = {-15, -35}
 
 function lvl2.setup()
     L.boss = {
-        x=0,
-        y=normal_y,
-        -- sy=3,
-        -- sx=2,
-        s=4.5,
-        r=0,
-        state = door_states.staying,
-        state_begin = L.time(),
-        next_state = 1,
-        hp = 3,
+        tag = "boss",
+        x = 0,
+        y = hoverY,
+        s = 4.5,
+        r = 0,
+        hp = 5,
         sprite = "door/door",
-        pl=-14,
-        pr=-19,
-        pb=0,
+        pl = -14,
+        pr = -19,
+        pb = 0,
+        dead=false,
+        
+        state = "tracking", 
+        attackCooldown = 3,
+        lastTimeAttacked = 0,
+        directionUpdateCooldown = 1.0,
+        lastTimeChangedDirection = 0,
+        moveSpeed = 300,
+        slamThreshold = 50,
+        velX = 0,
+        velY = 0,
+        slamSpeed = 1000,
+        riseSpeed = 500,
+        groundedDuration = 2.0,
+        timeHitGround = 0,
+
+        debris = {}
     }
     Player.setup()
+    L.player.x=-L.width/2+100   
 end
 
-local x_limit = 550
-local x_speed = 800
-local r_speed = 60
-local slam_speed = 1000
-local unslam_speed = -500
-local y_limit = 220
+local function updateBossDirection(boss, player)
+    local currentTime = L.time()
 
-local function door_move()
-    local dir_states = {1, -1, -1, 1}
-    local target_states = {1, 0, -1, 0}
-    local speed_mult = 1
-
-    if L.boss.hp == 2 then
-        speed_mult = 1.5
-    elseif L.boss.hp <= 1 then
-        speed_mult = 2
+    if currentTime - boss.lastTimeChangedDirection >= boss.directionUpdateCooldown then
+        if player.x > boss.x then
+            boss.velX = boss.moveSpeed
+        elseif player.x < boss.x then
+            boss.velX = -boss.moveSpeed
+        else
+            boss.velX = 0
+        end
+        boss.lastTimeChangedDirection = currentTime
     end
+end
 
-    if L.boss.state == door_states.going then
-        L.move_vel(L.boss)
+local function checkForSlam(boss, player)
+    local currentTime = L.time()
+    local isAttackReady = (currentTime - boss.lastTimeAttacked >= boss.attackCooldown)
+    local isUnderneath = math.abs(boss.x - player.x) <= boss.slamThreshold
 
-        if L.boss.vel_x < 0 and L.boss.x <= L.boss.target_x or L.boss.vel_x >= 0 and L.boss.x >= L.boss.target_x then
-            L.boss.state = L.boss.target_x == 0 and door_states.waiting_middle or door_states.staying
-            L.boss.state_begin = L.time()
+    if isAttackReady and isUnderneath then
+        boss.velX = 0
+        boss.lastTimeAttacked = currentTime
+        return true
+    end
+    return false
+end
+local function spawnDebris(originX, originY)
+    for i = 1, 4 do
+        local direction = (i % 2 == 0) and 1 or -1
+        
+        local speedX = math.random(150, 400) * direction
+        local speedY = -math.random(800, 1700)
+
+        table.insert(L.boss.debris, {
+            tag = "debris",
+            x = originX,
+            y = originY,
+            sx = 0.8,
+            sy = 0.8,
+            s = 1,
+            velX = speedX,
+            velY = speedY,
+            bounces = 0,
+            dead = false,
+            debug = true
+        })
+    end
+end
+
+local function updateDebris(dt)
+    local gravityPull = 1500
+
+    for i = #L.boss.debris, 1, -1 do
+        local d = L.boss.debris[i]
+
+        d.velY = d.velY + (gravityPull * dt)
+        d.x = d.x + (d.velX * dt)
+        d.y = d.y + (d.velY * dt)
+
+        if d.y >= groundY then
+            d.y = groundY
+            if d.bounces == 0 then
+                d.velY = -d.velY * 0.5 
+                d.bounces = 1
+            else
+                d.dead = true
+            end
+        end
+
+        if not d.dead and L.collide(L.player, d) then
+            if L.player.is_punching() then
+                
+            else
+                L.player.take_damage()
+                
+            end
+            d.dead = true
+        end
+
+        if d.dead then
+            table.remove(L.boss.debris, i)
+        else
+            L.draw(d)
         end
     end
+end
 
-    if L.boss.state == door_states.waiting_middle and L.pasttime(L.boss.state_begin + 1 / speed_mult) then
-        L.boss.state = door_states.slam_prep
-    end
+local function calculatePlayerScale(currentX, minX, maxX, scaleRange)
+    local minScale = scaleRange[1]
+    local maxScale = scaleRange[2]
+    local progress = (currentX - minX) / (maxX - minX)
+    progress = math.max(0, math.min(1, progress))
+    return minScale + ((maxScale - minScale) * progress)
+end
 
-    if L.boss.state == door_states.slam_prep then
-        L.boss.r = L.boss.r + r_speed * L.dt * speed_mult
-        if L.boss.r >= 90 then
-            L.boss.r = 90
-            L.boss.state = door_states.about_to_slam
-            L.boss.state_begin = L.time()
-        end
-    end
-
-    if L.boss.state == door_states.about_to_slam and L.pasttime(L.boss.state_begin + 2 / speed_mult) then
-        L.boss.state = door_states.slam
-    end
-
-    if L.boss.state == door_states.slam then
-        L.boss.vel_x = 0
-        L.boss.vel_y = slam_speed * speed_mult
-        L.move_vel(L.boss)
-        if L.boss.y >= y_limit then
-           L.boss.y = y_limit
-           L.boss.state = door_states.slammed
-           L.boss.state_begin = L.time()
-        end
-    end
-
-    if L.boss.state == door_states.slammed and L.pasttime(L.boss.state_begin + 1 / speed_mult) then
-        L.boss.state = door_states.unslam
-    end
-
-    if L.boss.state == door_states.unslam then
-        L.boss.vel_x = 0
-        L.boss.vel_y = unslam_speed * speed_mult
-        L.move_vel(L.boss)
-        if L.boss.y <= normal_y then
-           L.boss.y = normal_y
-           L.boss.state = door_states.unrot_prep
-        end
-    end
-
-    if L.boss.state == door_states.unrot_prep and L.pasttime(L.boss.state_begin + 1 / speed_mult) then
-        L.boss.state = door_states.unrot
-    end
-
-    if L.boss.state == door_states.unrot then
-        L.boss.r = L.boss.r - r_speed * L.dt * speed_mult
-        if L.boss.r <= 0 then
-            L.boss.r = 0
-            L.boss.state = door_states.staying
-            L.boss.state_begin = L.time()
-        end
-    end
-
-    if L.boss.state == door_states.staying and L.pasttime(L.boss.state_begin + 1 / speed_mult) then
-        L.boss.state = door_states.going
-        local dir_mult = dir_states[((L.boss.next_state - 1) % #dir_states) + 1]
-        local target_mult = target_states[((L.boss.next_state - 1) % #target_states) + 1]
-        L.boss.vel_x = x_speed * dir_mult * speed_mult
-        L.boss.vel_y = 0
-        L.boss.target_x = x_limit * target_mult
-        L.boss.next_state = L.boss.next_state + 1
-    end
+local function calculateJumpSpeed(currentX, minX, maxX, jumpRange)
+    local minJump = jumpRange[1]
+    local maxJump = jumpRange[2]
+    local progress = (currentX - minX) / (maxX - minX)
+    progress = math.max(0, math.min(1, progress))
+    return minJump + ((maxJump - minJump) * progress)
 end
 
 function lvl2.loop(dt)
+    L.draw({ x = 0, y = 0, sprite = "scenes/2", s = 6.66, sprite_t = 0.1 })
+    local leftEdge = -L.width / 2
+    local rightEdge = L.width / 2
+    
+    -- Player Lerp Updates
+    L.player.s = calculatePlayerScale(L.player.x, leftEdge, rightEdge, scales)
+    Player.jump_speed = calculateJumpSpeed(L.player.x, leftEdge, rightEdge, jumpSpeeds)
+    
     Player.loop()
-	L.player.on_ground = gravity.ground_collide(L.player, L1.ground)
+    L.player.on_ground = gravity.ground_collide(L.player, groundBot)
 
-    local collide, from_above, _ = gravity.check_collide(L.player, L.boss)
+    -- Boss State Machine
+    if L.boss.state == "tracking" then
+        updateBossDirection(L.boss, L.player)
+        L.boss.x = L.boss.x + (L.boss.velX * dt)
+        
+        if checkForSlam(L.boss, L.player) then
+            L.boss.state = "slamming"
+            L.boss.velX = 0
+            L.boss.velY = L.boss.slamSpeed
+        end
+
+    elseif L.boss.state == "slamming" then
+        L.boss.y = L.boss.y + (L.boss.velY * dt)
+        
+        if L.boss.y >= groundY then 
+            L.boss.y = groundY
+            L.boss.velY = 0
+            L.boss.state = "grounded"
+            L.boss.timeHitGround = L.time()
+
+            spawnDebris(L.boss.x, groundY)
+        end
+
+    elseif L.boss.state == "grounded" then
+        if L.time() - L.boss.timeHitGround >= L.boss.groundedDuration then
+            L.boss.state = "rising"
+            L.boss.velY = -L.boss.riseSpeed
+        end
+
+    elseif L.boss.state == "rising" then
+        L.boss.y = L.boss.y + (L.boss.velY * dt)
+        
+        if L.boss.y <= hoverY then
+            L.boss.y = hoverY
+            L.boss.velY = 0
+            L.boss.state = "tracking"
+            L.boss.lastTimeAttacked = L.time() 
+        end
+    end
+
+    -- Collision & Damage Logic
+    local collide, fromAbove, _ = gravity.check_collide(L.player, L.boss)
     if collide then
-        if from_above then
+        if L.boss.state == "grounded" and fromAbove then
+            L.player.vel_y = -2000
             L.boss.hp = L.boss.hp - 1
-            L.print("jumped on", L.boss.hp)
-        else
+            L.print("Boss Hit! HP:", L.boss.hp)
+            
+            
+            
+            L.boss.state = "rising"
+            L.boss.velY = -L.boss.riseSpeed
+        elseif L.boss.state ~= "grounded" then
             L.player.take_damage()
         end
     end
 
-    door_move()
+    updateDebris(dt)
 
     L.draw(L.patch(L.boss, {debug=true}))
     L.draw(L.boss)
-    L.draw(L.patch(L.player, {debug=true}))
     L.draw(L.player)
-    L.draw(ground_bot)
-    L.draw(ground_top)
+    L.draw(groundBot)
     L.draw_hud()
 end
 

@@ -11,15 +11,30 @@ local Player = {}
 
 local movement_const = 60
 local dodge_cooldown = 0.5
-local jump_speed = -25
+local base_jump_speed = -25
+
+local function newDJEffect()
+    local newDJEffect = {
+        x=L.player.x,
+        y=L.player.y,
+        sprite="particles/1/jump_burst",
+        sprite_t=0.1,
+        s=3,
+        sprite_start = L.time(),
+        tag="tempEffect"
+    }
+    table.insert(L.player.particles, newDJEffect)
+end
 
 -- Base Setup
 function Player.setup()
+    Player.jump_speed = base_jump_speed
     L.player = {
         x = 0, y = 0, speed = 15, s = 2,
         vel_x = 0, vel_y = 0, hunger = 0,
         last_dodged = 0, dead = false, jumped_midair = true,
-        sprite = "player/idle"
+        sprite = "player/idle",
+        particles = {}
     }
 
     function L.player.is_dodging()
@@ -108,13 +123,14 @@ local function player_movement()
 	if L.key_down("space") then
 		if L.player.on_ground and not L.player.is_jump_from_idle() then
 			L.player.jumped_midair = false
-			L.player.vel_y = jump_speed * movement_const
+			L.player.vel_y = Player.jump_speed * movement_const
 			L.player.sprite = "player/in_air" -- reset this
 			L.key_pressed("space")
 		elseif L.key_pressed("space") and not L.player.jumped_midair then
-			L.player.vel_y = jump_speed * movement_const
+			L.player.vel_y = Player.jump_speed * movement_const
 			L.player.jumped_midair = true
 			L.player.sprite = "player/in_air"
+            newDJEffect()
 		end
 	end
 
@@ -155,7 +171,14 @@ local function player_movement()
 		L.player.c = "#FF4040"
 	end
 end
-
+local function particleLoop()
+    for _,ptc in ipairs(L.player.particles) do
+        L.draw(ptc)
+        if ptc.tag=="tempEffect" and L.sprite_finished(ptc) then
+            table.remove(L.player.particles, _)
+        end
+    end
+end
 -- The main loop
 function Player.loop()
     player_action()
@@ -163,6 +186,7 @@ function Player.loop()
     player_movement()
     L.move_vel(L.player)
     gravity.change_vel(L.player)
+    particleLoop()
     L.player.x, L.player.y = L.getSafeCoordinates(L.player, 15 * L.player.s, 15 * L.player.s) -- 15 is offset used for player too lazy to make it a constant
 end
 
