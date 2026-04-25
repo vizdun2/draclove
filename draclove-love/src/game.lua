@@ -1,21 +1,16 @@
 local L = require("lib/l")
-local gravity = loadfile("draclove-love/src/gravity.lua")()
-local CB = loadfile("draclove-love/src/chairBoss.lua")()
+L.clear_pck_cache()
+local gravity = require("src/gravity")
+local CB = require("src/chairBoss")
 
-
-
-function L.setup()
-	L.plane = {x=0, y=0, dead=false, velocity=0}
-	CB.newBoss()
-	L.player = {x=0,y=0, speed = 8, vel_x = 0, vel_y=0, hunger = 0, dodging = false, sprite="idle"}
-end
-
-local ground = {x=0, y=300, sx=100, tag="ground"}
-local ground1 = {x=0, y=-300, sx=100, tag="ground"}
+local ground = { x = 0, y = 300, sx = 100, tag = "ground" }
+local ground1 = { x = 0, y = -300, sx = 100, tag = "ground" }
 local level_1 = {
-	boss = {x=0,y=0,phase="start"},
-	np_objects = {ground, ground1}, -- non player objects
+	boss = { x = 0, y = 0, phase = "start" },
+	np_objects = { ground, ground1 }, -- non player objects
 }
+
+local hunger_limit = 3
 
 function L.setup()
 	CB.newBoss()
@@ -30,14 +25,16 @@ function L.setup()
 		dead = false,
 		dodging = false,
 		punching = false,
+		jumped_midair = false,
 		sprite =
 		"player/idle"
 	}
 	function L.player.take_damage()
-		local hunger_limit = 3
+		L.player.hurt_time = L.time()
 		L.player.hunger = L.player.hunger + 1
 		if L.player.hunger > hunger_limit then
 			L.player.dead = true
+			L.printNoBs("You died. Rip bozo.")
 		end
 	end
 
@@ -118,6 +115,14 @@ local function player_movement()
 	if L.key_down("space") and L.player.on_ground then
 		L.player.vel_y = jump_speed * movement_const
 	end
+
+	if L.player.hurt_time and L.pasttime(L.player.hurt_time + 0.4) then
+		L.hurt_time = nil
+		L.player.c = "#FFFFFF"
+	elseif L.player.hurt_time then
+		L.player.sprite = "player/damage"
+		L.player.c = "#FF4040"
+	end
 end
 
 local function base_player_loop()
@@ -139,7 +144,7 @@ function level_1.loop(dt)
 	CB.renderBoss()
 	CB.bossLoopLogic(dt, L.player)
 
-	for _,np_obj in ipairs(level_1.np_objects) do
+	for _, np_obj in ipairs(level_1.np_objects) do
 		L.move_vel(np_obj)
 		if L.collide(L.player, np_obj) and L.key_pressed("x") then
 			level_1.interact_with(np_obj)
@@ -153,8 +158,12 @@ function level_1.loop(dt)
 				break
 			end
 		end
-		CB.handleWallBounce(projectile, L.width/2, L.height/2)
+		CB.handleWallBounce(projectile, L.width / 2, L.height / 2)
 		L.draw(projectile)
+	end
+
+	for i = 1, hunger_limit, 1 do
+		L.draw({ sprite = "icons/hunger", s = 3, x = -600 + (i - 1) * 60, y = 250, c = (i > L.player.hunger and "FFFFFF" or "606060") })
 	end
 end
 

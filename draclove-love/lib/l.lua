@@ -105,7 +105,8 @@ function L.play(audio_name, volume)
 end
 
 local function get_obj_sprite_stuffs(obj)
-    local drawable = (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].image) or square_canvas
+    local drawable = (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].image) or
+    square_canvas
     local row_count = (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].row) or 1
     local col_count = (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].col) or 1
     local sprite_width = drawable:getWidth() / col_count
@@ -216,7 +217,8 @@ function L.draw(obj)
         )
     else
         local drawable, sprite_width, sprite_height, r, c = get_obj_sprite_stuffs(obj)
-        local sprite_i = (obj.sprite_t and (math.floor((L.time() - (obj.sprite_start or 0)) / obj.sprite_t) % (r * c) + 1)) or 1
+        local sprite_i = (obj.sprite_t and (math.floor((L.time() - (obj.sprite_start or 0)) / obj.sprite_t) % (r * c) + 1)) or
+        1
 
         local x, y, dx, dy = L.padding_adjusted(obj)
 
@@ -448,9 +450,17 @@ function L.move_vel(obj, mult)
     return L.move(obj, (obj.vel_x or 0) * L.dt, (obj.vel_y or 0) * L.dt, mult)
 end
 
+function L.clear_pck_cache()
+    for pck, _ in pairs(package.loaded) do
+        if pck:match("^src/") then
+            package.loaded[pck] = nil
+        end
+    end
+end
+
 local last_mod_time = nil
 function love.update(dt)
-    L.dt = math.min(dt, 1/30)
+    L.dt = math.min(dt, 1 / 30)
 
     local newest_mod_time = 0
     for _, file in ipairs(love.filesystem.getDirectoryItems("src")) do
