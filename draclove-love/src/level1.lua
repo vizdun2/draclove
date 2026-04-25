@@ -11,7 +11,7 @@ L1.level = {
 	np_objects = { L1.ground, L1.ground1 }, -- non player objects
 }
 L1.lines = {}
-L1.player_lines = { { text = "Stoner: I feel this girl has a screw loose!", audio = "audio/chair/screw_loose.wav" } }
+L1.player_lines = { { text = "Stoner: She got a screw loose brother!", audio = "audio/chair/screw_loose.wav" }, {text="Stoner: That girl falling head over wheels for me!",audio=""}, {text="Stoner: I need to take the her wheels man, maybe they edible, like them gummy bears or smth"}}
 
 
 local player_next_line_offset = 10
@@ -55,10 +55,9 @@ function L1.loop(dt)
 		L1.player_next_line  = L1.player_next_line + player_next_line_offset + math.random(10)
 	end
 	
-	gravity.change_vel(L.player)
 
 
-	L.player.on_ground = isGrounded()
+	L.player.on_ground = isGrounded() -- not IN PLAYER BECAUSE OF isGROUNDED BEING LOCAL
 	-- idle right
 	-- L.draw(L.patch(L.player, {debug=true, pl=-30, pr=-3}))
 	-- idle left
