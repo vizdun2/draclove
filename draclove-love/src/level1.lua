@@ -35,7 +35,7 @@ function L1.loop(dt)
 
 	for _, np_obj in ipairs(L1.level.np_objects) do
 		L.move_vel(np_obj)
-		if L.collide(L.player, np_obj) and L.key_pressed("x") then
+		if L.collide(L.player, np_obj) and L.player.is_punching() then
 			L1.interact_with(np_obj)
 		end
 		L.draw(np_obj)

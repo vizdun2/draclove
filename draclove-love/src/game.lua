@@ -15,46 +15,56 @@ function L.setup()
 		vel_x = 0,
 		vel_y = 0,
 		hunger = 0,
+		last_dodged = 0,
 		dead = false,
-		dodging = false,
-		punching = false,
-		jumped_midair = false,
+		jumped_midair = true,
 		sprite =
 		"player/idle"
 	}
 	function L.player.take_damage()
+		if L.player.is_dodging() then
+			return false
+		end
+		if L.player.hurt_time ~= nil and L.time() - L.player.hurt_time < 0.2 then
+			return false
+		end
 		L.player.hurt_time = L.time()
 		L.player.hunger = L.player.hunger + 1
 		if L.player.hunger > L.hunger_limit then
 			L.player.dead = true
 			L.printNoBs("You died. Rip bozo.")
 		end
+		return true
+	end
+
+	function L.player.is_dodging()
+		return L.player.sprite == "player/matrix"
+	end
+
+	function L.player.is_punching()
+		return L.player.sprite == "player/punch"
+	end
+
+	function L.player.is_inair()
+		return L.player.sprite == "player/inair"
 	end
 	-- set the level variable for this file
 	L.level_1 = L1
 end
 
-
 local movement_const = 60
-
-
-
-
-
-
-
+local dodge_cooldown = 0.5
 local function player_action()
-	if L.key_pressed("c") then
-		L.player.dodging = true
+	if L.key_pressed("c") and L.time() - L.player.last_dodged > dodge_cooldown then
 		L.player.sprite = "player/matrix"
 		L.player.sprite_t = 0.05
 		L.player.sprite_start = L.time()
 		L.player.pr, L.player.pl = 0, 0
 		L.player.pt = -30
+		L.player.last_dodged = L.time()
 	end
 	if L.key_pressed("x") then
 		L.player.sprite = "player/punch"
-		L.player.punching = true
 		L.player.sprite_t = 0.05
 		L.player.sprite_start = L.time()
 		L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
@@ -62,16 +72,14 @@ local function player_action()
 end
 
 local function player_state_handler()
-	if L.player.dodging and L.sprite_finished(L.player) then
-		L.player.dodging = false
+	if L.player.is_dodging() and L.sprite_finished(L.player) then
 		L.player.sprite = "player/idle"
-	elseif L.player.punching and L.sprite_finished(L.player) then
+	elseif L.player.is_punching() and L.sprite_finished(L.player) then
 		L.player.sprite = "player/idle"
-		L.player.punching = false
 	end
 end
 local function player_movement()
-	if not L.player.on_ground and not L.player.punching then
+	if not L.player.on_ground and not L.player.is_inair() then
 		L.player.sprite = "player/inair"
 		L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
 	end
@@ -92,7 +100,7 @@ local function player_movement()
 		end
 	end
 
-	if L.player.dodging or not L.player.on_ground then
+	if L.player.is_dodging() or not L.player.on_ground then
 		return
 	end
 	
@@ -109,7 +117,7 @@ local function player_movement()
 		L.player.sprite = "player/runnin"
 		L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
 	else
-		if not L.player.punching then
+		if not L.player.is_punching() then
 			L.player.sprite = "player/idle"
 			L.player.sprite_t = 0.1
 			L.player.pr = (L.player.sx == -1) and -30 or -3
