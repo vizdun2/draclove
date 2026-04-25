@@ -22,7 +22,7 @@ end
 function gravity.check_collide(obj, ground)
     if L.collide(ground, obj) then
         L.move(obj, 0, -obj.vel_y * L.dt)
-        local from_above = not L.collide(ground, obj)
+        local from_above = obj.vel_y > 0 and not L.collide(ground, obj)
         L.move(obj, 0, obj.vel_y * L.dt)
         L.move_vel(obj, -1)
         local new = not L.collide(ground, obj)
