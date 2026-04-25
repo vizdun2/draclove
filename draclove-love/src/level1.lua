@@ -12,7 +12,6 @@ L1.level = {
 function L1.setup()
     CB.newBoss()
     L.player = {
-		debug=true,
 		x = 0,
 		y = 0,
 		speed = 15,
