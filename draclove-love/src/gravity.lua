@@ -23,7 +23,8 @@ function gravity.ground_collide(obj, ground)
     if L.collide(obj, ground) then
 		local _, oh = L.obj_dims(obj)
 		local _, gh = L.obj_dims(ground)
-		obj.y = ground.y - gh / 2 - oh / 2
+		obj.y = ground.y - gh / 2 - oh / 2 - (obj.pb or 0)
+        obj.vel_y = 0
         return true
 	end
 

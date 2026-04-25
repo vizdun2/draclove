@@ -105,8 +105,7 @@ function L.play(audio_name, volume)
 end
 
 local function get_obj_sprite_stuffs(obj)
-    local drawable = (obj.debug and square_canvas) or
-        (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].image) or square_canvas
+    local drawable = (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].image) or square_canvas
     local row_count = (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].row) or 1
     local col_count = (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].col) or 1
     local sprite_width = drawable:getWidth() / col_count
@@ -114,11 +113,12 @@ local function get_obj_sprite_stuffs(obj)
     return drawable, sprite_width, sprite_height, row_count, col_count
 end
 
-local function padding_adjusted(obj, sw, sh)
-    local x = ((not obj.debug) and (obj.x or 0)) or ((obj.x or 0) + ((obj.pl or 0) - (obj.pr or 0)) / 2)
-    local y = ((not obj.debug) and (obj.y or 0)) or ((obj.y or 0) + ((obj.pt or 0) - (obj.pb or 0)) / 2)
-    local dx = ((not obj.debug) and 1) or ((sw + (obj.pl or 0) + (obj.pr or 0)) / sw)
-    local dy = ((not obj.debug) and 1) or ((sh + (obj.pt or 0) + (obj.pb or 0)) / sh)
+function L.padding_adjusted(obj)
+    local drawable, sw, sh, _r, _c = get_obj_sprite_stuffs(obj)
+    local x = (obj.x or 0) + ((obj.pr or 0) - (obj.pl or 0)) / 2
+    local y = (obj.y or 0) + ((obj.pb or 0) - (obj.pt or 0)) / 2
+    local dx = (sw + (obj.pl or 0) + (obj.pr or 0)) / sw
+    local dy = (sh + (obj.pt or 0) + (obj.pb or 0)) / sh
     return x, y, dx, dy
 end
 
@@ -217,19 +217,28 @@ function L.draw(obj)
         local drawable, sprite_width, sprite_height, r, c = get_obj_sprite_stuffs(obj)
         local sprite_i = (obj.sprite_t and (math.floor((L.time() - (obj.sprite_start or 0)) / obj.sprite_t) % (r * c) + 1)) or 1
 
-        local x, y, dx, dy = padding_adjusted(obj, sprite_width, sprite_height)
+        local x, y, dx, dy = L.padding_adjusted(obj)
+
+        local debug_x = (not obj.debug and obj.x) or x
+        local debug_y = (not obj.debug and obj.y) or y
+        local debug_sx = (not obj.debug and 1) or (sprite_width / square_size * dx)
+        local debug_sy = (not obj.debug and 1) or (sprite_height / square_size * dy)
+
+        -- if obj.debug then
+        --     L.print(obj)
+        -- end
 
         love.graphics.draw(
-            drawable,
-            (obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].quads[sprite_i]) or
-            square_quad,
-            ((x - L.cam_x) * L.cam_s) + L.width / 2,
-            ((y - L.cam_y) * L.cam_s) + L.height / 2,
+            (not obj.debug and drawable) or square_canvas,
+            (obj.debug and square_quad) or
+            ((obj.sprite and L.assets.textures[obj.sprite] and L.assets.textures[obj.sprite].quads[sprite_i]) or square_quad),
+            ((debug_x - L.cam_x) * L.cam_s) + L.width / 2,
+            ((debug_y - L.cam_y) * L.cam_s) + L.height / 2,
             math.rad(obj.r or 0),
-            dx * (obj.sx or 1) * (obj.s or 1) * L.cam_s,
-            dy * (obj.sy or 1) * (obj.s or 1) * L.cam_s,
-            sprite_width / 2,
-            sprite_height / 2
+            debug_sx * (obj.sx or 1) * (obj.s or 1) * L.cam_s,
+            debug_sy * (obj.sy or 1) * (obj.s or 1) * L.cam_s,
+            (not obj.debug and sprite_width / 2) or (square_size / 2),
+            (not obj.debug and sprite_height / 2) or (square_size / 2)
         )
     end
 
@@ -258,27 +267,30 @@ local i = 0
 function L.collide(a, b)
     local aw, ah = L.obj_dims(a)
     local bw, bh = L.obj_dims(b)
+    local ax, ay, adx, ady = L.padding_adjusted(a)
+    local bx, by, bdx, bdy = L.padding_adjusted(b)
+    aw, ah = aw * adx, ah * ady
+    bw, bh = bw * bdx, bh * bdy
 
     local sa = math.sqrt(aw * aw + ah * ah)
     local sb = math.sqrt(bw * bw + bh * bh)
 
-    local aabb = a.x - sa / 2 < b.x + sb / 2 and
-        a.x + sa / 2 > b.x - sb / 2 and
-        a.y - sa / 2 < b.y + sb / 2 and
-        a.y + sa / 2 > b.y - sb / 2
+    local aabb = ax - sa / 2 < bx + sb / 2 and
+        ax + sa / 2 > bx - sb / 2 and
+        ay - sa / 2 < by + sb / 2 and
+        ay + sa / 2 > by - sb / 2
 
     if not aabb then
         return false
     end
 
-    local sat = rotated_rect_collision({ x = a.x, y = a.y, w = aw, h = ah, angle = math.rad(a.r or 0) },
-        { x = b.x, y = b.y, w = bw, h = bh, angle = math.rad(b.r or 0) })
+    local sat = rotated_rect_collision({ x = ax, y = ay, w = aw, h = ah, angle = math.rad(a.r or 0) },
+        { x = bx, y = by, w = bw, h = bh, angle = math.rad(b.r or 0) })
 
     if not sat then
         return false
     end
 
-    -- print("collision, collision!", i)
     i = i + 1
 
     return true
@@ -434,7 +446,7 @@ end
 
 local last_mod_time = nil
 function love.update(dt)
-    L.dt = dt
+    L.dt = math.min(dt, 1/30)
 
     local newest_mod_time = 0
     for _, file in ipairs(love.filesystem.getDirectoryItems("src")) do
