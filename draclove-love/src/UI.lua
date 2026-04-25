@@ -3,7 +3,7 @@ local L = require("lib/l")
 local UI = {}
 
 -- Create the button with width and height
-function UI.newButton(xCord, yCord, btnWidth, btnHeight, tag, buttonList, sprite, scale)
+function UI.newButton(xCord, yCord, btnWidth, btnHeight, tag, buttonList, sprite, scale, hoverAnim, pressAnim)
     local newBtn = {
         x = xCord,
         y = yCord,
@@ -13,9 +13,11 @@ function UI.newButton(xCord, yCord, btnWidth, btnHeight, tag, buttonList, sprite
         isHovered = false,
         isPressed = false,
         sprite = sprite,
-        s = scale or 1
+        s = scale or 1,
+        hoverAnimation = hoverAnim,
+        pressAnim = pressAnim
     }
-    
+
     if newBtn.sprite then
         local realWidth, realHeight = L.obj_dims(newBtn)
         newBtn.w = realWidth
