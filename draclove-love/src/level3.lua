@@ -25,7 +25,7 @@ local function generate_pipes()
 end
 
 local origin_x = 0
-local origin_y = -300
+local origin_y = -720/2
 
 function lvl3.setup()
     L.boss = {
@@ -106,15 +106,32 @@ function lvl3.loop(dt)
 
     do_toilet()
 
-    for i, pipe in ipairs(L.pipes) do
+    if L.hit_time and L.pasttime(L.hit_time + 1) then
+        L.hit_time = nil
+    end
+
+    local pipes = {}
+    table.insert(pipes, { c=L.hit_time and "#FF5050", sprite = "idibiks/pipe", r=90, x = (origin_x + L.boss.x) / 2, y = L.boss.y, sy = math.abs(origin_x - L.boss.x) / 64, sx=L.boss.x > 0 and -1 or 1 })
+    table.insert(pipes, { c=L.hit_time and "#FF5050", sprite = "idibiks/pipe", x = origin_x, y = (origin_y + L.boss.y) / 2, sy = math.abs(origin_y - L.boss.y) / 64 })
+    table.insert(pipes, { c=L.hit_time and "#FF5050", sprite = L.boss.x > 0 and "idibiks/joint_right" or "idibiks/joint_left", x = origin_x, y = L.boss.y })
+
+    if L.player.is_punching() then
+        for _i, pipe in ipairs(pipes) do
+            if L.collide(L.player, pipe) and not L.hit_time then
+                L.hit_time = L.time()
+                L.print("hit")
+                break
+            end
+        end
+    end
+
+    L.draw({sprite="scenes/3", s=6.66})
+
+    for _i, pipe in ipairs(pipes) do
         L.draw(pipe)
     end
 
-    L.draw({ sprite = "idibiks/pipe", r=90, x = (origin_x + L.boss.x) / 2, y = L.boss.y, sy = math.abs(origin_x - L.boss.x) / 64, sx=L.boss.x > 0 and -1 or 1 })
-    L.draw({ sprite = "idibiks/pipe", x = origin_x, y = (origin_y + L.boss.y) / 2, sy = math.abs(origin_y - L.boss.y) / 64 })
-    L.draw({ sprite = L.boss.x > 0 and "idibiks/joint_right" or "idibiks/joint_left", x = origin_x, y = L.boss.y })
-
-    L.draw(L.patch(L.boss, {sprite="idibiks/attack", sy=-1}))
+    L.draw(L.patch(L.boss, {sprite="idibiks/attack", sy=1}))
 
     for _, proj in pairs(L.water_projs) do
         L.draw(proj)
@@ -122,7 +139,7 @@ function lvl3.loop(dt)
 
     L.draw(L.patch(L.player, { debug = true }))
     L.draw(L.player)
-    L.draw(ground_bot)
+    -- L.draw(ground_bot)
     -- L.draw(ground_top)
     L.draw_hud()
 end
