@@ -76,10 +76,18 @@ local function isGrounded()
     return false
 end
 function L1.loop(dt)
+    if L.boss.dead and L.boss.deathCount == 1 then
+        L.active_level_i = 2
+		L.reset()
+        return
+    elseif L.boss.dead then
+        L.boss.deathCount = L.boss.deathCount + 1 
+        CB.resetBossHealth()
+    end
 	L.base_player_loop()
 	L.base_dialogue_loop()
 	gravity.change_vel(L.player)
-	L.move_vel(L.player)
+	
 
 	L.player.on_ground = isGrounded()
 	-- idle right

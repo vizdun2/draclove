@@ -163,16 +163,35 @@ local function player_movement()
 	end
 end
 
-function L.base_player_loop()
-	player_action()
-	player_state_handler()
-	player_movement()
-end
 
 function L.active_level()
 	return L.levels[L.active_level_i]
 end
+function L.getSafeCoordinates(obj, offsetX, offsetY)
+    -- Calculate the absolute limits
+    local limitX = L.width / 2
+    local limitY = L.height / 2
 
+    -- Calculate the exact allowed boundaries
+    local maxX = limitX - offsetX
+    local minX = -limitX + offsetX
+    local maxY = limitY - offsetY
+    local minY = -limitY + offsetY
+
+    -- Clamp the X and Y coordinates
+    local safeX = math.max(minX, math.min(maxX, obj.x))
+    local safeY = math.max(minY, math.min(maxY, obj.y))
+
+    return safeX, safeY
+end
+function L.base_player_loop()
+	player_action()
+	player_state_handler()
+	player_movement()
+	L.move_vel(L.player)
+	L.player.x, L.player.y = L.getSafeCoordinates(L.player, 15 * L.player.s, 15 * L.player.s)
+	
+end
 function L.base_dialogue_loop()
 	L.play_dialogue()
 	for k, obj in ipairs(L.active_level().level.np_objects) do

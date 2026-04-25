@@ -185,7 +185,6 @@ end
 function lvl2.loop(dt)
     L.base_player_loop()
     gravity.change_vel(L.player)
-	L.move_vel(L.player)
 	L.player.on_ground = gravity.ground_collide(L.player, L1.ground)
 
     local collide, from_above, _ = gravity.check_collide(L.player, L.boss)

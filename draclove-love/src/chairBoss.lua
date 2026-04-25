@@ -15,32 +15,7 @@ function CB.newProjectile(initialX, initialY, velX, velY)
         s=6
     }
 end
--- charge state - player can punch the wheels
--- take damage on collision
-
-function CB.newBoss()
-    L.boss = {
-        tag = "boss",
-        projectiles = {},
-        wheels = {},
-        x = L.width / 2 - 90,
-        y = 50,
-        sideOffset = 90,
-        velocity = 0,
-        dead = false,
-        dashSpeed = 1500,
-        inAction = false,
-        dashingLeft = false,
-        chargingUp = false,
-        lostWheelThisPhase = false,
-        currentCooldown = 0,
-        lastActionTime = 0,
-        lastAttack = "stun",
-        sprite = "chair/zidle_idle",
-        sprite_t = 0.1,
-        s = 7,
-    }
-
+function CB.resetBossHealth()
     L.boss.wheels = {
         wheelm = {
             tag = "wheel",
@@ -73,6 +48,41 @@ function CB.newBoss()
             canBeHit = false
         },
     }
+end
+-- charge state - player can punch the wheels
+-- take damage on collision
+
+function CB.newBoss()
+    L.boss = {
+        tag = "boss",
+        projectiles = {},
+        wheels = {},
+        x = L.width / 2 - 90,
+        y = 50,
+        sideOffset = 90,
+        velocity = 0,
+        dead = false,
+        dashSpeed = 1500,
+        inAction = false,
+        dashingLeft = false,
+        chargingUp = false,
+        lostWheelThisPhase = false,
+        currentCooldown = 0,
+        lastActionTime = 0,
+        lastAttack = "stun",
+        sprite = "chair/zidle_idle",
+        sprite_t = 0.1,
+        s = 7,
+        speedMultiplier = 0.1,
+        currentMultiplier = 0.1,
+        pl=-10,
+        pr=-10,
+        dashCount = 0,
+        projectileCount = 0,
+        deathCOunt = 0,
+    }
+
+    CB.resetBossHealth()
 end
 
 -- do NOT touch the logic. Only god could fix it if you do.
@@ -140,7 +150,7 @@ local function enterAction(attack, cooldown)
     L.boss.lastActionTime = L.time()
 end
 local function chargePhase()
-    enterAction("charge", 2)
+    enterAction("charge", 2.5)
     L.boss.chargingUp = true
     L.boss.sprite = "chair/chair_lift_off"
     L.boss.r = (L.boss.x>0 and 90) or -90
@@ -183,6 +193,7 @@ local function dashAttack()
         wheel.x = wheel.x * -1
     end
     enterAction("dash", 4)
+    L.boss.currentMultiplier = 0.1
     if L.boss.x >= 0 then
         L.boss.dashingLeft = true
     else
@@ -199,36 +210,64 @@ local function resetBoss()
 end
 local function handleDashMovement(dt)
     local moveDistance = L.boss.dashSpeed * dt
-
+    L.boss.currentMultiplier = L.boss.currentMultiplier + (L.boss.currentMultiplier * L.boss.speedMultiplier)
     if L.boss.dashingLeft then
-        L.boss.x = L.boss.x - moveDistance
+        L.boss.x = L.boss.x - moveDistance*L.boss.currentMultiplier
     else
-        L.boss.x = L.boss.x + moveDistance
+        L.boss.x = L.boss.x + moveDistance*L.boss.currentMultiplier
     end
 end
-local function projectileAttack(player)
+local function projectileAttack(player, extrax, extray)
     local speed = 200
-    local x, y = L.vec_to(player, L.boss)
-    spawnProjectile(L.boss.x, L.boss.y, speed * -x, speed * -y)
+    local x, y = L.vec_to(player, L.boss) 
+    spawnProjectile(L.boss.x, L.boss.y, speed * -x * extrax , speed * -y * extray)
 end
 local function stunAttack()
-    enterAction("stun", 1.5)
+    enterAction("stun", 2)
     L.boss.sprite = "chair/idle"
+end
+
+local function projecAttack()
+    enterAction("projectile", 1.5)
+    L.boss.sprite = "chair/runnin"
+    projectileAttack(L.player, 1, 1)
+    projectileAttack(L.player, 1, -1)
+    projectileAttack(L.player, -1, 1)
 end
 
 -- gets next attack -> the automat logic
 -- charge -> dash -> stun -> repeat
 local function getNextAttack(player)
-    if L.boss.currentCooldown <=0 then
+    if L.boss.currentCooldown <= 0 then
         
-    
         if L.boss.lastAttack == "charge" then
             dashAttack()
-        elseif L.boss.lastAttack == "stun" then
-            chargePhase()
-        elseif L.boss.lastAttack == "dash" then
+            
+        elseif L.boss.lastAttack == "dash" or L.boss.lastAttack == "projectile" then
             stunAttack()
+            
+        elseif L.boss.lastAttack == "stun" then
+            local nextMove = math.random(1, 2)
+            
+            if nextMove == 1 and L.boss.projectileCount >= 2 then
+                nextMove = 2
+            elseif nextMove == 2 and L.boss.dashCount >= 2 then
+                nextMove = 1
+            end
+            
+            if nextMove == 1 then
+                L.boss.projectileCount = L.boss.projectileCount + 1
+                L.boss.dashCount = 0
+                
+                projecAttack(player) 
+            else
+                L.boss.dashCount = L.boss.dashCount + 1
+                L.boss.projectileCount = 0
+                
+                chargePhase()
+            end
         end
+        
     end
 end
 -- (A and B) or C -> B if A true, otherwise C
@@ -252,7 +291,7 @@ local function loseAWheel(wheel)
         return
     end
     
-    projectileAttack(L.player) 
+    projectileAttack(L.player, 1, 1)
     L.player.vel_y = -1500
 
     L.boss.lostWheelThisPhase = true
@@ -296,11 +335,12 @@ local function whatWheelToUse()
 
 end
 function CB.renderBoss()
+    --L.draw(L.patch(L.boss, { debug = true }))
     L.draw(L.boss)
-
     whatWheelToUse()
     for _, wheel in pairs(L.boss.wheels) do
-        L.draw(L.patch(wheel, { debug = true }))
+        --L.draw(L.patch(wheel, { debug = true }))
+        --L.draw(wheel)
     end
 end
 
