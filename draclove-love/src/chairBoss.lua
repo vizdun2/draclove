@@ -248,19 +248,14 @@ local function getNextAttack(player)
             stunAttack()
             
         elseif L.boss.lastAttack == "stun" then
-            local nextMove = math.random(1, 2)
             
-            if nextMove == 1 and L.boss.projectileCount >= 2 then
-                nextMove = 2
-            elseif nextMove == 2 and L.boss.dashCount >= 2 then
-                nextMove = 1
-            end
             
-            if nextMove == 1 then
+            
+            if L.boss.projectileCount < 2 then
                 L.boss.projectileCount = L.boss.projectileCount + 1
                 L.boss.dashCount = 0
                 
-                projecAttack(player) 
+                projecAttack() 
             else
                 L.boss.dashCount = L.boss.dashCount + 1
                 L.boss.projectileCount = 0
@@ -286,7 +281,9 @@ local function loseAWheel(wheel)
         return
     end
     L.boss.wheels[wheelKey] = nil
-    
+
+    L.boss.lostWheelThisPhase = true
+
     if L.table_length(L.boss.wheels) <= 0 then
         L.boss.dead = true
         return
@@ -295,7 +292,7 @@ local function loseAWheel(wheel)
     projectileAttack(L.player, 1, 1)
     L.player.vel_y = -1500
 
-    L.boss.lostWheelThisPhase = true
+    
 end
 function L.onCollisionWithPlayer()
     --L.printNoBs("Collided " .. L.boss.lastAttack .. " " .. tostring(L.boss.chargingUp) .. " " .. tostring(L.boss.lostWheelThisPhase))
