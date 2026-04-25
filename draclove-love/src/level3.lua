@@ -3,10 +3,7 @@ local gravity = require("src/gravity")
 local lvl3 = {}
 
 local ground_bot = { x = 0, y = 300, sx = 100, tag = "ground" }
-local ground_top = { x = 0, y = -300, sx = 100, tag = "ground" }
-
-local normal_y = 60
-
+-- local ground_top = { x = 0, y = -300, sx = 100, tag = "ground" }
 
 local function generate_pipes()
     local points = {}
@@ -26,10 +23,13 @@ local function generate_pipes()
     end
 end
 
+local origin_x = 0
+local origin_y = -300
+
 function lvl3.setup()
     L.boss = {
-        x = -550,
-        y = normal_y - 200,
+        x = 0,
+        y = -300,
         -- sy=3,
         -- sx=2,
         s = 4,
@@ -38,7 +38,8 @@ function lvl3.setup()
         -- state_begin = L.time(),
         -- next_state = 1,
         hp = 3,
-        sprite = "idibiks/toilet_normal",
+        sprite = "idibiks/idle",
+        sprite_t = 0.1,
         pl = -12,
         pr = -8,
         pb = 0,
@@ -99,23 +100,23 @@ function lvl3.setup()
     -- generate_pipes()
 end
 
-local toilet_speed = 300
+local toilet_speed = 50
 
 local function do_toilet()
     if not L.boss.target then
         L.boss.target = { x = L.boss.x, y = L.boss.y }
-        while L.dist(L.boss, L.boss.target) < 100 or math.abs(L.boss.y - L.boss.target.y) < 100 or math.abs(L.boss.x - L.boss.target.x) < 100 do
+        while L.dist(L.boss, L.boss.target) < 200 or math.abs(L.boss.y - L.boss.target.y) < 100 or math.abs(L.boss.x - L.boss.target.x) < 100 do
             L.boss.target = { x = math.random() * 550 * 2 - 550, y = math.random() * 160 * 2 - 160 }
         end
         local vx, vy = L.vec_to(L.boss.target, L.boss)
         L.boss.vel_x = vx * toilet_speed
         L.boss.vel_y = vy * toilet_speed
+        if L.boss.vel_x < 0 then
+            L.boss.sx = -1
+        else
+            L.boss.sx = 1
+        end
         L.print(L.boss)
-
-        table.insert(L.pipes,
-            { x = (L.boss.target.x + L.boss.x) / 2, y = L.boss.target.y, sx = math.abs(L.boss.target.x - L.boss.x) / 32 })
-        table.insert(L.pipes,
-            { x = L.boss.x, y = (L.boss.target.y + L.boss.y) / 2, sy = math.abs(L.boss.target.y - L.boss.y) / 32 })
     end
 
     if L.dist(L.boss, L.boss.target) < 10 then
@@ -127,9 +128,8 @@ local function do_toilet()
 end
 
 function lvl3.loop(dt)
-    L.base_player_loop()
     gravity.change_vel(L.player)
-    L.move_vel(L.player)
+    L.base_player_loop()
     L.player.on_ground = gravity.ground_collide(L.player, L1.ground)
 
     -- local collide, from_above, _ = gravity.check_collide(L.player, L.boss)
@@ -148,11 +148,14 @@ function lvl3.loop(dt)
         L.draw(pipe)
     end
 
-    L.draw(L.boss)
+    L.draw({ sprite = "idibiks/pipe", r=90, x = (origin_x + L.boss.x) / 2, y = L.boss.y, sy = math.abs(origin_x - L.boss.x) / 64 })
+    L.draw({ sprite = "idibiks/pipe", x = origin_x, y = (origin_y + L.boss.y) / 2, sy = math.abs(origin_y - L.boss.y) / 64 })
+
+    L.draw(L.patch(L.boss, {sprite="idibiks/attack", sy=-1}))
     L.draw(L.patch(L.player, { debug = true }))
     L.draw(L.player)
     L.draw(ground_bot)
-    L.draw(ground_top)
+    -- L.draw(ground_top)
     L.draw_hud()
 end
 
