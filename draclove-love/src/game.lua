@@ -80,7 +80,7 @@ local function player_state_handler()
 end
 local function player_movement()
 	if not L.player.on_ground and not L.player.is_inair() then
-		L.player.sprite = "player/inair"
+		L.player.sprite = "player/in_air"
 		L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
 	end
 

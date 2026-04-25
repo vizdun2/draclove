@@ -26,6 +26,7 @@ function L1.loop(dt)
 	-- idle left
 	-- L.draw(L.patch(L.player, {debug=true, pr=-30, pl=-3}))
 	-- L.draw(L.patch(L.player, {debug=true, pt=-30}))
+
 	L.draw(L.patch(L.player, {debug=true}))
 	L.draw(L.player)
 

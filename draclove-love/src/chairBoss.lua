@@ -34,7 +34,7 @@ function CB.newBoss()
         lostWheelThisPhase = false,
         currentCooldown = 0,
         lastActionTime = 0,
-        lastAttack = "charge",
+        lastAttack = "stun",
         sprite = "chair/zidle_idle",
         sprite_t = 0.1,
         s = 7,
@@ -48,7 +48,8 @@ function CB.newBoss()
             s = 1.3,
             dead = false,
             sprite = nil,
-            parent = L.boss
+            parent = L.boss,
+            canBeHit = false
         },
         wheell = {
             tag = "wheel",
@@ -57,7 +58,8 @@ function CB.newBoss()
             s = 1.3,
             dead = false,
             sprite = nil,
-            parent = L.boss
+            parent = L.boss,
+            canBeHit = false
         },
         wheelr = {
             tag = "wheel",
@@ -66,7 +68,8 @@ function CB.newBoss()
             s = 1.3,
             dead = false,
             sprite = nil,
-            parent = L.boss
+            parent = L.boss,
+            canBeHit = false
         },
     }
 end
@@ -115,7 +118,16 @@ function CB.handleWallBounce(obj, xLimit, yLimit)
 
     return hasBounced
 end
-
+local function turnWheelsVulnerable()
+    for _, wheel in pairs(L.boss.wheels) do
+        wheel.canBeHit = true
+    end
+end
+local function turnWheelsInvulnerable()
+    for _, wheel in pairs(L.boss.wheels) do
+        wheel.canBeHit = false
+    end
+end
 
 local function enterAction(attack, cooldown)
     L.boss.lastAttack = attack
@@ -124,8 +136,11 @@ local function enterAction(attack, cooldown)
     L.boss.lastActionTime = L.time()
 end
 local function chargePhase()
-    enterAction("charge", 10)
+    enterAction("charge", 3)
     L.boss.chargingUp = true
+    L.boss.sprite = "chair/lift_off"
+    L.boss.r = (L.boss.x>0 and 90) or -90
+    turnWheelsVulnerable()
 end
 local function spawnProjectile(x, y, velX, velY)
     local proj = CB.newProjectile(x, y, velX, velY)
@@ -159,6 +174,7 @@ local function updateProjectiles(dt)
 end
 
 local function dashAttack()
+    turnWheelsInvulnerable()
     enterAction("dash", 4)
     if L.boss.x >= 0 then
         L.boss.dashingLeft = true
@@ -171,6 +187,8 @@ local function resetBoss()
     L.boss.currentCooldown = 0
     L.boss.chargingUp = false
     L.boss.lostWheelThisPhase = false
+    L.boss.sprite = "chair/zidle_idle"
+    L.boss.r = 0
 end
 local function handleDashMovement(dt)
     local moveDistance = L.boss.dashSpeed * dt
@@ -186,33 +204,33 @@ local function projectileAttack(player)
     local x, y = L.vec_to(player, L.boss)
     spawnProjectile(L.boss.x, L.boss.y, speed * -x, speed * -y)
 end
-
-
-local function stunPhase()
-    local stunCooldown = 3
-    enterAction("stun", stunCooldown)
+local function stunAttack()
+    enterAction("stun", 2)
+    L.boss.sprite = "chair/zidle_idle"
 end
+
 -- gets next attack -> the automat logic
 -- charge -> dash -> stun -> repeat
 local function getNextAttack(player)
-    if L.boss.currentCooldown <= 0 and L.boss.lastAttack == "charge" then
-        dashAttack()
-    elseif L.boss.currentCooldown <= 0 and L.boss.lastAttack == "stun" then
-        chargePhase()
-    elseif L.boss.currentCooldown <= 0 and L.boss.lastAttack == "dash" then
-        stunPhase()
+    if L.boss.currentCooldown <=0 then
+        
+    
+        if L.boss.lastAttack == "charge" then
+            dashAttack()
+        elseif L.boss.lastAttack == "stun" then
+            chargePhase()
+        elseif L.boss.lastAttack == "dash" then
+            stunAttack()
+        end
     end
 end
 -- (A and B) or C -> B if A true, otherwise C
 local function playerWheelCollision()
-    local w = {}
     for wheelKey, wheel in pairs(L.boss.wheels) do
-        table.insert(w, L.collide(L.player, wheel))
         if L.collide(L.player, wheel) then
             return wheelKey
         end
     end
-    L.print(w)
     return nil
 end
 local function loseAWheel(wheel)
@@ -232,10 +250,9 @@ local function loseAWheel(wheel)
 end
 function L.onCollisionWithPlayer()
     --L.printNoBs("Collided " .. L.boss.lastAttack .. " " .. tostring(L.boss.chargingUp) .. " " .. tostring(L.boss.lostWheelThisPhase))
-    if L.boss.chargingUp and L.player.punching and not L.boss.lostWheelThisPhase then
+    if  L.boss.chargingUp and L.player.is_punching() and not L.boss.lostWheelThisPhase then
         local colidedWheel = playerWheelCollision()
         if colidedWheel then
-            L.printNoBs("Wheel hit: " .. colidedWheel)
             loseAWheel(colidedWheel)
         end
     else
@@ -252,6 +269,7 @@ end
 -- called in each loop
 function CB.bossLoopLogic(dt, player)
     --L.printNoBs("iblis",L.boss.lastAttack)
+    playerWheelCollision()
     if L.pasttime(L.boss.lastActionTime + L.boss.currentCooldown) and L.boss.inAction then
         resetBoss()
     end
