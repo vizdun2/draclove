@@ -76,6 +76,7 @@ local function isGrounded()
     return false
 end
 function L1.loop(dt)
+	-- L.draw({x=0,y=0,sprite="scenes/2",s=9,sprite_t=0.1})
     if L.boss.dead and L.boss.deathCount == 1 then
         L.active_level_i = 2
 		L.reset()

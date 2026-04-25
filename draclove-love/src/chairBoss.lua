@@ -59,6 +59,7 @@ CB.oneliners = { { text = "I will crush you like a pringle", audio = "pringle.wa
 
 function CB.newBoss()
     L.boss = {
+        nextBossLineAt = 10 + math.random(5),
         tag = "boss",
         projectiles = {},
         wheels = {},
@@ -208,15 +209,16 @@ local function dashAttack()
 end
 
 local function bossLine()
-    L.print("Said boss line!")
-    local oneliner = CB.oneliners[math.random(4)]
-    oneliner.audio = "audio/chair/" .. oneliner.audio
-    oneliner.text = "Chair:" .. oneliner.text
-    L.push_dialogue(oneliner)
+    if L.boss.nextBossLineAt < L.time() then
+        local oneliner = L.patch(CB.oneliners[math.random(4)], {})
+        oneliner.audio = "audio/chair/" .. oneliner.audio
+        oneliner.text = "Chair:" .. oneliner.text
+        L.push_dialogue(oneliner)
+        L.boss.nextBossLineAt = L.boss.nextBossLineAt + 20 + math.random(10)
+    end
 end
 
 local function resetBoss()
-    bossLine()
     L.boss.inAction = false
     L.boss.currentCooldown = 0
     L.boss.chargingUp = false
@@ -355,6 +357,7 @@ end
 function CB.bossLoopLogic(dt, player)
     --L.printNoBs("iblis",L.boss.lastAttack)
     playerWheelCollision()
+    bossLine()
     if L.pasttime(L.boss.lastActionTime + L.boss.currentCooldown) and L.boss.inAction then
         resetBoss()
     end

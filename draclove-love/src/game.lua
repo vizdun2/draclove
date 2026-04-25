@@ -32,17 +32,16 @@ function L.pop_dialogue()
 end
 
 function L.play_dialogue()
-	if (L.dialogue_manager.next_dialogue_at == nil or L.time() < L.dialogue_manager.next_dialogue_at) and L.dialogue_manager.events.next_add_i > L.dialogue_manager.events.next_pop_i then
+	if (L.dialogue_manager.next_dialogue_at == nil or L.time() > L.dialogue_manager.next_dialogue_at) and L.dialogue_manager.events.next_add_i > L.dialogue_manager.events.next_pop_i  then
 		local dialogue = L.pop_dialogue()
-		print(dialogue)
 		if dialogue ~= nil then
 			if dialogue.audio ~= "" then
 				-- L.play(dialogue.audio)
 			end
-			local next_at = L.time() + string.len(dialogue.text) * 0.1
+			local next_at = L.time() + string.len(dialogue.text) * 0.5
 			table.insert(L.active_level().level.np_objects,
 				{
-					x = -5 * string.len(dialogue.text),
+					x = -10 * string.len(dialogue.text),
 					y = 310,
 					is_dead_at = next_at,
 					text =
