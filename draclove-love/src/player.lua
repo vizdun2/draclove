@@ -56,6 +56,8 @@ function Player.setup()
     end
 end
 
+
+
 -- Internal movement logic
 local function player_anime(sprite, t)
     L.player.sprite = sprite
