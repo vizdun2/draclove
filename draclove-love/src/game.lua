@@ -89,11 +89,26 @@ local function player_movement()
 		L.player.sprite = "player/inair"
 	end
 
+	local player_speed = L.player.speed
+	local jump_speed = -25
+
+	if L.key_down("space") then
+		if L.player.on_ground then
+			L.player.vel_y = jump_speed * movement_const
+			L.player.jumped_midair = false
+			-- reset this
+			L.key_pressed("space")
+		elseif L.key_pressed("space") and not L.player.jumped_midair then
+			L.player.vel_y = jump_speed * movement_const
+			L.player.jumped_midair = true
+			L.printNoBs("Double jumped")
+		end
+	end
+
 	if L.player.dodging or not L.player.on_ground then
 		return
 	end
-	local player_speed = L.player.speed
-	local jump_speed = -30
+	
 	if L.key_down("d") then
 		L.player.vel_x = player_speed * movement_const
 		L.player.sprite_t = 0.1
@@ -110,10 +125,6 @@ local function player_movement()
 			L.player.sprite_t = 0.1
 		end
 		L.player.vel_x = 0
-	end
-
-	if L.key_down("space") and L.player.on_ground then
-		L.player.vel_y = jump_speed * movement_const
 	end
 
 	if L.player.hurt_time and L.pasttime(L.player.hurt_time + 0.4) then
