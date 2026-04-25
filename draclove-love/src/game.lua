@@ -73,7 +73,7 @@ local function player_action()
 	elseif L.key_pressed("x") then
 		print("punched")
 		if L.player.on_ground then
-			player_anime("player/punch_from_idle", 0.1)
+			player_anime("player/punch_from_air", 0.1)
 		else
 			player_anime("player/punch_from_air", 0.1)
 		end
