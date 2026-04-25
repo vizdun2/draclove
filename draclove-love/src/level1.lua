@@ -36,7 +36,7 @@ local function isGrounded()
 	return false
 end
 function L1.loop(dt)
-	L.draw({ x = 0, y = 0, sprite = "scenes/1", s = 9, sprite_t = 0.1 })
+	L.draw({ x = 0, y = 0, sprite = "scenes/1", s = 6.66, sprite_t = 0.1 })
 	if L.boss.dead and L.boss.deathCount == 1 then
 		L.active_level_i = 2
 		L.reset()
@@ -78,7 +78,9 @@ function L1.loop(dt)
 		if L.collide(L.player, np_obj) and L.player.is_punching() then
 			L1.interact_with(np_obj)
 		end
-		--L.draw(np_obj)
+		if np_obj.tag ~= "ground" and np_obj.tag ~= "ceiling" then
+			L.draw(np_obj)
+		end
 	end
 	for _, projectile in pairs(L.boss.projectiles) do
 		for i, np_obj in ipairs(L1.level.np_objects) do
