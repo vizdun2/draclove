@@ -2,8 +2,9 @@ local L = require("lib/l")
 L.clear_pck_cache()
 local L1 = require("src/level1")
 local L2 = require("src/level2")
+local L3 = require("src/level3")
 -- as of now, all levels MUST have a .setup function and a .loop function
-L.levels = { L1, L2 }
+L.levels = { L1, L2, L3 }
 L.hunger_limit = 3
 
 
@@ -13,8 +14,6 @@ function L.setup()
 
 	-- dialogue event = {text="text", audio="path_to_my_audio_file"}
 	L.dialogue_manager = { events = { que = {}, next_pop_i = 1, next_add_i = 1 }, next_dialogue_at = nil }
-
-	L.push_dialogue({ text = "Hello idiot, how are you doing??", audio = nil })
 end
 
 function L.push_dialogue(dialogue_event)
@@ -32,21 +31,25 @@ function L.pop_dialogue()
 end
 
 function L.play_dialogue()
-	if L.dialogue_manager.next_dialogue_at == nil or L.time() < L.dialogue_manager.next_dialogue_at then
+	if (L.dialogue_manager.next_dialogue_at == nil or L.time() > L.dialogue_manager.next_dialogue_at) and L.dialogue_manager.events.next_add_i > L.dialogue_manager.events.next_pop_i  then
 		local dialogue = L.pop_dialogue()
 		if dialogue ~= nil then
-			-- L.play(dialogue.audio)
+			if dialogue.audio ~= "" then
+				-- L.play(dialogue.audio)
+			end
+			local next_at = L.time() + string.len(dialogue.text) * 0.5
 			table.insert(L.active_level().level.np_objects,
 				{
-					x = -5 * string.len(dialogue.text),
+					x = -10 * string.len(dialogue.text),
 					y = 310,
-					is_dead_at = L.time() + string.len(dialogue.text) * 0.05,
+					is_dead_at = next_at,
 					text =
 						dialogue.text,
 					tag = "text",
 					font = "pixelifysans",
 					font_size = 30
 				})
+			L.dialogue_manager.next_dialogue_at = next_at
 		end
 	end
 end
@@ -61,22 +64,23 @@ end
 function L.active_level()
 	return L.levels[L.active_level_i]
 end
+
 function L.getSafeCoordinates(obj, offsetX, offsetY)
-    -- Calculate the absolute limits
-    local limitX = L.width / 2
-    local limitY = L.height / 2
+	-- Calculate the absolute limits
+	local limitX = L.width / 2
+	local limitY = L.height / 2
 
-    -- Calculate the exact allowed boundaries
-    local maxX = limitX - offsetX
-    local minX = -limitX + offsetX
-    local maxY = limitY - offsetY
-    local minY = -limitY + offsetY
+	-- Calculate the exact allowed boundaries
+	local maxX = limitX - offsetX
+	local minX = -limitX + offsetX
+	local maxY = limitY - offsetY
+	local minY = -limitY + offsetY
 
-    -- Clamp the X and Y coordinates
-    local safeX = math.max(minX, math.min(maxX, obj.x))
-    local safeY = math.max(minY, math.min(maxY, obj.y))
+	-- Clamp the X and Y coordinates
+	local safeX = math.max(minX, math.min(maxX, obj.x))
+	local safeY = math.max(minY, math.min(maxY, obj.y))
 
-    return safeX, safeY
+	return safeX, safeY
 end
 
 function L.base_dialogue_loop()

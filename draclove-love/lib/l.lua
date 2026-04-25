@@ -488,6 +488,10 @@ function L.clear_pck_cache()
     end
 end
 
+function L.dist(a,b)
+    return math.sqrt((a.x - b.x)*(a.x - b.x) + (a.y - b.y)*(a.y - b.y)) 
+end
+
 local last_mod_time = nil
 function love.update(dt)
     L.dt = math.min(dt, 1 / 30)
