@@ -116,8 +116,8 @@ end
 
 function L.padding_adjusted(obj)
     local drawable, sw, sh, _r, _c = get_obj_sprite_stuffs(obj)
-    local x = (obj.x or 0) + ((obj.pr or 0) - (obj.pl or 0)) / 2
-    local y = (obj.y or 0) + ((obj.pb or 0) - (obj.pt or 0)) / 2
+    local x = (obj.x or 0) + ((obj.pr or 0) - (obj.pl or 0))
+    local y = (obj.y or 0) + ((obj.pb or 0) - (obj.pt or 0))
     local dx = (sw + (obj.pl or 0) + (obj.pr or 0)) / sw
     local dy = (sh + (obj.pt or 0) + (obj.pb or 0)) / sh
     return x, y, dx, dy

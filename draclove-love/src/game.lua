@@ -66,12 +66,15 @@ local function player_action()
 		L.player.sprite = "player/matrix"
 		L.player.sprite_t = 0.05
 		L.player.sprite_start = L.time()
+		L.player.pr, L.player.pl = 0, 0
+		L.player.pt = -30
 	end
 	if L.key_pressed("x") then
 		L.player.sprite = "player/punch"
 		L.player.punching = true
 		L.player.sprite_t = 0.05
 		L.player.sprite_start = L.time()
+		L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
 	end
 end
 
@@ -87,6 +90,7 @@ end
 local function player_movement()
 	if not L.player.on_ground and not L.player.punching then
 		L.player.sprite = "player/inair"
+		L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
 	end
 
 	local player_speed = L.player.speed
@@ -114,15 +118,20 @@ local function player_movement()
 		L.player.sprite_t = 0.1
 		L.player.sx = 1
 		L.player.sprite = "player/runnin"
+		L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
 	elseif L.key_down("a") then
 		L.player.vel_x = -player_speed * movement_const
 		L.player.sprite_t = 0.1
 		L.player.sx = -1
 		L.player.sprite = "player/runnin"
+		L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
 	else
 		if not L.player.punching then
 			L.player.sprite = "player/idle"
 			L.player.sprite_t = 0.1
+			L.player.pr = (L.player.sx == -1) and -30 or -3
+			L.player.pl = (L.player.sx == -1) and -3 or -30
+			L.player.pt = 0
 		end
 		L.player.vel_x = 0
 	end
@@ -132,6 +141,7 @@ local function player_movement()
 		L.player.c = "#FFFFFF"
 	elseif L.player.hurt_time then
 		L.player.sprite = "player/damage"
+		L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
 		L.player.c = "#FF4040"
 	end
 end
@@ -148,6 +158,12 @@ function level_1.loop(dt)
 	gravity.change_vel(L.player)
 	L.move_vel(L.player)
 	L.player.on_ground = gravity.ground_collide(L.player, ground)
+	-- idle right
+	-- L.draw(L.patch(L.player, {debug=true, pl=-30, pr=-3}))
+	-- idle left
+	-- L.draw(L.patch(L.player, {debug=true, pr=-30, pl=-3}))
+	-- L.draw(L.patch(L.player, {debug=true, pt=-30}))
+	L.draw(L.patch(L.player, {debug=true}))
 	L.draw(L.player)
 	L.draw(ground)
 
