@@ -1,9 +1,11 @@
 local L = require("lib/l")
+local gravity = require("src/gravity") 
 
 local Player = {}
 
 -----------------------------------------------------------------------------------------------------------------
 -- in your level file, do "local Player = require("src/player")" at the top and then call Player.setup() in setup
+-- lastly Player.loop() in loop, remove all previous player related loops!!!!
 -- override any function as you please like L.player.take_damage = function() ...
 -----------------------------------------------------------------------------------------------------------------
 
@@ -155,6 +157,7 @@ function Player.loop()
     player_state_handler()
     player_movement()
     L.move_vel(L.player)
+    gravity.change_vel(L.player)
     L.player.x, L.player.y = L.getSafeCoordinates(L.player, 15 * L.player.s, 15 * L.player.s) -- 15 is offset used for player too lazy to make it a constant
 end
 

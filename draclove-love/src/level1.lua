@@ -40,9 +40,8 @@ function L1.loop(dt)
         CB.resetBossHealth()
 		L.push_dialogue({text="Chair: That is what I call, regeneration!", audio="audio/chair/regeneration.wav"})
     end
-	L.base_player_loop()
+	Player.loop()
 	L.base_dialogue_loop()
-	gravity.change_vel(L.player)
 	
 
 	L.player.on_ground = isGrounded()
