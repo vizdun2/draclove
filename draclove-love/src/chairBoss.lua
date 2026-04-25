@@ -218,7 +218,7 @@ local function handleDashMovement(dt)
     end
 end
 local function projectileAttack(player, extrax, extray)
-    local speed = 200
+    local speed = 150
     local x, y = L.vec_to(player, L.boss) 
     spawnProjectile(L.boss.x, L.boss.y, speed * -x * extrax , speed * -y * extray)
 end
