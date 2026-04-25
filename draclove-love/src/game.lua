@@ -3,10 +3,12 @@ L.clear_pck_cache()
 local L1 = require("src/level1")
 local L2 = require("src/level2")
 local L3 = require("src/level3")
+local GO = require("src/ItsJoeverScreen")
 -- as of now, all levels MUST have a .setup function and a .loop function
-L.levels = { L1, L2, L3 }
+L.levels = { L1, L2, L3, GO }
 L.hunger_limit = 3
-
+L.failedLevel = nil
+L.gameOverScreen = L.table_length(L.levels)
 
 function L.setup()
 	L.active_level_i = L.active_level_i or 1

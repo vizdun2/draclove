@@ -49,8 +49,11 @@ function Player.setup()
         L.player.hurt_time = L.time()
         L.player.hunger = L.player.hunger + 1
         
-        if L.player.hunger > L.hunger_limit then
+        if L.player.hunger >= L.hunger_limit then
             L.player.dead = true
+            L.failedLevel = L.active_level_i
+            L.active_level_i = L.gameOverScreen
+		    L.reset()
         end
         return true
     end

@@ -3,7 +3,7 @@ local L = require("lib/l")
 local UI = {}
 
 -- Create the button with width and height
-function UI.newButton(xCord, yCord, btnWidth, btnHeight, tag, buttonList)
+function UI.newButton(xCord, yCord, btnWidth, btnHeight, tag, buttonList, sprite, scale)
     local newBtn = {
         x = xCord,
         y = yCord,
@@ -11,8 +11,17 @@ function UI.newButton(xCord, yCord, btnWidth, btnHeight, tag, buttonList)
         h = btnHeight,
         tag = tag,
         isHovered = false,
-        isPressed = false
+        isPressed = false,
+        sprite = sprite,
+        s = scale or 1
     }
+    
+    if newBtn.sprite then
+        local realWidth, realHeight = L.obj_dims(newBtn)
+        newBtn.w = realWidth
+        newBtn.h = realHeight
+    end
+
     table.insert(buttonList, newBtn)
     
     return newBtn
@@ -53,7 +62,11 @@ end
 -- debug draw
 function UI.render(buttonList)
     for _, btn in ipairs(buttonList) do
+        if not btn.sprite then
         L.draw(L.patch(btn, { debug = true })) 
+        else
+            L.draw(btn)
+        end
     end
 end
 
