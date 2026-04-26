@@ -14,6 +14,7 @@ function lvl4.setup()
         -- state_begin = L.time(),
         -- next_state = 1,
         hp = 20,
+        maxHp = 20,
         sprite = "mouse_dragon/idle",
         -- sprite = "mouse_dragon/dragon_flight",
         sprite_t = 0.1,
@@ -35,6 +36,22 @@ function lvl4.setup()
     L.player.x = -600
     L.weed = {}
     L.last_weed_gen = 0
+end
+
+local function draw_hud()
+    local totalIcons = math.ceil(L.boss.maxHp / 5)
+    
+    local activeIcons = math.ceil(L.boss.hp / 5)
+
+    for i = 1, totalIcons do
+        L.draw({ 
+            sprite = "mouse_dragon/trava",
+            s = 3, 
+            x = -600 + (i - 1) * 80, 
+            y = -L.height / 2 + 60, 
+            c = (i <= activeIcons and "FFFFFF" or "606060") 
+        })
+    end
 end
 
 local weed_speed = 500
@@ -145,6 +162,7 @@ function lvl4.loop(dt)
 
     Player.loop()
     L.draw(L.player)
+    draw_hud()
     L.draw_hud()
     return true
 end
