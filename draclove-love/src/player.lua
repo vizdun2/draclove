@@ -173,10 +173,29 @@ local function player_movement()
 	end
 end
 local function particleLoop()
-    for _,ptc in ipairs(L.player.particles) do
+    local currentTime = L.time()
+
+    for i = #L.player.particles, 1, -1 do
+        local ptc = L.player.particles[i]
+        
         L.draw(ptc)
-        if ptc.tag=="tempEffect" and L.sprite_finished(ptc) then
-            table.remove(L.player.particles, _)
+        
+        if ptc.tag == "tempEffect" then
+            if L.sprite_finished(ptc) then
+                table.remove(L.player.particles, i)
+            end
+            
+        elseif ptc.tag == "lingerEffect" then
+            
+            if not ptc.hasSwapped and L.sprite_finished(ptc) then
+                ptc.sprite = ptc.finalSprite
+                ptc.sprite_t = nil
+                ptc.hasSwapped = true
+            end
+            
+            if currentTime - ptc.startTime >= ptc.lifetime then
+                table.remove(L.player.particles, i)
+            end
         end
     end
 end

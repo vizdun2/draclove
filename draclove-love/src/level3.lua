@@ -214,7 +214,7 @@ function lvl3.loop(dt)
         L.boss.dead = true
     end
     if L.boss.dead == true then
-        L.nextLevel = L.gameOverScreen
+        L.nextLevel = 4
         L.active_level_i = L.transition
         L.reset()
     end

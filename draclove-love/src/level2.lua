@@ -15,9 +15,13 @@ local function newCrack()
         x=L.boss.x,
         y=L.boss.y+100,
         sprite="particles/crack",
-        tag="tempEffect",
+        finalSprite = "particles/crack_last",
+        tag="lingerEffect",
         sprite_t=0.3,
         sprite_start = L.time(),
+        startTime = L.time(),
+        hasSwapped = false,
+        lifetime=30,
         s=2,
     }
     table.insert(L.player.particles, crack)
