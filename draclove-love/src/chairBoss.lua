@@ -11,7 +11,7 @@ function CB.newProjectile(initialX, initialY, velX, velY)
         dead = false,
         sprite = "chair/wheel_projectile",
         sprite_t = 0.1,
-        lifeTime = 4,
+        lifeTime = 3,
         s = 6
     }
 end
@@ -159,7 +159,7 @@ local function enterAction(attack, cooldown)
     L.boss.lastActionTime = L.time()
 end
 local function chargePhase()
-    enterAction("charge", 2.5)
+    enterAction("charge", 3)
     L.boss.chargingUp = true
     L.boss.sprite = "chair/chair_lift_off"
     L.boss.r = (L.boss.x > 0 and 90) or -90
@@ -238,7 +238,7 @@ local function handleDashMovement(dt)
     end
 end
 local function projectileAttack(player, extrax, extray)
-    local speed = 150
+    local speed = 75
     local x, y = L.vec_to(player, L.boss)
     spawnProjectile(L.boss.x, L.boss.y, speed * -x * extrax, speed * -y * extray)
 end
