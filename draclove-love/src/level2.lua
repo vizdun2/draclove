@@ -312,7 +312,7 @@ function lvl2.loop(dt)
             L.boss.lastTimeAttacked = currentTime
         end
     else
-        if L.boss.hp <= 0 thens
+        if L.boss.hp <= 0 then
             L.boss.dead = true
         end
         if L.boss.dead == true then
