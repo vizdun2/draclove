@@ -12,11 +12,12 @@ L1.level = {
 L1.lines = {}
 L1.player_lines = { { text = "Stoner: She got a screw loose brother!", audio = "audio/chair/screw_loose.wav" }, {text="Stoner: That girl falling head over wheels for me!",audio=""}, {text="Stoner: I need to take the her wheels man, maybe they edible, like them gummy bears or smth"}}
 
-
+Audio_source = nil
 local player_next_line_offset = 10
 L1.player_next_line = player_next_line_offset + math.random(5)
 
 function L1.setup()
+	Audio_source = L.play("audio/soundtrack/first_ost_intro")
 	CB.newBoss()
 	Player.setup()
 	L.player.currentDJSprite="particles/1/jump_burst"
@@ -41,6 +42,11 @@ local function draw_hud()
 		L.draw({ sprite = "chair/wheel", s = 5, x = -600 + (i - 1) * 60, y = -L.height/2+30, c = (i <= L.boss.health and "FFFFFF" or "606060") })
 	end
 end
+
+function L1.start_playing_audio_loop() 
+
+end
+
 function L1.loop(dt)
 	L.draw({ x = 0, y = 0, sprite = "scenes/1", s = 6.66, sprite_t = 0.1 })
 	if L.boss.dead then
@@ -53,6 +59,10 @@ function L1.loop(dt)
 	Player.loop()
 	draw_hud()
 	L.base_dialogue_loop()
+
+	if Audio_source:isStopped() then
+		L.print("finished playing audio")
+	end
 
 	if L1.player_next_line < L.time() then
 		L.push_dialogue(L1.player_lines[math.random(#L1.player_lines)])
