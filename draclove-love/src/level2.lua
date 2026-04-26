@@ -164,8 +164,7 @@ local function spawnDebris(originX, originY)
             velY = speedY,
             bounces = 0,
             dead = false,
-            debug = false,
-            born = L.time(),
+            debug = false
         })
     end
 end
@@ -185,9 +184,6 @@ local function updateDebris(dt)
             if d.bounces == 0 then
                 d.velY = -d.velY * 0.5
                 d.bounces = 1
-                if L.pasttime(d.born + 0.75) then
-                    L.play("audio/stuff_break", 0.3)
-                end
             else
                 d.dead = true
             end
@@ -204,9 +200,6 @@ local function updateDebris(dt)
 
         if d.dead then
             table.remove(L.boss.debris, i)
-            if L.pasttime(d.born + 0.75) then
-                L.play("audio/stuff_break", 0.3)
-            end
         else
             L.draw(d)
         end
@@ -229,18 +222,6 @@ local function calculateJumpSpeed(currentX, minX, maxX, jumpRange)
     return minJump + ((maxJump - minJump) * progress)
 end
 local function bossStateMachine(dt)
-    if L.boss.state == "grounded" then
-        if L.time() - L.boss.timeHitGround >= L.boss.groundedDuration and (L.sprite_finished(L.boss) or not L.boss.already_got_hit)  then
-            L.boss.last_grounded = L.time()
-            L.boss.state = "rising"
-            L.boss.sprite = "door/door"
-            L.boss.velY = -L.boss.riseSpeed
-        end
-        return
-    else
-        L.boss.sprite = "door/door"
-    end
-
     if L.boss.state == "tracking" then
         updateBossDirection(L.boss, L.player)
         L.boss.x = L.boss.x + (L.boss.velX * dt)
@@ -272,6 +253,15 @@ local function bossStateMachine(dt)
             L.play("audio/door_slam", 0.4)
             L.boss.already_got_hit = false
         end
+    elseif L.boss.state == "grounded" then
+        L.draw({sprite="UI/hand",s = 0.15, x = L.boss.x, y = L.boss.y-150, r = 90, sprite_t = 0.08})
+
+        if L.time() - L.boss.timeHitGround >= L.boss.groundedDuration and L.sprite_finished(L.boss) then
+            L.boss.last_grounded = L.time()
+            L.boss.state = "rising"
+            L.boss.sprite = "door/door"
+            L.boss.velY = -L.boss.riseSpeed
+        end
     elseif L.boss.state == "rising" then
         L.boss.y = L.boss.y + (L.boss.velY * dt * 0.5)
         
@@ -291,7 +281,7 @@ end
 
 
 function lvl2.start_playing_audio_loop()
-    Audio_source = L.play("audio/soundtrack/second_ost_loop", 0.80)
+    Audio_source = L.play("audio/soundtrack/second_ost_loop", 1)
     Source_path = "audio/soundtrack/second_ost_loop"
     Audio_source:setLooping(true)
 end
