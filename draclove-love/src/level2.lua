@@ -262,7 +262,7 @@ local function bossStateMachine(dt)
             L.boss.already_got_hit = false
         end
     elseif L.boss.state == "grounded" then
-        L.draw({sprite="UI/hand",s = 0.15, x = L.boss.x, y = L.boss.y-150, r = 90, sprite_t = 0.08})
+        L.draw({sprite="UI/hand",s = 2, x = L.boss.x, y = L.boss.y-150, r = 90, sprite_t = 0.08})
 
         if L.time() - L.boss.timeHitGround >= L.boss.groundedDuration and L.sprite_finished(L.boss) then
             L.boss.last_grounded = L.time()

@@ -4,6 +4,7 @@ local Player = require("src/player")
 local lvl4 = {}
 
 function lvl4.setup()
+    L.audio_intro("audio/soundtrack/first_ost_intro")
     L.boss = {
         x = L.width / 2 - 150,
         y = 0,
@@ -56,7 +57,17 @@ end
 
 local weed_speed = 500
 
+function lvl4.start_audio_loop()
+    Source_path = "audio/soundtrack/first_ost_loop"
+    Audio_source = L.play(Source_path)
+    Audio_source:setLooping(true)
+end
+
 function lvl4.loop(dt)
+    if Source_path ~= "audio/soundtrack/first_ost_intro" and not Audio_source:isPlaying() then
+        lvl4.start_audio_loop()
+    end
+    
     if L.boss.hp <= 0 then
         L.boss.dead = true
     end

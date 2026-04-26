@@ -348,9 +348,9 @@ local function whatWheelToUse()
         end
     elseif L.boss.lastAttack == "charge" then
         if L.boss.sx < 0 then
-            L.draw({sprite = "UI/hand",x = L.boss.x - 300, y = L.boss.y, s = 0.15, sx = 1, sprite_t=0.1})
+            L.draw({sprite = "UI/hand",x = L.boss.x - 300, y = L.boss.y, s = 2, sx = 1, sprite_t=0.1})
         else
-            L.draw({sprite = "UI/hand",x = L.boss.x + 300, y = L.boss.y, s = 0.15, sx = -1, sprite_t = 0.1})
+            L.draw({sprite = "UI/hand",x = L.boss.x + 300, y = L.boss.y, s = 2, sx = -1, sprite_t = 0.1})
         end
         
         if L.boss.wheels.wheell then
