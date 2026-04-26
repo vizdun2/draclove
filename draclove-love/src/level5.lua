@@ -40,7 +40,7 @@ end
 
 function lvl5.setup()
     L.audio_intro("audio/soundtrack/menu_music")
-    L.player = { x = -500, y = 0, sprite = "chips/honza_citron_idle", s = 0.15, vel_x = 0, vel_y = 0, dash_mult = 1, last_used_dash = 0 }
+    L.player = { x = 0, y = 0, sprite = "chips/honza_citron_idle", s = 0.075, vel_x = 0, vel_y = 0, dash_mult = 1, last_used_dash = 0 }
     L.chips = { sprite = "chips/normal", s = 2, x = 500, y = 0, spawned = L.time() }
     L.chip_projs = {}
     L.deads = {}
@@ -65,7 +65,7 @@ end
 local move_const = 250
 local move_cap = 50
 local size = 0.2 * 1120
-local cam_bound_x, cam_bound_y = L.width / 2 * 0.09, L.height / 2 * 0.95
+local cam_bound_x, cam_bound_y = L.width / 2 - 290, L.height / 2 - 175
 
 local function move_player()
     if L.key_down("a") then L.player.vel_x = L.player.vel_x - move_const * L.dt end
@@ -128,8 +128,8 @@ function lvl5.loop(dt)
         L.chips.spawned = L.time()
     end
 
-    L.set_cam(L.clamp(-cam_bound_x, L.player.x / 8, cam_bound_x), L.clamp(-cam_bound_y, L.player.y / 8, cam_bound_y), 1.1)
-    L.draw({ sprite = "scenes/5", s = 6.66 })
+    L.set_cam(L.clamp(-cam_bound_x, L.player.x, cam_bound_x), L.clamp(-cam_bound_y, L.player.y, cam_bound_y), 2.2)
+    L.draw({ sprite = "scenes/5", s = 6.66 / 2, sprite_t=0.1 })
     -- L.draw(L.chips)
     L.draw(L.player)
 
