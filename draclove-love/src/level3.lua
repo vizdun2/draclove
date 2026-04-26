@@ -80,6 +80,7 @@ function lvl3.setup()
     L.spill = nil
     L.water_level = nil
     L.player.currentDJSprite="particles/3/jump_burst"
+    L.player.y = 220
 
     L.introAnimation = {
         x = 0,
