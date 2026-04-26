@@ -40,6 +40,7 @@ local states = {
 local boss_max_hp = 20
 
 function lvl3.setup()
+    L.audio_intro("audio/soundtrack/third_ost_intro")
     L.boss = {
         x = 0,
         y = -300,
@@ -211,7 +212,24 @@ local function spawn_scars()
     end
 end
 
+
+local audio_loop = "audio/soundtrack/third_ost_loop"
+local audio_intro = "audio/soundtrack/third_ost_intro"
+
+
+function lvl3.start_playing_audio_loop()
+    Audio_source = L.play(audio_loop, 1)
+    Source_path = audio_loop
+    Audio_source:setLooping(true)
+end
+
 function lvl3.loop(dt)
+
+    if Source_path == audio_intro and not Audio_source:isPlaying() then
+        Audio_source:stop()
+        lvl3.start_playing_audio_loop()
+    end
+
     if L.boss.hp <= 0 then
         L.boss.dead = true
     end

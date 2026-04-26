@@ -4,6 +4,9 @@ local OS = {}
 
 local buttons = {}
 function OS.setup()
+    if Audio_source ~=nil then
+        Audio_source:stop()
+    end
     buttons = {}
     UI.newButton(-L.width/2+100,-250,40,20,"restart", buttons, "UI/button_idle", 1.5, "UI/button_hover", "UI/button_click","UI/button_hovering","Restart",140)
     UI.newButton(-L.width/2+100,-130,40,20,"mainMenu", buttons, "UI/button_idle", 1.5, "UI/button_hover", "UI/button_click","UI/button_hovering","Main menu", 150)

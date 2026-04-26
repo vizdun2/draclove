@@ -7,20 +7,20 @@ L1 = {}
 
 L1.ground = { x = 0, y = 300, sx = 100, tag = "ground" }
 L1.level = {
-	np_objects = { L1.ground}, -- non player objects
+	np_objects = { L1.ground }, -- non player objects
 }
 L1.lines = {}
-L1.player_lines = { { text = "Stoner: She got a screw loose brother!", audio = "audio/chair/screw_loose.wav" }, {text="Stoner: That girl falling head over wheels for me!",audio=""}, {text="Stoner: I need to take the her wheels man, maybe they edible, like them gummy bears or smth"}}
+L1.player_lines = { { text = "Stoner: She got a screw loose brother!", audio = "audio/chair/screw_loose.wav" }, { text = "Stoner: That girl falling head over wheels for me!", audio = "" }, { text = "Stoner: I need to take the her wheels man, maybe they edible, like them gummy bears or smth" } }
 
-Audio_source = nil
 local player_next_line_offset = 10
+L1.finished_intro = false
 L1.player_next_line = player_next_line_offset + math.random(5)
 
 function L1.setup()
-	Audio_source = L.play("audio/soundtrack/first_ost_intro")
+	L.audio_intro("audio/soundtrack/first_ost_intro")
 	CB.newBoss()
 	Player.setup()
-	L.player.currentDJSprite="particles/1/jump_burst"
+	L.player.currentDJSprite = "particles/1/jump_burst"
 end
 
 function L1.interact_with(obj)
@@ -39,12 +39,14 @@ local function isGrounded()
 end
 local function draw_hud()
 	for i = 1, L.boss.maxHealth, 1 do
-		L.draw({ sprite = "chair/wheel", s = 5, x = -600 + (i - 1) * 60, y = -L.height/2+30, c = (i <= L.boss.health and "FFFFFF" or "606060") })
+		L.draw({ sprite = "chair/wheel", s = 5, x = -600 + (i - 1) * 60, y = -L.height / 2 + 30, c = (i <= L.boss.health and "FFFFFF" or "606060") })
 	end
 end
 
-function L1.start_playing_audio_loop() 
-
+function L1.start_playing_audio_loop()
+	Audio_source = L.play("audio/soundtrack/first_ost_loop",0.70)
+	Source_path = "audio/soundtrack/first_ost_loop"
+	Audio_source:setLooping(true)
 end
 
 function L1.loop(dt)
@@ -54,21 +56,21 @@ function L1.loop(dt)
 		L.active_level_i = L.transition
 		L.reset()
 		return
-	
 	end
 	Player.loop()
 	draw_hud()
 	L.base_dialogue_loop()
 
-	if Audio_source:isStopped() then
-		L.print("finished playing audio")
+	if Source_path == "audio/soundtrack/first_ost_intro" and not Audio_source:isPlaying() then
+		Audio_source:stop()
+		L1.start_playing_audio_loop()
 	end
 
 	if L1.player_next_line < L.time() then
 		L.push_dialogue(L1.player_lines[math.random(#L1.player_lines)])
-		L1.player_next_line  = L1.player_next_line + player_next_line_offset + math.random(10)
+		L1.player_next_line = L1.player_next_line + player_next_line_offset + math.random(10)
 	end
-	
+
 
 
 	L.player.on_ground = isGrounded() -- not IN PLAYER BECAUSE OF isGROUNDED BEING LOCAL

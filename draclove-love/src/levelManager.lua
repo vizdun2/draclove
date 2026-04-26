@@ -7,6 +7,9 @@ end
 
 function LM.startNewLevel(level)
     L.active_level = level
+    if Audio_source~=nil then
+        Audio_source:stop()
+    end
     if L.active_level.setup then
         L.active_level.setup()
     end

@@ -7,8 +7,8 @@ local groundBot = { x = 0, y = 300, sx = 100, tag = "ground" }
 
 local hoverY = 20
 local groundY = 220
-local scales = {1, 4}
-local jumpSpeeds = {-15, -35}
+local scales = { 1, 4 }
+local jumpSpeeds = { -15, -35 }
 
 local function newCrack()
     local crack = {
@@ -25,39 +25,40 @@ local function newCrack()
         s=2,
     }
     table.insert(L.player.particles, crack)
-    
 end
 
 local function newImpact()
     local impact = {
-        x=L.boss.x,
-        y=L.boss.y-230,
-        sprite="particles/impact",
-        tag="tempEffect",
-        sprite_t=0.1,
+        x = L.boss.x,
+        y = L.boss.y - 230,
+        sprite = "particles/impact",
+        tag = "tempEffect",
+        sprite_t = 0.1,
         sprite_start = L.time(),
-        s=8,
+        s = 8,
     }
     table.insert(L.player.particles, impact)
-    
 end
+
+
 function lvl2.setup()
+    L.audio_intro("audio/soundtrack/second_ost_intro")
     L.boss = {
         tag = "boss",
-        x = L.width/2-100,
-        y = hoverY+150,
+        x = L.width / 2 - 100,
+        y = hoverY + 150,
         s = 4.5,
         r = 0,
         hp = 5,
-        normalSprite = "door/door_normal", 
+        normalSprite = "door/door_normal",
         monsterSprite = "door/door",
         sprite = "door/door_normal",
         pl = -18,
         pr = -24,
         pb = -5,
         pt = -5,
-        dead=false,
-        
+        dead = false,
+
         state = "intro",
         attackCooldown = 2.3,
         lastTimeAttacked = 0,
@@ -82,9 +83,9 @@ function lvl2.setup()
         cracks = {},
     }
     Player.setup()
-    L.player.x=-L.width/2+100   
-    L.player.y=L.height/2-50
-    L.player.currentDJSprite="particles/2/jump_burst"
+    L.player.x = -L.width / 2 + 100
+    L.player.y = L.height / 2 - 50
+    L.player.currentDJSprite = "particles/2/jump_burst"
 end
 
 local function updateBossDirection(boss, player)
@@ -143,7 +144,7 @@ local function spawnDebris(originX, originY)
 
     for i = 1, 4 do
         local direction = (i % 2 == 0) and 1 or -1
-        
+
         local speedX = math.random(150, 400) * direction
         local speedY = -math.random(600, 1400)
 
@@ -178,7 +179,7 @@ local function updateDebris(dt)
         if d.y >= groundY then
             d.y = groundY
             if d.bounces == 0 then
-                d.velY = -d.velY * 0.5 
+                d.velY = -d.velY * 0.5
                 d.bounces = 1
             else
                 d.dead = true
@@ -187,10 +188,9 @@ local function updateDebris(dt)
 
         if not d.dead and L.collide(L.player, d) then
             if L.player.is_punching() then
-                
+
             else
                 L.player.take_damage()
-                
             end
             d.dead = true
         end
@@ -222,58 +222,67 @@ local function bossStateMachine(dt)
     if L.boss.state == "tracking" then
         updateBossDirection(L.boss, L.player)
         L.boss.x = L.boss.x + (L.boss.velX * dt)
-        
+
         if checkForSlam(L.boss, L.player) then
             L.boss.state = "prepSlam"
-            L.boss.velX = 0 
+            L.boss.velX = 0
         end
-
     elseif L.boss.state == "prepSlam" then
         L.boss.r = L.boss.r + (L.boss.rotationSpeed * dt)
-        
+
         if L.boss.r >= 90 then
             L.boss.r = 90
             L.boss.state = "slamming"
             L.boss.velY = L.boss.slamSpeed
         end
-
     elseif L.boss.state == "slamming" then
         L.boss.y = L.boss.y + (L.boss.velY * dt)
-        
-        if L.boss.y >= groundY then 
+
+        if L.boss.y >= groundY then
             L.boss.y = groundY
             L.boss.velY = 0
             L.boss.state = "grounded"
             L.boss.timeHitGround = L.time()
-            
+
             newImpact()
             newCrack()
             spawnDebris(L.boss.x, groundY)
         end
-
     elseif L.boss.state == "grounded" then
         if L.time() - L.boss.timeHitGround >= L.boss.groundedDuration then
             L.boss.state = "rising"
             L.boss.velY = -L.boss.riseSpeed
         end
-
     elseif L.boss.state == "rising" then
         L.boss.y = L.boss.y + (L.boss.velY * dt)
-        
+
         if L.boss.r > 0 then
             L.boss.r = math.max(0, L.boss.r - (L.boss.rotationSpeed * dt))
         end
-        
+
         if L.boss.y <= hoverY then
             L.boss.y = hoverY
             L.boss.velY = 0
             L.boss.r = 0
             L.boss.state = "tracking"
-            L.boss.lastTimeAttacked = L.time() 
+            L.boss.lastTimeAttacked = L.time()
         end
     end
 end
+
+
+function lvl2.start_playing_audio_loop()
+    Audio_source = L.play("audio/soundtrack/second_ost_loop", 0.80)
+    Source_path = "audio/soundtrack/second_ost_loop"
+    Audio_source:setLooping(true)
+end
+
 function lvl2.loop(dt)
+    if Source_path == "audio/soundtrack/second_ost_intro" and not Audio_source:isPlaying() then
+        Audio_source:stop()
+        print("Started playing sountrack")
+        lvl2.start_playing_audio_loop()
+    end
     if L.boss.state == "intro" then
         local currentTime = L.time()
         L.draw({ x = 0, y = 0, sprite = "scenes/1", s = 6.66 })
@@ -281,7 +290,6 @@ function lvl2.loop(dt)
         L.draw(L.player)
         L.draw_hud()
         if currentTime - L.boss.lastGlitchTime >= L.boss.nextGlitchDelay then
-            
             if L.boss.sprite == L.boss.normalSprite then
                 L.boss.sprite = L.boss.monsterSprite
             else
@@ -295,29 +303,28 @@ function lvl2.loop(dt)
         if currentTime - L.boss.introStartTime >= L.boss.introDuration then
             L.boss.state = "tracking"
             L.boss.sprite = L.boss.monsterSprite
-            
-            L.boss.y=hoverY
-            L.boss.lastTimeChangedDirection = currentTime 
+
+            L.boss.y = hoverY
+            L.boss.lastTimeChangedDirection = currentTime
             L.boss.lastTimeAttacked = currentTime
         end
-
     else
         if L.boss.hp <= 0 then
-            L.boss.dead=true
+            L.boss.dead = true
         end
-        if L.boss.dead==true then
-            L.nextLevel=3
-            L.active_level_i=L.transition
+        if L.boss.dead == true then
+            L.nextLevel = 3
+            L.active_level_i = L.transition
             L.reset()
         end
         L.draw({ x = 0, y = 0, sprite = "scenes/2", s = 6.66, sprite_t = 0.1 })
         local leftEdge = -L.width / 2
         local rightEdge = L.width / 2
-        
+
         -- Player Lerp Updates
         L.player.s = calculatePlayerScale(L.player.x, leftEdge, rightEdge, scales)
         Player.jump_speed = calculateJumpSpeed(L.player.x, leftEdge, rightEdge, jumpSpeeds)
-        
+
         Player.loop()
         L.player.on_ground = gravity.ground_collide(L.player, groundBot)
 
@@ -331,9 +338,9 @@ function lvl2.loop(dt)
                 L.player.vel_y = -2000
                 L.boss.hp = L.boss.hp - 1
                 L.print("Boss Hit! HP:", L.boss.hp)
-                
-                
-                
+
+
+
                 L.boss.state = "rising"
                 L.boss.velY = -L.boss.riseSpeed
             elseif L.boss.state ~= "grounded" then
