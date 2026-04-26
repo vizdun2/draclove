@@ -37,6 +37,8 @@ local states = {
     spilling_recover = 4,
 }
 
+local boss_max_hp = 20
+
 function lvl3.setup()
     L.boss = {
         x = 0,
@@ -201,7 +203,7 @@ local function spawn_scars()
     local x_ratio = x_size / sum
     local rn = L.time()
 
-    for _ = 1, 1 do
+    for _ = 1, boss_max_hp - L.boss.hp do
         local on_x = math.random() <= x_ratio
         local x, y = on_x and math.random() * L.boss.x or 0,
             on_x and L.boss.y or math.random() * (L.boss.y - origin_y) + origin_y
@@ -291,7 +293,10 @@ function lvl3.loop(dt)
     end
     Player.loop()
 
-    for _i, scar in ipairs(L.scars) do
+    for _i, scar in pairs(L.scars) do
+        L.print(scar)
+        scar.x = L.boss.x < 0 and math.max(scar.x, L.boss.x) or math.min(scar.x, L.boss.x)
+        scar.y = L.boss.y < 0 and math.max(scar.y, L.boss.y) or math.min(scar.y, L.boss.y)
         L.draw(scar)
     end
 

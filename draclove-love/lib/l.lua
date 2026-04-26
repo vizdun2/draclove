@@ -105,6 +105,7 @@ function L.play(audio_name, volume)
         local source = L.assets.sounds[audio_name]:clone()
         source:setVolume(volume or 1)
         source:play()
+        return source
     end
 end
 
