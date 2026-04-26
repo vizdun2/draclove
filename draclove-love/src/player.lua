@@ -12,6 +12,7 @@ local dodge_cooldown = 0.5
 local base_jump_speed = -25
 
 local Player = {}
+Player.jump_speed = base_jump_speed -- DO NOT MOVE, IT *WILL* BREAK SHIT
 
 
 local function newDJEffect(sprite)
@@ -30,7 +31,6 @@ end
 
 -- Base Setup
 function Player.setup()
-    Player.jump_speed = base_jump_speed
     L.player = {
         x = 0, y = 0, speed = 15, s = 2,
         vel_x = 0, vel_y = 0, hunger = 0,
@@ -40,7 +40,6 @@ function Player.setup()
         timeStopped = false,
         space = false,
     }
-    Player.jump_speed=base_jump_speed
     function L.player.is_dodging()
         return L.player.sprite == "player/matrix_from_air" or L.player.sprite =="player/matrix_from_idle"
     end
@@ -124,7 +123,7 @@ local function player_movement()
 	local player_speed = L.player.speed
 
 
-	if L.key_down("space") then
+	if L.key_down("space") and not L.player.jump_disabled then
 		if L.player.on_ground and not L.player.is_jump_from_idle() then
 			L.player.jumped_midair = false
 			L.player.vel_y = Player.jump_speed * movement_const
@@ -139,17 +138,17 @@ local function player_movement()
 	end
 
 
-	if L.key_down("d") then
+	if (not L.player.roofwalk and L.key_down("d")) or (L.player.roofwalk and L.key_down("a")) then
 		L.player.vel_x = player_speed * movement_const
-		L.player.sx = 1
+		L.player.sx = not L.player.roofwalk and 1 or -1
 		if not L.player.is_jump_from_idle() and L.player.on_ground and not L.player.is_dodging() and not L.player.is_punching() then
 			L.player.sprite_t = 0.1
 			L.player.sprite = "player/runnin"
 			L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
 		end
-	elseif L.key_down("a") then
+	elseif (not L.player.roofwalk and L.key_down("a")) or (L.player.roofwalk and L.key_down("d")) then
 		L.player.vel_x = -player_speed * movement_const
-		L.player.sx = -1
+		L.player.sx = not L.player.roofwalk and -1 or 1
 		if not L.player.is_jump_from_idle() and L.player.on_ground and not L.player.is_dodging() and not L.player.is_punching() then
 			L.player.sprite_t = 0.1
 			L.player.sprite = "player/runnin"
@@ -174,6 +173,12 @@ local function player_movement()
 		-- L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
 		L.player.c = "#FF4040"
 	end
+
+    if L.player.roofwalk then
+        L.player.sy = -1
+    else
+        L.player.sy = 1
+    end
 end
 local function particleLoop()
     local currentTime = L.time()
@@ -208,9 +213,19 @@ function Player.loop()
     player_state_handler()
     player_movement()
     L.move_vel(L.player)
-    gravity.change_vel(L.player)
+    if not L.player.roofwalk and not L.player.off_move then
+        gravity.change_vel(L.player)
+    end
     particleLoop()
-    L.player.x, L.player.y = L.getSafeCoordinates(L.player, 15 * L.player.s, 15 * L.player.s) -- 15 is offset used for player too lazy to make it a constant
+    if L.player.off_move then
+        if L.player.x < -610 then
+            L.player.roofwalk = not L.player.roofwalk
+            L.player.y = not L.player.roofwalk and 220 or -L.height / 2 + 32 * L.player.s
+        end
+        L.player.x = L.clamp(-610, L.player.x, 610)
+    else
+        L.player.x, L.player.y = L.getSafeCoordinates(L.player, 15 * L.player.s, 15 * L.player.s) -- 15 is offset used for player too lazy to make it a constant
+    end
 end
 
 return Player
