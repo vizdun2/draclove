@@ -5,12 +5,20 @@ local BS = {}
 local buttons = {}
 
 local cutsceneMap = {
-    [1] = "assets/video/video.ogv", -- before initial level
+    [1] = nil, -- before initial level
     [2] = nil,
     [3] = nil,
     [4] = nil,
     [5] = nil,
     [6] = nil, -- after last elvel
+}
+local voiclineMap = {
+    [1] = "You, little bitchboy ARE TRIPPING BALLS", -- before initial level
+    [2] = "good work. Munchies are far away still.",
+    [3] = "Did you relly just struggle to open the door?? Idiot.",
+    [4] = "You, little bitchboy ARE TRIPPING BALLS",
+    [5] = "You, little bitchboy ARE TRIPPING BALLS",
+    [6] = "Lemon.", -- after last elvel
 }
 
 function BS.setup()
@@ -45,7 +53,7 @@ function BS.loop()
     
     UI.update(buttons)
     L.draw({x=0,y=0, sprite="UI/background", rainbow=true, s=6.66})
-    L.draw({c="#000000", text="You, little bitchboy ARE TRIPPING BALLS", font="pixelifysans", font_size=38, align="lm", x=-L.width/2+100, y=-L.height/2+200})
+    L.draw({c="#000000", text=voiclineMap[L.nextLevel], font="pixelifysans", font_size=38, align="lm", x=-L.width/2+100, y=-L.height/2+200})
     
     if UI.isButtonPressed("goNext", buttons) then
         L.active_level_i = L.nextLevel or 1
