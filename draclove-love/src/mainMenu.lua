@@ -7,9 +7,12 @@ function MM.setup()
     buttons = {}
     if Audio_source ~= nil and Source_path ~= "audio/soundtrack/menu_music" then
         Audio_source:stop()
+        Source_path = "audio/soundtrack/menu_music"
+        Audio_source = L.play(Source_path, 0.7)
+        Audio_source:setLooping(true)
     elseif Audio_source == nil then
         Source_path = "audio/soundtrack/menu_music"
-        Audio_source = L.play(Source_path,0.7)
+        Audio_source = L.play(Source_path, 0.7)
         Audio_source:setLooping(true)
     end
 
