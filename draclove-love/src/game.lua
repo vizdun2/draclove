@@ -37,6 +37,36 @@ function L.setup()
 	-- dialogue event = {text="text", audio="path_to_my_audio_file"}
 	L.dialogue_manager = { events = { que = {}, next_pop_i = 1, next_add_i = 1 }, next_dialogue_at = nil }
 end
+
+function L.drawVerticalHealthBar(boss, posX, posY, fillSprite, borderSprite, baseScale)
+    baseScale = baseScale or 1
+
+    local healthPercent = math.max(0, math.min(1, boss.hp / boss.maxHp))
+
+    local fillBar = {
+        x = posX,
+        y = posY,
+        sprite = fillSprite,
+        s = baseScale,
+        sy = healthPercent
+    }
+    local dummyMeasurement = { sprite = fillSprite, s = baseScale, sy = 1 }
+    local _, fullHeight = L.obj_dims(dummyMeasurement)
+
+    local missingHeight = (fullHeight+20) * (1 - healthPercent)
+    fillBar.y = fillBar.y + (missingHeight / 2)
+
+    local borderBar = {
+        x = posX,
+        y = posY,
+        sprite = borderSprite,
+        s = baseScale,
+        sy = 1
+    }
+
+    L.draw(fillBar)
+    L.draw(borderBar)
+end
 function L.spawnDeathDebris(originX, originY, spriteList, scale)
     local pieceSprites = spriteList
 

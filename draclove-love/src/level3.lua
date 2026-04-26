@@ -57,6 +57,7 @@ function lvl3.setup()
         -- state_begin = L.time(),
         -- next_state = 1,
         hp = 25,
+        maxHp=25,
         sprite = "idibiks/idle",
         sprite_t = 0.1,
         pl = -20,
@@ -336,7 +337,11 @@ function lvl3.start_playing_audio_loop()
     Source_path = audio_loop
     Audio_source:setLooping(true)
 end
-
+local function draw_hud()
+	for i = 1, L.boss.maxHp/5, 1 do
+		L.draw({ sprite = "chair/wheel", s = 5, x = -600 + (i - 1) * 60, y = -L.height / 2 + 30, c = (i <= L.boss.hp/5 and "FFFFFF" or "606060") })
+	end
+end
 function lvl3.loop(dt)
 
     if Source_path == audio_intro and not Audio_source:isPlaying() then
@@ -435,6 +440,8 @@ function lvl3.loop(dt)
     end
 
     L.draw({ sprite = "scenes/3", s = 6.66, sprite_t = 0.1 })
+    local barX = -L.width / 2 + 150
+    local barY = -200
 
     for _i, pipe in ipairs(pipes) do
         L.draw(pipe)
@@ -456,7 +463,7 @@ function lvl3.loop(dt)
 
     --L.draw(L.patch(L.player, { debug = true }))
     L.draw(L.player)
-
+    draw_hud()
     if L.spill then
         L.draw(L.spill)
     end

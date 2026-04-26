@@ -50,6 +50,7 @@ function lvl2.setup()
         s = 4.5,
         r = 0,
         hp = 5,
+        maxHp = 5,
         normalSprite = "door/door_normal",
         monsterSprite = "door/door",
         sprite = "door/door_normal",
@@ -282,7 +283,11 @@ function lvl2.start_playing_audio_loop()
     Source_path = "audio/soundtrack/second_ost_loop"
     Audio_source:setLooping(true)
 end
-
+local function draw_hud()
+	for i = 1, L.boss.maxHp, 1 do
+		L.draw({ sprite = "chair/wheel", s = 5, x = -600 + (i - 1) * 60, y = -L.height / 2 + 30, c = (i <= L.boss.hp and "FFFFFF" or "606060") })
+	end
+end
 function lvl2.loop(dt)
     if Source_path == "audio/soundtrack/second_ost_intro" and not Audio_source:isPlaying() then
         Audio_source:stop()
@@ -334,6 +339,7 @@ function lvl2.loop(dt)
 
         updateDebris(dt)
         --L.draw(L.patch(L.boss, {debug=true}))
+        draw_hud()
         L.draw(L.boss)
         L.draw(L.player)
         --L.draw(groundBot)
