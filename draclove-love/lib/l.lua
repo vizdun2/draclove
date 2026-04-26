@@ -20,6 +20,7 @@ local L = {
     next_uid = 1,
     stopped_since = nil,
     skipped_secs = 0,
+    debug = true,
 }
 
 local square_size = 32
@@ -37,6 +38,7 @@ local function load_assets_rec(dir)
         if love.filesystem.getInfo(dir .. filename).type == "directory" then
             load_assets_rec(dir .. filename .. "/")
         else
+            L.print("Started loading", filename)
             local texture_name, texture_row, texture_col = filename:match("^(.*)_([0-9]+)x([0-9]+)%.png$")
             local audio_name = filename:match("^(.*)%.mp3$") or filename:match("^(.*)%.wav$")
             local font_name = filename:match("^(.*)%.ttf$")
@@ -65,6 +67,7 @@ local function load_assets_rec(dir)
             elseif font_name then
                 L.assets.fonts[dirwithoutassets .. font_name] = filename
             end
+            L.print("Finished loading", filename)
         end
     end
 end
@@ -233,6 +236,10 @@ end
 function L.draw(obj)
     local r, g, b, a = hex_to_rgb(obj.c or "#ffffff")
     love.graphics.setColor(r, g, b, a)
+
+    if not L.debug then
+        obj.debug = nil
+    end
 
     if obj.text then
         local font = lazy_get_font(obj.font, obj.font_size or 13)
@@ -500,6 +507,10 @@ function L.printF(f, g, ...)
 end
 
 function L.print(...)
+    if not L.debug then
+        return
+    end
+
     return L.printF(function(v)
         return inspect(v, { newline = "", indent = "" })
     end, function(v)
@@ -508,6 +519,10 @@ function L.print(...)
 end
 
 function L.printNoBs(...)
+    if not L.debug then
+        return
+    end
+
     return L.printF(function(v)
         return v
     end, function(v)
