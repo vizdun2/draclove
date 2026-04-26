@@ -55,7 +55,7 @@ local function draw_hud()
 end
 
 function L1.start_playing_audio_loop()
-	Audio_source = L.play("audio/soundtrack/first_ost_loop",0.70)
+	Audio_source = L.play("audio/soundtrack/first_ost_loop",0.85)
 	Source_path = "audio/soundtrack/first_ost_loop"
 	Audio_source:setLooping(true)
 end
