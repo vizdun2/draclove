@@ -28,7 +28,11 @@ function L1.setup()
         sprite_start = L.time(),
 		sx = -1,
     }
+	L.player.x = -L.width / 2 + 150
+	L.player.y = 220
+	L1.finishedEnd = false
 end
+
 
 function L1.interact_with(obj)
 	-- for the given tag of obj, run the specific interaction
@@ -116,16 +120,25 @@ function L1.loop(dt)
 end
 
 function L1.startScene()
+	L.draw({ x = 0, y = 0, sprite = "scenes/1", s = 6.66, sprite_t = 0.1 })
     if L.sprite_finished(L.introAnimation) then
         return false
     end
 	L.draw(L.introAnimation)
+	L.draw(L.player)
 	return true
 end
-function L1.endScene()
-	L.nextLevel = 2
-	L.active_level_i = L.transition
-	L.reset()
-    return false
+function L1.endScene(dt)
+	L.draw({ x = 0, y = 0, sprite = "scenes/1", s = 6.66, sprite_t = 0.1 })
+	Player.physicsOnlyLoop()
+	L.draw(L.player)
+	L.updateDeathDebris(dt, 220)
+	if L.time() - L.boss.timeOfDeath >= 3.5 then
+		L.nextLevel = 2
+		L.active_level_i = L.transition
+		L.reset()
+		return false
+	end
+	
 end
 return L1

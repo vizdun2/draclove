@@ -42,6 +42,9 @@ local states = {
 local boss_max_hp = 20
 
 function lvl3.setup()
+    lvl3.timer = nil
+    lvl3.cooldwon = 2.5
+    lvl3.intro = true
     L.audio_intro("audio/soundtrack/third_ost_intro")
     L.boss = {
         x = 0,
@@ -77,6 +80,16 @@ function lvl3.setup()
     L.spill = nil
     L.water_level = nil
     L.player.currentDJSprite="particles/3/jump_burst"
+
+    L.introAnimation = {
+        x = 0,
+        y = 200,
+        s = L.boss.s,
+        sprite = "idibiks/zachod_transform",
+        sprite_t = 0.12,
+        sprite_start = L.time(),
+		sx = -1,
+    }
 end
 
 local toilet_speed = 200
@@ -409,7 +422,7 @@ function lvl3.loop(dt)
         spawn_scars()
     end
 
-    L.draw({ sprite = "scenes/3", s = 6.66 })
+    L.draw({ sprite = "scenes/3", s = 6.66, sprite_t = 0.1 })
 
     for _i, pipe in ipairs(pipes) do
         L.draw(pipe)
@@ -445,8 +458,26 @@ function lvl3.loop(dt)
     L.draw_hud()
     return true
 end
+
 function lvl3.startScene()
-    return false
+    if not lvl3.intro then
+        return false
+    end
+	L.draw({ x = 0, y = 0, sprite = "scenes/3", s = 6.66 })
+    if L.sprite_finished(L.introAnimation) and lvl3.timer ~= nil then
+        L.draw({ x = 0, y = 0, sprite = "scenes/blackout", s = 6.66})
+        if L.time() > lvl3.timer + lvl3.cooldwon then
+        lvl3.intro = false
+        end
+    end
+    if L.sprite_finished(L.introAnimation) and lvl3.timer == nil then
+        lvl3.timer = L.time()
+    end
+    if not L.sprite_finished(L.introAnimation) then
+        L.draw(L.introAnimation)
+    end
+	
+	return true
 end
 function lvl3.endScene()
     L.nextLevel = 4

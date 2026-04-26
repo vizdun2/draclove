@@ -207,6 +207,33 @@ local function particleLoop()
         end
     end
 end
+function Player.physicsOnlyLoop()
+    L.player.vel_x = 0
+    
+    if not L.player.on_ground then
+        L.player.sprite = "player/in_air"
+    else
+        L.player.sprite = "player/idle"
+    end
+
+    L.move_vel(L.player)
+    
+    if not L.player.roofwalk and not L.player.off_move then
+        gravity.change_vel(L.player)
+    end
+    
+    particleLoop()
+    
+    if L.player.off_move then
+        if L.player.x < -610 then
+            L.player.roofwalk = not L.player.roofwalk
+            L.player.y = not L.player.roofwalk and 220 or -L.height / 2 + 32 * L.player.s
+        end
+        L.player.x = L.clamp(-610, L.player.x, 610)
+    else
+        L.player.x, L.player.y = L.getSafeCoordinates(L.player, 15 * L.player.s, 15 * L.player.s)
+    end
+end
 -- The main loop
 function Player.loop()
     player_action()

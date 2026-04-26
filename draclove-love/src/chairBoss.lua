@@ -11,7 +11,7 @@ function CB.newProjectile(initialX, initialY, velX, velY)
         dead = false,
         sprite = "chair/wheel_projectile",
         sprite_t = 0.1,
-        lifeTime = 3,
+        lifeTime = 4,
         s = 6
     }
 end
@@ -88,8 +88,9 @@ function CB.newBoss()
         deathCount = 0,
         health=3,
         maxHealth=3,
+        timeOfDeath = nil
     }
-
+    CB.bossPieces = {"destroyed/zidle1","destroyed/zidle2","destroyed/zidle3"}
     CB.resetBossHealth()
 end
 
@@ -241,7 +242,7 @@ local function handleDashMovement(dt)
     end
 end
 local function projectileAttack(player, extrax, extray)
-    local speed = 75
+    local speed = 150
     local x, y = L.vec_to(player, L.boss)
     spawnProjectile(L.boss.x, L.boss.y, speed * -x * extrax, speed * -y * extray)
 end
@@ -308,6 +309,8 @@ local function loseAWheel(wheel)
 		-- L.push_dialogue({ text = "Chair: That is what I call, regeneration!", audio = "audio/chair/regeneration.wav" })
     end
     if L.boss.health <= 0 then
+        L.spawnDeathDebris(L.boss.x, L.boss.y, CB.bossPieces,6 )
+        L.boss.timeOfDeath = L.time()
         L.boss.dead = true
         return
     end

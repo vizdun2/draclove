@@ -88,6 +88,7 @@ function lvl2.setup()
     L.player.x = -L.width / 2 + 100
     L.player.y = L.height / 2 - 50
     L.player.currentDJSprite = "particles/2/jump_burst"
+    lvl2.bossPieces = {"destroyed/door1", "destroyed/door2", "destroyed/door3"}
 end
 
 local function updateBossDirection(boss, player)
@@ -287,12 +288,12 @@ function lvl2.loop(dt)
         lvl2.start_playing_audio_loop()
     end
         if L.boss.hp <= 0 then
+            L.spawnDeathDebris(L.boss.x, L.boss.y, lvl2.bossPieces, 4)
+            L.boss.timeOfDeath = L.time()
             L.boss.dead = true
         end
         if L.boss.dead == true then
-            L.nextLevel = 3
-            L.active_level_i = L.transition
-            L.reset()
+            return false
         end
         L.draw({ x = 0, y = 0, sprite = "scenes/2", s = 6.66, sprite_t = 0.1 })
         local leftEdge = -L.width / 2
@@ -364,7 +365,17 @@ function lvl2.startScene()
     end
     return false
 end
-function lvl2.endScene()
-    return false
+function lvl2.endScene(dt)
+	L.draw({ x = 0, y = 0, sprite = "scenes/2", s = 6.66, sprite_t = 0.1 })
+	L.draw(L.player)
+    Player.physicsOnlyLoop()
+	L.updateDeathDebris(dt, 220)
+	if L.time() - L.boss.timeOfDeath >= 3.5 then
+		L.nextLevel = 3
+		L.active_level_i = L.transition
+		L.reset()
+		return false
+	end
+	return true
 end
 return lvl2

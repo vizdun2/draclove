@@ -32,12 +32,67 @@ end
 function L.setup()
 	L.active_level_i = L.active_level_i or L.mainMenu
 	L.active_level().setup()
-
+	L.deathDebris = {}
 	L.scenePhase = "start"
 	-- dialogue event = {text="text", audio="path_to_my_audio_file"}
 	L.dialogue_manager = { events = { que = {}, next_pop_i = 1, next_add_i = 1 }, next_dialogue_at = nil }
 end
+function L.spawnDeathDebris(originX, originY, spriteList, scale)
+    local pieceSprites = spriteList
 
+
+    for i = 1, L.table_length(pieceSprites) do
+        local speedX = math.random(-600, 600)
+        local speedY = -math.random(600, 1200)
+
+        table.insert(L.deathDebris, {
+            x = originX,
+            y = originY,
+            sx = 1,
+            sy = 1,
+            s = scale,
+            sprite = pieceSprites[i],
+            
+            velX = speedX,
+            velY = speedY,
+            bounces = 0,
+            
+            r = math.random(0, 360),
+            rotSpeed = math.random(-400, 400) 
+        })
+    end
+end
+
+function L.updateDeathDebris(dt, groundLevelY)
+    local gravityPull = 1500
+
+    for i = #L.deathDebris, 1, -1 do
+        local d = L.deathDebris[i]
+
+        d.velY = d.velY + (gravityPull * dt)
+        d.x = d.x + (d.velX * dt)
+        d.y = d.y + (d.velY * dt)
+        d.r = d.r + (d.rotSpeed * dt)
+
+        if d.y >= groundLevelY then
+            d.y = groundLevelY
+            
+            if d.bounces < 2 then
+                d.velY = -d.velY * 0.35 
+                d.velX = d.velX * 0.5 
+                d.rotSpeed = d.rotSpeed * 0.5 
+                d.bounces = d.bounces + 1
+            else
+                d.velX = 0
+                d.velY = 0
+                d.rotSpeed = 0
+            end
+        end
+
+        -- 3. Draw the piece
+        L.draw(d)
+    end
+end
 local last_dialogue_active_uid = nil
 
 function L.push_dialogue(dialogue_event)
@@ -138,12 +193,6 @@ function L.draw_hud()
 end
 
 function L.render(dt)
-	for i = 1, #L.levels do
-		if L.key_released(tostring(i)) then
-			L.active_level_i = i
-			L.reset()
-		end
-	end
 	if L.player then
 		pauseUnpause()
 	end
@@ -167,8 +216,14 @@ function L.render(dt)
 	    
 	    if L.scenePhase == "end"then
 	        if currentLevel.endScene then
-	            currentLevel.endScene()
+	            currentLevel.endScene(dt)
 	        end
 	    end
+	end
+	for i = 1, #L.levels do
+		if L.key_released(tostring(i)) then
+			L.active_level_i = i
+			L.reset()
+		end
 	end
 end
