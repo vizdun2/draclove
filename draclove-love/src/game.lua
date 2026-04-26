@@ -118,6 +118,7 @@ local function pauseUnpause()
             L.player.timeStopped = false
         else
             L.stop_time()
+			L.pauseScreen.setup()
             L.player.timeStopped = true
         end
     end
