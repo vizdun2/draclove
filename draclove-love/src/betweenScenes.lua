@@ -12,7 +12,7 @@ function BS.loop()
     
     UI.update(buttons)
     L.draw({x=0,y=0, sprite="UI/background", rainbow=true, s=6.66})
-    L.draw({c="#000000", text="You, little bitchboy ARE TRIPPING BALLS", font="pixelifysans", font_size=38, align="lm", x=-L.width/2+100, y=-L.height/2+200})
+    -- L.draw({c="#000000", text="You, little bitchboy ARE TRIPPING BALLS", font="pixelifysans", font_size=38, align="lm", x=-L.width/2+100, y=-L.height/2+200})
     if UI.isButtonPressed("goNext", buttons) then
         L.active_level_i = L.nextLevel or 1
         L.reset()
