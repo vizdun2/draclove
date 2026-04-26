@@ -17,7 +17,8 @@ function OS.loop()
     L.draw({x=0,y=0, sprite="UI/background", rainbow=true, s=6.66})
     L.draw({c="#000000", text="Game Over", font="pixelifysans", font_size=100, align="mm", x=L.width/2-300, y=-L.height/2+80})
     if UI.isButtonPressed("restart", buttons) then
-        L.active_level_i = L.failedLevel or 1
+        L.nextLevel = L.failedLevel or 1
+		L.active_level_i = L.transition
         L.reset()
         return true
     end

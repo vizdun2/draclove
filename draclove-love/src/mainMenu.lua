@@ -45,12 +45,14 @@ function MM.loop()
         y = -L.height / 2 + 80
     })
     if UI.isButtonPressed("startGame", buttons) then
-        L.active_level_i = 1
+        L.nextLevel = 1
+		L.active_level_i = L.transition
         L.reset()
         return true
     end
     if UI.isButtonPressed("continueGame", buttons) then
-        L.active_level_i = L.failedLevel or 1
+        L.nextLevel = L.failedLevel or 1
+		L.active_level_i = L.transition
         L.reset()
         return true
     end

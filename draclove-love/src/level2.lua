@@ -295,7 +295,7 @@ function lvl2.start_playing_audio_loop()
 end
 local function draw_hud()
 	for i = 1, L.boss.maxHp, 1 do
-		L.draw({ sprite = "UI/door_icon", s = 5, x = -600 + (i - 1) * 60, y = -L.height / 2 + 30, c = (i <= L.boss.hp and "FFFFFF" or "606060") })
+		L.draw({ sprite = "UI/door_icon", s = 1, x = -600 + (i - 1) * 60, y = -L.height / 2 + 30, c = (i <= L.boss.hp and "FFFFFF" or "606060") })
 	end
 end
 function lvl2.loop(dt)

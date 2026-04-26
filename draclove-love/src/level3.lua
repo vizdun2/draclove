@@ -512,8 +512,41 @@ function lvl3.startScene()
 	return true
 end
 function lvl3.endScene()
-    L.nextLevel = 4
-    L.active_level_i = L.transition
-    L.reset()
+    if not lvl3.endTimer then
+        lvl3.endTimer = L.time()
+        lvl3.endPhase = "blackout"
+        
+        if Audio_source then
+            Audio_source:stop()
+        end
+    end
+
+    local timeInPhase = L.time() - lvl3.endTimer
+
+    if lvl3.endPhase == "blackout" then
+        L.draw({ x = 0, y = 0, sprite = "scenes/blackout", s = 6.66})
+        
+        if timeInPhase >= lvl3.cooldwon then
+            lvl3.endPhase = "reveal"
+            lvl3.endTimer = L.time()
+        end
+
+    elseif lvl3.endPhase == "reveal" then
+        L.draw({ x = 0, y = 0, sprite = "scenes/3", s = 6.66 })
+        
+        L.draw({ 
+            x = 0, 
+            y = 200, 
+            s = L.boss.s, 
+            sprite = "idibiks/toilet_normal",
+            sx = -1 
+        })
+
+        if timeInPhase >= lvl3.cooldwon then
+            L.nextLevel = 4
+            L.active_level_i = L.transition
+            L.reset()
+        end
+    end
 end
 return lvl3
