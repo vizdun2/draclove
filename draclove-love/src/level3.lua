@@ -110,6 +110,8 @@ local function shoot_water(pelletsInCircle)
             sprite = "idibiks/water_projectile" 
         }
     end
+
+    L.play("audio/splash1", 0.4)
 end
 local prep_rot_speed = 300
 local flow_speed = 15
@@ -231,6 +233,7 @@ local function do_toilet()
             changeState(states.spilling)
             L.boss.state_start = L.time()
             L.boss.sprite = "idibiks/attack"
+            L.play("audio/wave", 0.4)
         end
     end
 
@@ -337,8 +340,11 @@ function lvl3.loop(dt)
     for id, proj in pairs(L.water_projs) do
         if L.collide(proj, L.player) then
             if(L.player.take_damage())then
+                L.play("audio/splash2", 0.6)
                 L.water_projs[id] = nil
             end
+        elseif L.pasttime(proj.born + 10) then
+            L.water_projs[id] = nil
         end
         L.move_vel(proj)
     end

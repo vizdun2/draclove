@@ -111,6 +111,9 @@ function CB.projectileNPCollision(proj, npObj, dt)
         proj.vel_y = -proj.vel_y
     end
     proj.lifeTime = proj.lifeTime - 1
+    if proj.lifeTime~=0 then
+        L.play("audio/chair/pingpong_test",1)
+    end
 end
 
 function CB.handleWallBounce(obj, xLimit, yLimit)
@@ -211,6 +214,7 @@ local function dashAttack()
     else
         L.boss.dashingLeft = false
     end
+    L.play("audio/chair/chairdash", 0.3)
 end
 
 local function bossLine()
@@ -244,6 +248,7 @@ local function projectileAttack(player, extrax, extray)
     local speed = 75
     local x, y = L.vec_to(player, L.boss)
     spawnProjectile(L.boss.x, L.boss.y, speed * -x * extrax, speed * -y * extray)
+    L.play("audio/wheel_broke", 0.1)
 end
 local function stunAttack()
     enterAction("stun", 2)
