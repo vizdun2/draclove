@@ -59,7 +59,7 @@ function L.play_dialogue()
 			local uid = L.uid()
 			L.active_level().lines[uid] =
 			{
-				x = -10 * string.len(dialogue.text),
+				x = -5 * string.len(dialogue.text),
 				y = 310,
 				is_dead_at = next_at,
 				text =
