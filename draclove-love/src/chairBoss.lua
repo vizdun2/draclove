@@ -137,6 +137,9 @@ function CB.handleWallBounce(obj, xLimit, yLimit)
     end
     if hasBounced then
         obj.lifeTime = obj.lifeTime - 1
+        if obj.lifeTime~=0 then
+            L.play("audio/chair/pingpong_test",1)
+        end
     end
     return hasBounced
 end
@@ -302,7 +305,7 @@ local function loseAWheel(wheel)
     L.boss.health=L.boss.health-1
     if L.boss.health==3 then
         CB.resetBossHealth()
-		L.push_dialogue({ text = "Chair: That is what I call, regeneration!", audio = "audio/chair/regeneration.wav" })
+		-- L.push_dialogue({ text = "Chair: That is what I call, regeneration!", audio = "audio/chair/regeneration.wav" })
     end
     if L.boss.health <= 0 then
         L.boss.dead = true
