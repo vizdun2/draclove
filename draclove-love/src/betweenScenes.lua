@@ -13,11 +13,11 @@ local cutsceneMap = {
     [6] = nil, -- after last elvel
 }
 local voiclineMap = {
-    [1] = "You, little bitchboy ARE TRIPPING BALLS", -- before initial level
-    [2] = "good work. Munchies are far away still.",
-    [3] = "Did you relly just struggle to open the door?? Idiot.",
-    [4] = "You, little bitchboy ARE TRIPPING BALLS",
-    [5] = "You, little bitchboy ARE TRIPPING BALLS",
+    [1] = "WHerE iS MY mINd", -- before initial level
+    [2] = "Munchies are far away still.",
+    [3] = "Did you really just struggle to open the door?",
+    [4] = "Godspeed you, black emperor",
+    [5] = "Kitchen, my kitchen, far over the misty mountains rolled",
     [6] = "Lemon.", -- after last elvel
 }
 
