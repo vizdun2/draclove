@@ -12,7 +12,7 @@ local dodge_cooldown = 0.5
 local base_jump_speed = -25
 
 local Player = {}
-Player.jump_speed = base_jump_speed
+
 
 local function newDJEffect(sprite)
     local newDJEffect = {
@@ -30,6 +30,7 @@ end
 
 -- Base Setup
 function Player.setup()
+    Player.jump_speed = base_jump_speed
     L.player = {
         x = 0, y = 0, speed = 15, s = 2,
         vel_x = 0, vel_y = 0, hunger = 0,
