@@ -205,7 +205,7 @@ local function spawn_scars()
         local on_x = math.random() <= x_ratio
         local x, y = on_x and math.random() * L.boss.x or 0,
             on_x and L.boss.y or math.random() * (L.boss.y - origin_y) + origin_y
-        table.insert(L.scars, { x = x, y = y, sprite = "particles/water_sprinkle", sprite_t = 0.1, sprite_start = rn, debug = true })
+        table.insert(L.scars, { x = x, y = y, sprite = "particles/water_sprinkle", sprite_t = 0.1, sprite_start = rn })
     end
 end
 

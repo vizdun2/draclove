@@ -3,12 +3,13 @@ L.clear_pck_cache()
 local L1 = require("src/level1")
 local L2 = require("src/level2")
 local L3 = require("src/level3")
+local L5 = require("src/level5")
 local GO = require("src/ItsJoeverScreen")
 local MM = require("src/mainMenu")
 local CO = require("src/controls")
 local BS = require("src/betweenScenes")
 -- as of now, all levels MUST have a .setup function and a .loop function
-L.levels = { L1, L2, L3, BS, CO, MM, GO }
+L.levels = { L1, L2, L3, { setup = function () end, loop = function () end }, L5, BS, CO, MM, GO }
 L.hunger_limit = 5
 L.failedLevel = nil
 L.nextLevel = nil
