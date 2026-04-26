@@ -359,5 +359,10 @@ function lvl2.loop(dt)
         L.draw_hud()
     end
 end
-
+function lvl2.startScene()
+    return false
+end
+function lvl2.endScene()
+    return false
+end
 return lvl2

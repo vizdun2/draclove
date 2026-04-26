@@ -69,7 +69,7 @@ function lvl3.setup()
         spillCount = 0,
         queuedAttack = nil,
         chaseThresholds = {20, 15, 10, 5},
-        takeHitCooldown = 0.6,
+        takeHitCooldown = 0.75,
     }
     Player.setup()
     L.pipes = {}
@@ -391,7 +391,7 @@ function lvl3.loop(dt)
             if L.collide(L.player, pipe) and not L.hit_time then
                 L.hit_time = L.time()
                 L.boss.hp = L.boss.hp - 1
-                L.player.vel_y = -1500
+                L.player.vel_y = -1000
                 if #L.scars == 0 then
                     L.scars = nil
                 end
@@ -450,6 +450,12 @@ function lvl3.loop(dt)
     -- L.draw(ground_bot)
     -- L.draw(ground_top)
     L.draw_hud()
+    return true
 end
-
+function lvl3.startScene()
+    return false
+end
+function lvl3.endScene()
+    return false
+end
 return lvl3

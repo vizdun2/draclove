@@ -3,7 +3,7 @@ local CB = require("src/chairBoss")
 local gravity = require("src/gravity")
 local Player = require("src/player")
 
-L1 = {}
+local L1 = {}
 
 L1.ground = { x = 0, y = 300, sx = 100, tag = "ground" }
 L1.level = {
@@ -106,6 +106,13 @@ function L1.loop(dt)
 		L.draw(line)
 	end
 	L.draw_hud()
+	return true
 end
 
+function L1.startScene()
+    return false
+end
+function L1.endScene()
+    return false
+end
 return L1
