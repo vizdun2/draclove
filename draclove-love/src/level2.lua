@@ -249,6 +249,7 @@ local function bossStateMachine(dt)
             newImpact()
             newCrack()
             spawnDebris(L.boss.x, groundY)
+            L.play("audio/door_slam", 0.4)
         end
     elseif L.boss.state == "grounded" then
         if L.time() - L.boss.timeHitGround >= L.boss.groundedDuration then
