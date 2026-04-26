@@ -368,10 +368,15 @@ function lvl3.loop(dt)
         L.hit_time = nil
     end
 
+    if not L.boss.started then
+        L.boss.started = L.time()
+    end
+
+    local c_default = not L.pasttime(L.boss.started + 5) and L.time() % 1 <= 0.5 and "FFFF50"
     local pipes = {}
     table.insert(pipes,
         {
-            c = L.hit_time and "#FF5050",
+            c = L.hit_time and "#FF5050" or c_default,
             sprite = "idibiks/pipe",
             r = 90,
             x = (origin_x + L.boss.x) / 2,
@@ -382,7 +387,7 @@ function lvl3.loop(dt)
         })
     table.insert(pipes,
         {
-            c = L.hit_time and "#FF5050",
+            c = L.hit_time and "#FF5050" or c_default,
             sprite = "idibiks/pipe",
             x = origin_x,
             y = (origin_y + L.boss.y) / 2,
@@ -391,7 +396,7 @@ function lvl3.loop(dt)
         })
     table.insert(pipes,
         {
-            c = L.hit_time and "#FF5050",
+            c = L.hit_time and "#FF5050" or c_default,
             sprite = L.boss.x > 0 and "idibiks/joint_right" or "idibiks/joint_left",
             x =
                 origin_x,
