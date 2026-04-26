@@ -76,7 +76,8 @@ local function shoot_water()
     for i = 0, pellet_count do
         local cr = r + original_angle + i * each_angle
         local vx, vy = L.angle_vec(cr)
-        L.water_projs[L.uid()] = { x = L.boss.x, y = L.boss.y, vel_x = vx * proj_speed, vel_y = vy * proj_speed, born = L.time(), sprite_t=0.1, sprite="idibiks/water_projectile" }
+        L.water_projs[L.uid()] = { x = L.boss.x, y = L.boss.y, vel_x = vx * proj_speed, vel_y = vy * proj_speed, born = L
+        .time(), sprite_t = 0.1, sprite = "idibiks/water_projectile" }
     end
 end
 
@@ -97,7 +98,7 @@ local function do_toilet()
         elseif L.time() > L.boss.last_burped + 0.5 then
             L.boss.sprite = "idibiks/idle"
         end
-        
+
         if not L.boss.target then
             L.boss.target = { x = L.boss.x, y = L.boss.y }
             while L.dist(L.boss, L.boss.target) < 200 or math.abs(L.boss.y - L.boss.target.y) < 100 or math.abs(L.boss.x - L.boss.target.x) < 100 do
@@ -133,12 +134,12 @@ local function do_toilet()
         end
     end
 
-    local xoff, yoff = L.boss.sx > 0 and -40 or 40,-5
+    local xoff, yoff = L.boss.sx > 0 and -40 or 40, -5
     local spill_mult = 2
 
     if L.boss.state == states.spilling then
         if not L.spill then
-            L.spill = {sprite="idibiks/water_column", sx=3.5}
+            L.spill = { sprite = "idibiks/water_column", sx = 3.5 }
         end
         local d = L.time() - L.boss.state_start
         L.spill.x = L.boss.x + xoff
@@ -152,10 +153,10 @@ local function do_toilet()
         end
     end
 
-    local origin = L.height/2 + 64 * 8 / 2 - 80
+    local origin = L.height / 2 + 64 * 8 / 2 - 80
     if L.boss.state == states.spilling_hard then
         if not L.water_level then
-            L.water_level = {x=0,y=L.height/2, sprite="idibiks/water", sprite_t=0.1, sx=20, sy=8, pt=-18}
+            L.water_level = { x = 0, y = L.height / 2, sprite = "idibiks/water", sprite_t = 0.1, sx = 20, sy = 8, pt = -18 }
         end
         local d = L.time() - L.boss.state_start
         L.water_level.y = origin - d * flow_speed * 32
@@ -191,13 +192,30 @@ local function do_toilet()
     end
 end
 
+local function spawn_scars()
+    L.scars = {}
+
+    local y_size = math.abs(L.boss.y - origin_y)
+    local x_size = math.abs(L.boss.x)
+    local sum = y_size + x_size
+    local x_ratio = x_size / sum
+    local rn = L.time()
+
+    for _ = 1, 1 do
+        local on_x = math.random() <= x_ratio
+        local x, y = on_x and math.random() * L.boss.x or 0,
+            on_x and L.boss.y or math.random() * (L.boss.y - origin_y) + origin_y
+        table.insert(L.scars, { x = x, y = y, sprite = "particles/water_sprinkle", sprite_t = 0.1, sprite_start = rn, debug = true })
+    end
+end
+
 function lvl3.loop(dt)
     if L.boss.hp <= 0 then
-        L.boss.dead=true
+        L.boss.dead = true
     end
-    if L.boss.dead==true then
-        L.nextLevel=L.gameOverScreen
-        L.active_level_i=L.transition
+    if L.boss.dead == true then
+        L.nextLevel = L.gameOverScreen
+        L.active_level_i = L.transition
         L.reset()
     end
     L.player.on_ground = gravity.ground_collide(L.player, L1.ground)
@@ -219,20 +237,39 @@ function lvl3.loop(dt)
 
     local pipes = {}
     table.insert(pipes,
-        { c = L.hit_time and "#FF5050", sprite = "idibiks/pipe", r = 90, x = (origin_x + L.boss.x) / 2, y = L.boss.y, sy =
-        math.abs(origin_x - L.boss.x) / 64, sx = L.boss.x > 0 and -1 or 1 })
+        {
+            c = L.hit_time and "#FF5050",
+            sprite = "idibiks/pipe",
+            r = 90,
+            x = (origin_x + L.boss.x) / 2,
+            y = L.boss.y,
+            sy =
+                math.abs(origin_x - L.boss.x) / 64,
+            sx = L.boss.x > 0 and -1 or 1
+        })
     table.insert(pipes,
-        { c = L.hit_time and "#FF5050", sprite = "idibiks/pipe", x = origin_x, y = (origin_y + L.boss.y) / 2, sy = math
-        .abs(origin_y - L.boss.y) / 64 })
+        {
+            c = L.hit_time and "#FF5050",
+            sprite = "idibiks/pipe",
+            x = origin_x,
+            y = (origin_y + L.boss.y) / 2,
+            sy = math
+                .abs(origin_y - L.boss.y) / 64
+        })
     table.insert(pipes,
-        { c = L.hit_time and "#FF5050", sprite = L.boss.x > 0 and "idibiks/joint_right" or "idibiks/joint_left", x =
-        origin_x, y = L.boss.y })
+        {
+            c = L.hit_time and "#FF5050",
+            sprite = L.boss.x > 0 and "idibiks/joint_right" or "idibiks/joint_left",
+            x =
+                origin_x,
+            y = L.boss.y
+        })
 
     if L.player.is_punching() then
         for _i, pipe in ipairs(pipes) do
             if L.collide(L.player, pipe) and not L.hit_time then
                 L.hit_time = L.time()
-                L.boss.hp = L.boss.hp-1
+                L.boss.hp = L.boss.hp - 1
                 L.print("hit")
                 break
             end
@@ -243,12 +280,21 @@ function lvl3.loop(dt)
         L.player.take_damage()
     end
 
+    if not L.scars or L.sprite_finished(L.scars[1]) then
+        spawn_scars()
+    end
+
     L.draw({ sprite = "scenes/3", s = 6.66 })
 
     for _i, pipe in ipairs(pipes) do
         L.draw(pipe)
     end
     Player.loop()
+
+    for _i, scar in ipairs(L.scars) do
+        L.draw(scar)
+    end
+
     L.draw(L.boss)
 
     for _, proj in pairs(L.water_projs) do
@@ -262,8 +308,8 @@ function lvl3.loop(dt)
         L.draw(L.spill)
     end
     if L.water_level then
-        L.draw(L.patch(L.water_level, {debug=true}))
-        L.draw(L.patch(L.water_level, {debug=false}))
+        L.draw(L.patch(L.water_level, { debug = true }))
+        L.draw(L.patch(L.water_level, { debug = false }))
     end
 
     -- L.draw(ground_bot)

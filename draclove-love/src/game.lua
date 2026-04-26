@@ -113,7 +113,6 @@ function L.draw_hud()
 end
 
 function L.render(dt)
-	L.print(L.active_level_i)
 	for i = 1, #L.levels do
 		if L.key_released(tostring(i)) then
 			L.active_level_i = i
