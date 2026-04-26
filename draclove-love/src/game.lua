@@ -8,6 +8,7 @@ local GO = require("src/ItsJoeverScreen")
 local MM = require("src/mainMenu")
 local CO = require("src/controls")
 local BS = require("src/betweenScenes")
+local PS = require("src/pause")
 -- as of now, all levels MUST have a .setup function and a .loop function
 L.levels = { L1, L2, L3, { setup = function () end, loop = function () end }, L5, BS, CO, MM, GO }
 L.hunger_limit = 5
@@ -17,6 +18,7 @@ L.gameOverScreen = L.table_length(L.levels)
 L.mainMenu = L.table_length(L.levels)-1
 L.controls = L.table_length(L.levels)-2
 L.transition = L.table_length(L.levels)-3
+L.pauseScreen = PS
 
 
 
@@ -107,6 +109,9 @@ function L.base_dialogue_loop()
 	end
 end
 local function pauseUnpause()
+	if L.player.timeStopped then
+		L.pauseScreen.loop()
+	end
 	if L.key_pressed("escape") then
         if L.player.timeStopped then
             L.start_time()

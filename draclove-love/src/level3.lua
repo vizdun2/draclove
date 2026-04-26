@@ -66,7 +66,7 @@ function lvl3.setup()
     L.player.currentDJSprite="particles/3/jump_burst"
 end
 
-local toilet_speed = 100
+local toilet_speed = 200
 local proj_speed = 200
 local pellet_count = 4
 local pellet_angle = 30
@@ -83,14 +83,14 @@ local function shoot_water()
     end
 end
 
-local prep_rot_speed = 50
+local prep_rot_speed = 200
 local flow_speed = 8
 local magic_y = 540 / 2
 local desired_water_level = 290
 
 local function do_toilet()
     if L.boss.state == states.moving_around then
-        if L.time() > L.boss.last_burped + 4 then
+        if L.time() > L.boss.last_burped + 2 then
             shoot_water()
             L.boss.last_burped = L.time()
             return
@@ -224,8 +224,13 @@ function lvl3.loop(dt)
 
     for id, proj in pairs(L.water_projs) do
         if L.collide(proj, L.player) then
-            L.water_projs[id] = nil
-            L.player.take_damage()
+            if L.player.is_punching()then
+                L.water_projs[id] = nil
+            else
+                L.water_projs[id] = nil
+                L.player.take_damage()
+            end
+  
         else
             L.move_vel(proj)
         end
