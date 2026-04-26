@@ -68,6 +68,9 @@ function lvl4.loop(dt)
             local vx, vy = L.vec_to(L.boss, w)
             w.vel_x = vx * weed_speed
             w.vel_y = vy * weed_speed
+            w.r = L.angle_look_at(w.x, w.y, L.boss.x, L.boss.y) + (w.y > 0 and 90 or -90)
+            w.sprite_t = 0.1
+            w.sprite = "mouse_dragon/trava_projectile"
         end
 
         if L.collide(w, L.patch(L.boss, { s = 0.8 })) then
