@@ -42,6 +42,7 @@ function lvl5.setup()
     Audio_source:stop()
     Audio_source = nil
     Source_path = nil
+    L.play("audio/john_lemon")
     L.player = { x = 0, y = 0, sprite = "chips/honza_citron_idle", s = 0.075, vel_x = 0, vel_y = 0, dash_mult = 1, last_used_dash = 0 }
     L.chips = { sprite = "chips/normal", s = 2, x = 500, y = 0, spawned = L.time() }
     L.chip_projs = {}
