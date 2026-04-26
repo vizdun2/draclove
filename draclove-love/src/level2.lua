@@ -27,6 +27,7 @@ local function newCrack()
     table.insert(L.player.particles, crack)
     
 end
+
 local function newImpact()
     local impact = {
         x=L.boss.x,
@@ -113,7 +114,33 @@ local function checkForSlam(boss, player)
     end
     return false
 end
+local function getUniqueRandoms(maxNumber, drawCount)
+    local numberPool = {}
+    for i = 1, maxNumber do
+        table.insert(numberPool, i)
+    end
+
+    local drawnResults = {}
+    
+    for i = 1, drawCount do
+        local randomIndex = math.random(1, #numberPool)
+        
+        table.insert(drawnResults, table.remove(numberPool, randomIndex))
+    end
+
+    return drawnResults
+end
 local function spawnDebris(originX, originY)
+    local sprites = {
+        "door/projectile1",
+        "door/projectile2",
+        "door/projectile3",
+        "door/projectile4",
+        "door/projectile5",
+        "door/projectile6",
+    }
+    local indexes = getUniqueRandoms(6,4)
+
     for i = 1, 4 do
         local direction = (i % 2 == 0) and 1 or -1
         
@@ -126,12 +153,14 @@ local function spawnDebris(originX, originY)
             y = originY,
             sx = 0.8,
             sy = 0.8,
-            s = 1,
+            s = 2,
+            sprite = sprites[indexes[i]],
+            sprite_t = 0.2,
             velX = speedX,
             velY = speedY,
             bounces = 0,
             dead = false,
-            debug = true
+            debug = false
         })
     end
 end

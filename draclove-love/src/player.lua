@@ -35,7 +35,8 @@ function Player.setup()
         vel_x = 0, vel_y = 0, hunger = 0,
         last_dodged = 0, dead = false, jumped_midair = true,
         sprite = "player/idle",
-        particles = {}
+        particles = {},
+        timeStopped = false,
     }
 
     function L.player.is_dodging()
