@@ -40,7 +40,7 @@ local function load_assets_rec(dir)
         else
             L.print("Started loading", filename)
             local texture_name, texture_row, texture_col = filename:match("^(.*)_([0-9]+)x([0-9]+)%.png$")
-            local audio_name = filename:match("^(.*)%.mp3$") or filename:match("^(.*)%.wav$")
+            local audio_name = filename:match("^(.*)%.mp3$") or filename:match("^(.*)%.wav$") or filename:match("^(.*)%.ogg$")
             local font_name = filename:match("^(.*)%.ttf$")
 
             if texture_name then

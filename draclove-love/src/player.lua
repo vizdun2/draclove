@@ -97,6 +97,7 @@ local function player_action()
         L.player.pt = -30
         L.player.last_dodged = L.time()
     elseif L.key_pressed("x") or L.key_pressed("n") then
+        L.play("audio/punch", 0.1)
         player_anime(L.player.on_ground and "player/punch_from_idle" or "player/punch_from_air", 0.03)
         L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
     end
@@ -133,6 +134,7 @@ local function player_movement()
 			L.player.vel_y = Player.jump_speed * movement_const
 			L.player.jumped_midair = true
 			L.player.sprite = "player/in_air"
+            L.play("audio/double_jump", 0.1)
             newDJEffect(L.player.currentDJSprite)
 		end
 	end

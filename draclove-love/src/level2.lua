@@ -250,11 +250,13 @@ local function bossStateMachine(dt)
             newImpact()
             newCrack()
             spawnDebris(L.boss.x, groundY)
+            L.play("audio/door_slam", 0.4)
         end
     elseif L.boss.state == "grounded" then
-        if L.time() - L.boss.timeHitGround >= L.boss.groundedDuration then
+        if L.time() - L.boss.timeHitGround >= L.boss.groundedDuration and L.sprite_finished(L.boss) then
             L.boss.last_grounded = L.time()
             L.boss.state = "rising"
+            L.boss.sprite = "door/door"
             L.boss.velY = -L.boss.riseSpeed
         end
     elseif L.boss.state == "rising" then
@@ -313,14 +315,18 @@ function lvl2.loop(dt)
         local collide, fromAbove, _ = gravity.check_collide(L.player, L.boss)
         if collide then
             if (L.boss.state == "grounded" or not L.pasttime(L.boss.last_grounded + 0.5)) and fromAbove then
-                L.player.vel_y = -2000
-                L.boss.hp = L.boss.hp - 1
-                L.print("Boss Hit! HP:", L.boss.hp)
+                if L.boss.sprite ~= "door/door_damaga" then
+                    L.player.vel_y = -2000
+                    L.boss.hp = L.boss.hp - 1
+                    L.boss.sprite = "door/door_damaga"
+                    L.boss.sprite_t = 0.1
+                    L.boss.sprite_start = L.time()
+                    L.print("Boss Hit! HP:", L.boss.hp)
 
 
-
-                L.boss.state = "rising"
-                L.boss.velY = -L.boss.riseSpeed
+                    L.boss.timeHitGround = 0
+                    L.play("audio/door_cracked", 0.6)
+                end
             elseif L.boss.state ~= "grounded" then
                 L.player.take_damage()
             end
