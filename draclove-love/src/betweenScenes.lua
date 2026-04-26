@@ -5,11 +5,11 @@ local BS = {}
 local buttons = {}
 
 local cutsceneMap = {
-    [1] = nil, -- before initial level
-    [2] = nil,
-    [3] = nil,
-    [4] = nil,
-    [5] = nil,
+    [1] = "assets/cutscene.ogv", -- before initial level
+    [2] = "assets/cutscene1",
+    [3] = "assets/cutscene2",
+    [4] = "assets/cutscene3",
+    [5] = "assets/cutscene4",
     [6] = nil, -- after last elvel
 }
 local voiclineMap = {
