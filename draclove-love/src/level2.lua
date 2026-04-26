@@ -251,6 +251,7 @@ local function bossStateMachine(dt)
             newCrack()
             spawnDebris(L.boss.x, groundY)
             L.play("audio/door_slam", 0.4)
+            L.boss.already_got_hit = false
         end
     elseif L.boss.state == "grounded" then
         if L.time() - L.boss.timeHitGround >= L.boss.groundedDuration and L.sprite_finished(L.boss) then
@@ -315,7 +316,8 @@ function lvl2.loop(dt)
         local collide, fromAbove, _ = gravity.check_collide(L.player, L.boss)
         if collide then
             if (L.boss.state == "grounded" or not L.pasttime(L.boss.last_grounded + 0.5)) and fromAbove then
-                if L.boss.sprite ~= "door/door_damaga" then
+                if not L.boss.already_got_hit then
+                    L.boss.already_got_hit = true
                     L.player.vel_y = -2000
                     L.boss.hp = L.boss.hp - 1
                     L.boss.sprite = "door/door_damaga"
