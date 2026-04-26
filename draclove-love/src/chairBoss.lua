@@ -57,6 +57,9 @@ end
 
 CB.oneliners = { { text = "I will crush you like a pringle", audio = "pringle.wav" }, { text = "*Rolls her wheels*", audio = "" }, { text = "Suck my wheels, stoner", audio = "suck.wav" }, { text = "Are you going to the shower? I know you have to.", audio = "shower.wav" } }
 
+
+
+
 function CB.newBoss()
     L.boss = {
         nextBossLineAt = 0 + math.random(5),
@@ -112,9 +115,6 @@ function CB.projectileNPCollision(proj, npObj, dt)
         proj.vel_y = -proj.vel_y
     end
     proj.lifeTime = proj.lifeTime - 1
-    if proj.lifeTime~=0 then
-        L.play("audio/chair/pingpong_test",1)
-    end
 end
 
 function CB.handleWallBounce(obj, xLimit, yLimit)
@@ -215,7 +215,6 @@ local function dashAttack()
     else
         L.boss.dashingLeft = false
     end
-    L.play("audio/chair/chairdash", 0.3)
 end
 
 local function bossLine()
@@ -249,7 +248,6 @@ local function projectileAttack(player, extrax, extray)
     local speed = 150
     local x, y = L.vec_to(player, L.boss)
     spawnProjectile(L.boss.x, L.boss.y, speed * -x * extrax, speed * -y * extray)
-    L.play("audio/wheel_broke", 0.1)
 end
 local function stunAttack()
     enterAction("stun", 2)
@@ -349,6 +347,15 @@ local function whatWheelToUse()
             L.draw(L.patch(L.boss, { sprite = "chair/wheel_middle" }))
         end
     elseif L.boss.lastAttack == "charge" then
+        if L.boss.sx < 0 then
+            L.draw({sprite = "UI/hand",x = L.boss.x - 300, y = L.boss.y, s = 0.15, sx = 1, sprite_t=0.1})
+        else
+            L.draw({sprite = "UI/hand",x = L.boss.x + 300, y = L.boss.y, s = 0.15, sx = -1, sprite_t = 0.1})
+        end
+        
+        if L.boss.wheels.wheell then
+            L.draw(L.patch(L.boss, { sprite = "chair/wheel_left_lift_off" }))
+        end
         if L.boss.wheels.wheell then
             L.draw(L.patch(L.boss, { sprite = "chair/wheel_left_lift_off" }))
         end

@@ -20,7 +20,7 @@ function MM.setup()
         UI.newButton(-L.width / 2 + 100, -250, 40, 20, "continueGame", buttons, "UI/button_idle", 1.5, "UI/button_hover",
             "UI/button_click", "UI/button_hovering", "Continue Game", 200)
         UI.newButton(-L.width / 2 + 100, -130, 40, 20, "abondonRun", buttons, "UI/button_idle", 1.5, "UI/button_hover",
-            "UI/button_click", "UI/button_hovering", "Abondon Run", 180)
+            "UI/button_click", "UI/button_hovering", "Abandon Run", 180)
         UI.newButton(-L.width / 2 + 100, -10, 40, 20, "controls", buttons, "UI/button_idle", 1.5, "UI/button_hover",
             "UI/button_click", "UI/button_hovering", "Controls", 150)
     elseif not L.failedLevel then

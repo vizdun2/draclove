@@ -165,7 +165,8 @@ local function spawnDebris(originX, originY)
             velY = speedY,
             bounces = 0,
             dead = false,
-            debug = false
+            debug = false,
+            born = L.time(),
         })
     end
 end
@@ -185,6 +186,9 @@ local function updateDebris(dt)
             if d.bounces == 0 then
                 d.velY = -d.velY * 0.5
                 d.bounces = 1
+                if L.pasttime(d.born + 0.2) then
+                    L.play("audio/stuff_break", 0.3)
+                end
             else
                 d.dead = true
             end
@@ -201,6 +205,9 @@ local function updateDebris(dt)
 
         if d.dead then
             table.remove(L.boss.debris, i)
+            if L.pasttime(d.born + 0.2) then
+                L.play("audio/stuff_break", 0.3)
+            end
         else
             L.draw(d)
         end
@@ -252,8 +259,11 @@ local function bossStateMachine(dt)
             newCrack()
             spawnDebris(L.boss.x, groundY)
             L.play("audio/door_slam", 0.4)
+            L.boss.already_got_hit = false
         end
     elseif L.boss.state == "grounded" then
+        L.draw({sprite="UI/hand",s = 0.15, x = L.boss.x, y = L.boss.y-150, r = 90, sprite_t = 0.08})
+
         if L.time() - L.boss.timeHitGround >= L.boss.groundedDuration and L.sprite_finished(L.boss) then
             L.boss.last_grounded = L.time()
             L.boss.state = "rising"
@@ -279,7 +289,7 @@ end
 
 
 function lvl2.start_playing_audio_loop()
-    Audio_source = L.play("audio/soundtrack/second_ost_loop", 0.80)
+    Audio_source = L.play("audio/soundtrack/second_ost_loop", 1)
     Source_path = "audio/soundtrack/second_ost_loop"
     Audio_source:setLooping(true)
 end
@@ -320,7 +330,8 @@ function lvl2.loop(dt)
         local collide, fromAbove, _ = gravity.check_collide(L.player, L.boss)
         if collide then
             if (L.boss.state == "grounded" or not L.pasttime(L.boss.last_grounded + 0.5)) and fromAbove then
-                if L.boss.sprite ~= "door/door_damaga" then
+                if not L.boss.already_got_hit then
+                    L.boss.already_got_hit = true
                     L.player.vel_y = -2000
                     L.boss.hp = L.boss.hp - 1
                     L.boss.sprite = "door/door_damaga"
