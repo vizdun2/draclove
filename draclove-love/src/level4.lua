@@ -31,6 +31,7 @@ function lvl4.setup()
     L.player.jump_disabled = true
     L.player.off_move = true
     L.player.y = 220
+    L.player.x = -600
     L.weed = {}
     L.last_weed_gen = 0
 end
@@ -81,12 +82,18 @@ function lvl4.loop(dt)
         L.hit_time = nil
     end
 
-    local burst = 1
-    if L.boss.burp_i < burst and L.pasttime(L.boss.last_burped + 0.1) or L.boss.burp_i >= burst and L.pasttime(L.boss.last_burped + 1) then
+    if L.pasttime(L.boss.last_burped + 4) then
+        L.boss.sprite = "mouse_dragon/dragon_flight"
+    end
+
+    local burst = 3
+    if L.boss.burp_i < burst and L.pasttime(L.boss.last_burped + 0.5) or L.boss.burp_i >= burst and L.pasttime(L.boss.last_burped + 5) then
         L.boss.last_burped = L.time()
         if L.boss.burp_i >= burst then
             L.boss.burp_i = 0
         end
+
+        L.boss.sprite = "mouse_dragon/dragon_flight"
 
         local speed = 800
         local vx, vy = L.vec_to(L.player, L.boss)
@@ -94,13 +101,26 @@ function lvl4.loop(dt)
         L.fire_projs[L.uid()] = { r = r+180, s = 1.5, sprite = "mouse_dragon/fireball", sprite_t = 0.1, x = L.boss.x, y = L
         .boss.y, vel_x = vx * speed, vel_y = vy * speed, born = L.time() }
         L.boss.burp_i = L.boss.burp_i + 1
+
+        if L.boss.burp_i >= burst then
+            L.boss.sprite = "mouse_dragon/idle"
+        end
     end
 
     if L.pasttime(L.last_weed_gen + 1) then
         L.last_weed_gen = L.time()
         local on_roof = math.random() <= 0.5
-        L.weed[L.uid()] = { x = math.random() * L.height - L.height / 2, y = on_roof and -L.height / 2 + 25 or 220 + 32, sy =
+        local nw =  { x = math.random() * L.height - L.height / 2, y = on_roof and -L.height / 2 + 25 or 220 + 32, sy =
         on_roof and -1 or 1, sprite = "mouse_dragon/trava", s = 4 }
+
+        local okay = not L.collide(nw, L.patch(L.player, {s=3}))
+        for oid, ow in pairs(L.weed) do
+            okay = okay and not L.collide(nw, ow)
+        end
+
+        if okay then
+            L.weed[L.uid()] = nw
+        end
     end
 
     L.draw({ sprite = "scenes/4", s = 6.66 })
