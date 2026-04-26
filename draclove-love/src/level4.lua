@@ -31,6 +31,8 @@ function lvl4.setup()
     L.player.jump_disabled = true
     L.player.off_move = true
     L.player.y = 220
+    L.weed = {}
+    L.last_weed_gen = 0
 end
 
 function lvl4.loop(dt)
@@ -76,6 +78,12 @@ function lvl4.loop(dt)
         L.boss.burp_i = L.boss.burp_i + 1
     end
 
+    if L.pasttime(L.last_weed_gen + 1) then
+        L.last_weed_gen = L.time()
+        local on_roof = math.random() <= 0.5
+        L.weed[L.uid()] = {x=math.random() * L.height - L.height / 2, y=on_roof and -L.height / 2 + 25 or 220 + 32, sy=on_roof and -1 or 1, sprite="mouse_dragon/trava", s = 2}
+    end
+
     L.draw({ sprite = "scenes/4", s = 6.66 })
 
     L.draw(L.patch(L.boss, {debug=true}))
@@ -83,6 +91,10 @@ function lvl4.loop(dt)
 
     for _, proj in pairs(L.fire_projs) do
         L.draw(proj)
+    end
+    
+    for _, weed in pairs(L.weed) do
+        L.draw(weed)
     end
 
     Player.loop()
