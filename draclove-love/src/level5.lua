@@ -75,14 +75,14 @@ local function move_player()
     if L.key_down("w") then L.player.vel_y = L.player.vel_y - move_const * L.dt end
     if L.key_down("s") then L.player.vel_y = L.player.vel_y + move_const * L.dt end
 
-    if L.key_down("space") and L.pasttime(L.player.last_used_dash + 0.8) then
+    if L.key_down("space") and L.player.last_used_dash and L.pasttime(L.player.last_used_dash + 0.8) then
         L.player.last_used_dash = L.time()
     end
 
-    if L.time() - L.player.last_used_dash <= 0.4 then
+    if L.player.last_used_dash and L.time() - L.player.last_used_dash <= 0.4 then
         L.player.dash_mult = 5
     end
-    if L.time() - L.player.last_used_dash >= 0.4 then
+    if L.player.last_used_dash and L.time() - L.player.last_used_dash >= 0.4 then
         L.player.dash_mult = 1
     end
 

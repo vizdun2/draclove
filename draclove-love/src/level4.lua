@@ -24,6 +24,7 @@ function lvl4.setup()
         last_burped = L.time(),
         burp_i = 0,
         takeHitCooldown = 0.6,
+        fucktuts = false,
     }
     Player.setup()
     L.fire_projs = {}
@@ -76,6 +77,7 @@ function lvl4.loop(dt)
         if L.collide(w, L.patch(L.boss, { s = 0.8 })) then
             L.weed[id] = nil
             L.boss.hp = L.boss.hp - 1
+            L.boss.fucktuts = true
         end
 
         L.move_vel(w)
@@ -136,6 +138,9 @@ function lvl4.loop(dt)
 
     for _, weed in pairs(L.weed) do
         L.draw(weed)
+        if weed.sprite == "mouse_dragon/trava" and not L.boss.fucktuts then
+            L.draw({r=(weed.y > 0 and 90 or -90), sprite="UI/hand", x = weed.x, y = weed.y + (weed.y > 0 and -75 or 75), sx = L.boss.x > 0 and 1 or -1, sprite_t = 0.08})
+        end
     end
 
     Player.loop()
