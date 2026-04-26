@@ -81,6 +81,8 @@ function lvl2.setup()
 
         debris = {},
         cracks = {},
+
+        last_grounded = 0,
     }
     Player.setup()
     L.player.x = -L.width / 2 + 100
@@ -250,12 +252,13 @@ local function bossStateMachine(dt)
         end
     elseif L.boss.state == "grounded" then
         if L.time() - L.boss.timeHitGround >= L.boss.groundedDuration then
+            L.boss.last_grounded = L.time()
             L.boss.state = "rising"
             L.boss.velY = -L.boss.riseSpeed
         end
     elseif L.boss.state == "rising" then
-        L.boss.y = L.boss.y + (L.boss.velY * dt)
-
+        L.boss.y = L.boss.y + (L.boss.velY * dt * 0.5)
+        
         if L.boss.r > 0 then
             L.boss.r = math.max(0, L.boss.r - (L.boss.rotationSpeed * dt))
         end
@@ -334,7 +337,7 @@ function lvl2.loop(dt)
         -- Collision & Damage Logic
         local collide, fromAbove, _ = gravity.check_collide(L.player, L.boss)
         if collide then
-            if L.boss.state == "grounded" and fromAbove then
+            if (L.boss.state == "grounded" or not L.pasttime(L.boss.last_grounded + 0.5)) and fromAbove then
                 L.player.vel_y = -2000
                 L.boss.hp = L.boss.hp - 1
                 L.print("Boss Hit! HP:", L.boss.hp)

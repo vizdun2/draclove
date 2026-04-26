@@ -250,9 +250,9 @@ end
 local function projecAttack()
     enterAction("projectile", 1.5)
     L.boss.sprite = "chair/runnin"
-    projectileAttack(L.player, 1, 1)
-    projectileAttack(L.player, 1, -1)
-    projectileAttack(L.player, -1, 1)
+    if math.random() <= 0.33 then projectileAttack(L.player, 1, 1) end
+    if math.random() <= 0.33 then projectileAttack(L.player, 1, -1) end
+    if math.random() <= 0.33 then projectileAttack(L.player, -1, 1) end
 end
 
 
