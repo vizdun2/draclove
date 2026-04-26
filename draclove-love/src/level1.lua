@@ -19,6 +19,15 @@ function L1.setup()
 	CB.newBoss()
 	Player.setup()
 	L.player.currentDJSprite = "particles/1/jump_burst"
+	L.introAnimation = {
+        x = L.boss.x,
+        y = L.boss.y,
+        s = L.boss.s,
+        sprite = "chair/transform",
+        sprite_t = 0.12,
+        sprite_start = L.time(),
+		sx = -1,
+    }
 end
 
 function L1.interact_with(obj)
@@ -107,7 +116,11 @@ function L1.loop(dt)
 end
 
 function L1.startScene()
-    return false
+    if L.sprite_finished(L.introAnimation) then
+        return false
+    end
+	L.draw(L.introAnimation)
+	return true
 end
 function L1.endScene()
 	L.nextLevel = 2
