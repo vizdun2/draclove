@@ -207,7 +207,7 @@ local function spawn_scars()
         local on_x = math.random() <= x_ratio
         local x, y = on_x and math.random() * L.boss.x or 0,
             on_x and L.boss.y or math.random() * (L.boss.y - origin_y) + origin_y
-        table.insert(L.scars, { x = x, y = y, sprite = "particles/water_sprinkle", sprite_t = 0.1, sprite_start = rn })
+        table.insert(L.scars, { x = x, y = y, sprite = "particles/water_sprinkle", sprite_t = 0.05, sprite_start = rn })
     end
 end
 
@@ -272,6 +272,9 @@ function lvl3.loop(dt)
             if L.collide(L.player, pipe) and not L.hit_time then
                 L.hit_time = L.time()
                 L.boss.hp = L.boss.hp - 1
+                if #L.scars == 0 then
+                    L.scars = nil
+                end
                 L.print("hit")
                 break
             end
@@ -282,7 +285,7 @@ function lvl3.loop(dt)
         L.player.take_damage()
     end
 
-    if not L.scars or L.sprite_finished(L.scars[1]) then
+    if not L.scars or #L.scars > 0 and L.sprite_finished(L.scars[1]) then
         spawn_scars()
     end
 

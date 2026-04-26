@@ -567,6 +567,10 @@ function L.start_time()
     L.stopped_since = nil
 end
 
+function L.clamp(low, n, high)
+  return math.min(math.max(n, low), high)
+end
+
 local last_mod_time = nil
 function love.update(dt)
     L.dt = math.min(dt, 1 / 30)
