@@ -40,19 +40,21 @@ function lvl2.setup()
     L.boss = {
         tag = "boss",
         x = L.width/2-100,
-        y = hoverY,
+        y = hoverY+150,
         s = 4.5,
         r = 0,
         hp = 5,
-        sprite = "door/door",
+        normalSprite = "door/door_normal", 
+        monsterSprite = "door/door",
+        sprite = "door/door_normal",
         pl = -18,
         pr = -24,
         pb = -5,
         pt = -5,
         dead=false,
         
-        state = "tracking", 
-        attackCooldown = 3,
+        state = "intro",
+        attackCooldown = 2.3,
         lastTimeAttacked = 0,
         directionUpdateCooldown = 1.0,
         lastTimeChangedDirection = 0,
@@ -66,11 +68,17 @@ function lvl2.setup()
         timeHitGround = 0,
         rotationSpeed = 400,
 
+        introStartTime = L.time(),
+        introDuration = 3, -- How long the glitching lasts in seconds
+        lastGlitchTime = L.time(),
+        nextGlitchDelay = 0.1,
+
         debris = {},
         cracks = {},
     }
     Player.setup()
     L.player.x=-L.width/2+100   
+    L.player.y=L.height/2-50
     L.player.currentDJSprite="particles/2/jump_burst"
 end
 
@@ -233,51 +241,80 @@ local function bossStateMachine(dt)
     end
 end
 function lvl2.loop(dt)
-    if L.boss.hp <= 0 then
-        L.boss.dead=true
-    end
-    if L.boss.dead==true then
-        L.nextLevel=3
-        L.active_level_i=L.transition
-        L.reset()
-    end
-    L.draw({ x = 0, y = 0, sprite = "scenes/2", s = 6.66, sprite_t = 0.1 })
-    local leftEdge = -L.width / 2
-    local rightEdge = L.width / 2
-    
-    -- Player Lerp Updates
-    L.player.s = calculatePlayerScale(L.player.x, leftEdge, rightEdge, scales)
-    Player.jump_speed = calculateJumpSpeed(L.player.x, leftEdge, rightEdge, jumpSpeeds)
-    
-    Player.loop()
-    L.player.on_ground = gravity.ground_collide(L.player, groundBot)
+    if L.boss.state == "intro" then
+        local currentTime = L.time()
+        L.draw({ x = 0, y = 0, sprite = "scenes/1", s = 6.66 })
+        L.draw(L.boss)
+        L.draw(L.player)
+        L.draw_hud()
+        if currentTime - L.boss.lastGlitchTime >= L.boss.nextGlitchDelay then
+            
+            if L.boss.sprite == L.boss.normalSprite then
+                L.boss.sprite = L.boss.monsterSprite
+            else
+                L.boss.sprite = L.boss.normalSprite
+            end
 
-    -- Boss State Machine
-    bossStateMachine(dt)
-
-    -- Collision & Damage Logic
-    local collide, fromAbove, _ = gravity.check_collide(L.player, L.boss)
-    if collide then
-        if L.boss.state == "grounded" and fromAbove then
-            L.player.vel_y = -2000
-            L.boss.hp = L.boss.hp - 1
-            L.print("Boss Hit! HP:", L.boss.hp)
-            
-            
-            
-            L.boss.state = "rising"
-            L.boss.velY = -L.boss.riseSpeed
-        elseif L.boss.state ~= "grounded" then
-            L.player.take_damage()
+            L.boss.nextGlitchDelay = math.random(5, 25) / 100
+            L.boss.lastGlitchTime = currentTime
         end
-    end
 
-    updateDebris(dt)
-    L.draw(L.patch(L.boss, {debug=true}))
-    L.draw(L.boss)
-    L.draw(L.player)
-    --L.draw(groundBot)
-    L.draw_hud()
+        if currentTime - L.boss.introStartTime >= L.boss.introDuration then
+            L.boss.state = "tracking"
+            L.boss.sprite = L.boss.monsterSprite
+            
+            L.boss.y=hoverY
+            L.boss.lastTimeChangedDirection = currentTime 
+            L.boss.lastTimeAttacked = currentTime
+        end
+
+    else
+        if L.boss.hp <= 0 then
+            L.boss.dead=true
+        end
+        if L.boss.dead==true then
+            L.nextLevel=3
+            L.active_level_i=L.transition
+            L.reset()
+        end
+        L.draw({ x = 0, y = 0, sprite = "scenes/2", s = 6.66, sprite_t = 0.1 })
+        local leftEdge = -L.width / 2
+        local rightEdge = L.width / 2
+        
+        -- Player Lerp Updates
+        L.player.s = calculatePlayerScale(L.player.x, leftEdge, rightEdge, scales)
+        Player.jump_speed = calculateJumpSpeed(L.player.x, leftEdge, rightEdge, jumpSpeeds)
+        
+        Player.loop()
+        L.player.on_ground = gravity.ground_collide(L.player, groundBot)
+
+        -- Boss State Machine
+        bossStateMachine(dt)
+
+        -- Collision & Damage Logic
+        local collide, fromAbove, _ = gravity.check_collide(L.player, L.boss)
+        if collide then
+            if L.boss.state == "grounded" and fromAbove then
+                L.player.vel_y = -2000
+                L.boss.hp = L.boss.hp - 1
+                L.print("Boss Hit! HP:", L.boss.hp)
+                
+                
+                
+                L.boss.state = "rising"
+                L.boss.velY = -L.boss.riseSpeed
+            elseif L.boss.state ~= "grounded" then
+                L.player.take_damage()
+            end
+        end
+
+        updateDebris(dt)
+        --L.draw(L.patch(L.boss, {debug=true}))
+        L.draw(L.boss)
+        L.draw(L.player)
+        --L.draw(groundBot)
+        L.draw_hud()
+    end
 end
 
 return lvl2
