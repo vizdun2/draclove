@@ -164,7 +164,8 @@ local function spawnDebris(originX, originY)
             velY = speedY,
             bounces = 0,
             dead = false,
-            debug = false
+            debug = false,
+            born = L.time(),
         })
     end
 end
