@@ -50,10 +50,7 @@ end
 function L1.loop(dt)
 	L.draw({ x = 0, y = 0, sprite = "scenes/1", s = 6.66, sprite_t = 0.1 })
 	if L.boss.dead then
-		L.nextLevel = 2
-		L.active_level_i = L.transition
-		L.reset()
-		return
+		return false
 	end
 	Player.loop()
 	draw_hud()
@@ -113,6 +110,9 @@ function L1.startScene()
     return false
 end
 function L1.endScene()
+	L.nextLevel = 2
+	L.active_level_i = L.transition
+	L.reset()
     return false
 end
 return L1

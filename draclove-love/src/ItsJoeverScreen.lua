@@ -19,14 +19,20 @@ function OS.loop()
     if UI.isButtonPressed("restart", buttons) then
         L.active_level_i = L.failedLevel or 1
         L.reset()
-        return
+        return true
     end
     if UI.isButtonPressed("mainMenu", buttons) then
         L.active_level_i = L.mainMenu
         L.reset()
-        return
+        return true
     end
     UI.render(buttons)
+    return true
 end
-
+function OS.startScene()
+    return false
+end
+function OS.endScene()
+    return false
+end
 return OS

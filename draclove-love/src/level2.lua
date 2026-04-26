@@ -60,9 +60,9 @@ function lvl2.setup()
         dead = false,
 
         state = "intro",
-        attackCooldown = 2.3,
+        attackCooldown = 2,
         lastTimeAttacked = 0,
-        directionUpdateCooldown = 1.0,
+        directionUpdateCooldown = 0.8,
         lastTimeChangedDirection = 0,
         moveSpeed = 300,
         slamThreshold = 50,
@@ -286,32 +286,6 @@ function lvl2.loop(dt)
         print("Started playing sountrack")
         lvl2.start_playing_audio_loop()
     end
-    if L.boss.state == "intro" then
-        local currentTime = L.time()
-        L.draw({ x = 0, y = 0, sprite = "scenes/1", s = 6.66 })
-        L.draw(L.boss)
-        L.draw(L.player)
-        L.draw_hud()
-        if currentTime - L.boss.lastGlitchTime >= L.boss.nextGlitchDelay then
-            if L.boss.sprite == L.boss.normalSprite then
-                L.boss.sprite = L.boss.monsterSprite
-            else
-                L.boss.sprite = L.boss.normalSprite
-            end
-
-            L.boss.nextGlitchDelay = math.random(5, 25) / 100
-            L.boss.lastGlitchTime = currentTime
-        end
-
-        if currentTime - L.boss.introStartTime >= L.boss.introDuration then
-            L.boss.state = "tracking"
-            L.boss.sprite = L.boss.monsterSprite
-
-            L.boss.y = hoverY
-            L.boss.lastTimeChangedDirection = currentTime
-            L.boss.lastTimeAttacked = currentTime
-        end
-    else
         if L.boss.hp <= 0 then
             L.boss.dead = true
         end
@@ -357,9 +331,37 @@ function lvl2.loop(dt)
         L.draw(L.player)
         --L.draw(groundBot)
         L.draw_hud()
-    end
+    
+    return true
 end
 function lvl2.startScene()
+    if L.boss.state == "intro" then
+        local currentTime = L.time()
+        L.draw({ x = 0, y = 0, sprite = "scenes/1", s = 6.66 })
+        L.draw(L.boss)
+        L.draw(L.player)
+        L.draw_hud()
+        if currentTime - L.boss.lastGlitchTime >= L.boss.nextGlitchDelay then
+            if L.boss.sprite == L.boss.normalSprite then
+                L.boss.sprite = L.boss.monsterSprite
+            else
+                L.boss.sprite = L.boss.normalSprite
+            end
+
+            L.boss.nextGlitchDelay = math.random(5, 25) / 100
+            L.boss.lastGlitchTime = currentTime
+        end
+
+        if currentTime - L.boss.introStartTime >= L.boss.introDuration then
+            L.boss.state = "tracking"
+            L.boss.sprite = L.boss.monsterSprite
+
+            L.boss.y = hoverY
+            L.boss.lastTimeChangedDirection = currentTime
+            L.boss.lastTimeAttacked = currentTime
+        end
+        return true
+    end
     return false
 end
 function lvl2.endScene()

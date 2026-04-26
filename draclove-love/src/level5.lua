@@ -140,6 +140,12 @@ function lvl5.loop(dt)
     for _, dead in pairs(L.deads) do
         L.draw(dead)
     end
+    return true
 end
-
+function lvl5.startScene()
+    return false
+end
+function lvl5.endScene()
+    return false
+end
 return lvl5

@@ -47,24 +47,30 @@ function MM.loop()
     if UI.isButtonPressed("startGame", buttons) then
         L.active_level_i = 1
         L.reset()
-        return
+        return true
     end
     if UI.isButtonPressed("continueGame", buttons) then
         L.active_level_i = L.failedLevel or 1
         L.reset()
-        return
+        return true
     end
     if UI.isButtonPressed("abondonRun", buttons) then
         L.failedLevel = nil
         L.reset()
-        return
+        return true
     end
     if UI.isButtonPressed("controls", buttons) then
         L.active_level_i = L.controls
         L.reset()
-        return
+        return true
     end
     UI.render(buttons)
+    return true
 end
-
+function MM.startScene()
+    return false
+end
+function MM.endScene()
+    return false
+end
 return MM

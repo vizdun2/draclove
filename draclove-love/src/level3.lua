@@ -114,7 +114,7 @@ end
 local prep_rot_speed = 300
 local flow_speed = 15
 local magic_y = 540 / 2
-local desired_water_level = 100
+local desired_water_level = 200
 
 local function changeState(state)
     L.boss.lastState=L.boss.state
@@ -329,22 +329,15 @@ function lvl3.loop(dt)
 
     if L.boss.hp <= 0 then
         L.boss.dead = true
+        return false
     end
-    if L.boss.dead == true then
-        L.nextLevel = 4
-        L.active_level_i = L.transition
-        L.reset()
-    end
-    L.player.on_ground = gravity.ground_collide(L.player, L1.ground)
+    
+    L.player.on_ground = gravity.ground_collide(L.player, ground_bot)
 
     for id, proj in pairs(L.water_projs) do
         if L.collide(proj, L.player) then
-            if L.player.is_punching()then
+            if(L.player.take_damage())then
                 L.water_projs[id] = nil
-            else
-                if(L.player.take_damage())then
-                    L.water_projs[id] = nil
-                end
             end
         end
         L.move_vel(proj)
@@ -456,6 +449,8 @@ function lvl3.startScene()
     return false
 end
 function lvl3.endScene()
-    return false
+    L.nextLevel = 4
+    L.active_level_i = L.transition
+    L.reset()
 end
 return lvl3

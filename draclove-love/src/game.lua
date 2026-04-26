@@ -3,6 +3,7 @@ L.clear_pck_cache()
 local L1 = require("src/level1")
 local L2 = require("src/level2")
 local L3 = require("src/level3")
+local L4 = require("src/level4")
 local L5 = require("src/level5")
 local GO = require("src/ItsJoeverScreen")
 local MM = require("src/mainMenu")
@@ -10,7 +11,7 @@ local CO = require("src/controls")
 local BS = require("src/betweenScenes")
 local PS = require("src/pause")
 -- as of now, all levels MUST have a .setup function and a .loop function
-L.levels = { L1, L2, L3, { setup = function () end, loop = function () end }, L5, BS, CO, MM, GO }
+L.levels = { L1, L2, L3, L4, L5, BS, CO, MM, GO }
 L.hunger_limit = 5
 L.failedLevel = nil
 L.nextLevel = nil
@@ -20,18 +21,13 @@ L.controls = L.table_length(L.levels)-2
 L.transition = L.table_length(L.levels)-3
 L.pauseScreen = PS
 
-function L.audio_intro(path) 
-	if Audio_source ~= nil then
-		Audio_source:stop()
-	end
-	Audio_source = L.play(path)
-	Source_path = path
-end
+
 
 function L.setup()
 	L.active_level_i = L.active_level_i or L.mainMenu
 	L.active_level().setup()
 
+	L.scenePhase = "start"
 	-- dialogue event = {text="text", audio="path_to_my_audio_file"}
 	L.dialogue_manager = { events = { que = {}, next_pop_i = 1, next_add_i = 1 }, next_dialogue_at = nil }
 end
@@ -124,7 +120,7 @@ local function pauseUnpause()
             L.player.timeStopped = false
         else
             L.stop_time()
-			L.pauseScreen.setup()
+			L.pauseScreen.loop()
             L.player.timeStopped = true
         end
     end
@@ -145,11 +141,28 @@ function L.render(dt)
 	if L.player then
 		pauseUnpause()
 	end
+	
 	if not L.player or not L.player.timeStopped then
-		if not L.active_level().startScene() then
-			if not L.active_level().loop() then
-				L.active_level().endScene()
-			end
-		end
+		local currentLevel = L.active_level()
+	    
+	    if L.scenePhase == "start" then
+	        if currentLevel.startScene and currentLevel.startScene() then
+	        else
+	            L.scenePhase = "loop"
+	        end
+	    end
+	    
+	    if L.scenePhase == "loop" then
+	        if currentLevel.loop and currentLevel.loop(dt) then
+	        else
+	            L.scenePhase = "end"
+	        end
+	    end
+	    
+	    if L.scenePhase == "end"then
+	        if currentLevel.endScene then
+	            currentLevel.endScene()
+	        end
+	    end
 	end
 end

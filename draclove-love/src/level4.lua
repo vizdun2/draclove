@@ -38,6 +38,12 @@ function lvl4.setup()
     L.spill = nil
     L.water_level = nil
     L.player.currentDJSprite="particles/3/jump_burst"
+    return true
 end
-
+function lvl4.startScene()
+    return false
+end
+function lvl4.endScene()
+    return false
+end
 return lvl4

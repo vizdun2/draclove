@@ -15,7 +15,7 @@ function OS.loop()
     if UI.isButtonPressed("mainMenu", buttons) then
         L.active_level_i = L.mainMenu
         L.reset()
-        return
+        return true
     end
     L.draw({c="#000000", text="[a][d]", font="pixelifysans", font_size=38, align="lm", x=-L.width/2+100, y=-L.height/2+200})
     L.draw({c="#000000", text="'movement'", font="pixelifysans", font_size=38, align="lm", x=-L.width/2+600, y=-L.height/2+200})
@@ -28,6 +28,13 @@ function OS.loop()
     L.draw({c="#000000", text="[c]/[m]", font="pixelifysans", font_size=38, align="lm", x=-L.width/2+100, y=-L.height/2+400})
     L.draw({c="#000000", text="'dodge'", font="pixelifysans", font_size=38, align="lm", x=-L.width/2+600, y=-L.height/2+400})
     UI.render(buttons)
+    return true
+end
+function OS.startScene()
+    return false
+end
+function OS.endScene()
+    return false
 end
 
 return OS

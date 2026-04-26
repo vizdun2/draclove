@@ -16,9 +16,15 @@ function BS.loop()
     if UI.isButtonPressed("goNext", buttons) then
         L.active_level_i = L.nextLevel or 1
         L.reset()
-        return
+        return true
     end
     UI.render(buttons)
+    return true
 end
-
+function BS.startScene()
+    return false
+end
+function BS.endScene()
+    return false
+end
 return BS
