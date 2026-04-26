@@ -4,6 +4,7 @@ local Player = require("src/player")
 local lvl4 = {}
 
 function lvl4.setup()
+    
     L.boss = {
         x = L.width / 2 - 150,
         y = 0,
@@ -34,6 +35,21 @@ function lvl4.setup()
     L.player.x = -600
     L.weed = {}
     L.last_weed_gen = 0
+
+
+    L.boss.x = L.width/2 - 20
+    L.boss.introTargetX = L.width / 2 - 150
+    L.boss.introSpeed = 150
+    L.boss.y=180
+    lvl4.introPhase = "walking"
+
+    L.boss.sprite = "mouse_dragon/mouse_runnin"
+    L.boss.sprite_t = 0.1
+    L.boss.sprite_start = L.time()
+
+    L.boss.introTargetY = 0
+    L.boss.ascendSpeed = 100
+
 end
 
 local weed_speed = 500
@@ -41,11 +57,7 @@ local weed_speed = 500
 function lvl4.loop(dt)
     if L.boss.hp <= 0 then
         L.boss.dead = true
-    end
-    if L.boss.dead == true then
-        L.nextLevel = 5
-        L.active_level_i = L.transition
-        L.reset()
+        return false
     end
 
     L.player.on_ground = true
@@ -145,11 +157,69 @@ function lvl4.loop(dt)
 end
 
 function lvl4.startScene()
-    return false
+    L.draw({ x = 0, y = 0, sprite = "scenes/4", s = 6.66 })
+
+    if lvl4.introPhase == "walking" then
+        
+        if L.boss.x > L.boss.introTargetX then
+            L.boss.x = L.boss.x - (L.boss.introSpeed * L.dt)
+        else
+            L.boss.x = L.boss.introTargetX
+            
+            lvl4.introPhase = "animating"
+            
+            L.boss.sprite = "mouse_dragon/transformation"
+            L.boss.sprite_t = 0.12
+            L.boss.sprite_start = L.time() 
+        end
+
+    elseif lvl4.introPhase == "animating" then
+        
+        if L.sprite_finished(L.boss) then
+            
+            L.boss.sprite = "mouse_dragon/idle"
+            L.boss.sprite_start = L.time()
+            
+            lvl4.introPhase = "ascending"
+        end
+
+    elseif lvl4.introPhase == "ascending" then
+        
+        if L.boss.y > L.boss.introTargetY then
+            L.boss.y = L.boss.y - (L.boss.ascendSpeed * L.dt)
+        else
+            L.boss.y = L.boss.introTargetY
+            
+            return false 
+        end
+    end
+
+    L.draw(L.player) 
+    L.draw(L.boss)
+
+    return true
 end
 
 function lvl4.endScene()
-    return false
-end
+    if not lvl4.endSceneStarted then
+        lvl4.endSceneStarted = true
+        
+        
+        L.boss.sprite = "mouse_dragon/transformation"
+        
+        L.boss.sprite_t = -0.12 
+        L.boss.sprite_start = L.time()
+    end
 
+    L.draw({ x = 0, y = 0, sprite = "scenes/4", s = 6.66 })
+    L.draw(L.player)
+    L.draw(L.boss)
+
+    if L.sprite_cycle_count(L.boss) <= -2 then
+        
+        L.nextLevel = 5 
+        L.active_level_i = L.transition
+        L.reset()
+    end
+end
 return lvl4
