@@ -10,11 +10,9 @@ L1.level = {
 	np_objects = { L1.ground }, -- non player objects
 }
 L1.lines = {}
-L1.player_lines = { { text = "Stoner: She got a screw loose brother!", audio = "audio/chair/screw_loose.wav" }, { text = "Stoner: That girl falling head over wheels for me!", audio = "" }, { text = "Stoner: I need to take the her wheels man, maybe they edible, like them gummy bears or smth" } }
+-- L1.player_lines = { { text = "Stoner: She got a screw loose brother!", audio = "audio/chair/screw_loose.wav" }, { text = "Stoner: That girl falling head over wheels for me!", audio = "" }, { text = "Stoner: I need to take the her wheels man, maybe they edible, like them gummy bears or smth" } }
 
-local player_next_line_offset = 10
 L1.finished_intro = false
-L1.player_next_line = player_next_line_offset + math.random(5)
 
 function L1.setup()
 	L.audio_intro("audio/soundtrack/first_ost_intro")
@@ -64,11 +62,6 @@ function L1.loop(dt)
 	if Source_path == "audio/soundtrack/first_ost_intro" and not Audio_source:isPlaying() then
 		Audio_source:stop()
 		L1.start_playing_audio_loop()
-	end
-
-	if L1.player_next_line < L.time() then
-		L.push_dialogue(L1.player_lines[math.random(#L1.player_lines)])
-		L1.player_next_line = L1.player_next_line + player_next_line_offset + math.random(10)
 	end
 
 

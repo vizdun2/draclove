@@ -36,7 +36,7 @@ function MM.loop()
     L.draw({ x = 0, y = 0, sprite = "UI/background", rainbow = true, s = 6.66 })
     L.draw({
         c = "#000000",
-        text = "Sylvia Path",
+        text = "Salvia Path",
         font = "pixelifysans",
         font_size = 100,
         align = "mm",

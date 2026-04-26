@@ -90,9 +90,9 @@ end
 local function player_action()
     if (L.key_pressed("c") or L.key_pressed("m")) and L.time() - L.player.last_dodged > dodge_cooldown then
         if L.player.on_ground then
-            player_anime("player/matrix_from_idle", 0.06)
+            player_anime("player/matrix_from_idle", 0.02)
         else
-            player_anime("player/matrix_from_air", 0.05)
+            player_anime("player/matrix_from_air", 0.025)
         end
         L.player.pr, L.player.pl = 0, 0
         L.player.pt = -30

@@ -250,9 +250,9 @@ end
 local function projecAttack()
     enterAction("projectile", 1.5)
     L.boss.sprite = "chair/runnin"
-    if math.random() <= 0.33 then projectileAttack(L.player, 1, 1) end
-    if math.random() <= 0.33 then projectileAttack(L.player, 1, -1) end
-    if math.random() <= 0.33 then projectileAttack(L.player, -1, 1) end
+    projectileAttack(L.player, 1, 1)
+    projectileAttack(L.player, 1, -1)
+    projectileAttack(L.player, -1, 1)
 end
 
 
@@ -363,7 +363,6 @@ end
 function CB.bossLoopLogic(dt, player)
     --L.printNoBs("iblis",L.boss.lastAttack)
     playerWheelCollision()
-    bossLine()
     if L.pasttime(L.boss.lastActionTime + L.boss.currentCooldown) and L.boss.inAction then
         resetBoss()
     end
