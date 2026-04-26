@@ -4,11 +4,7 @@ local Player = require("src/player")
 local lvl4 = {}
 
 function lvl4.setup()
-<<<<<<< HEAD
-    
-=======
     L.audio_intro("audio/soundtrack/first_ost_intro")
->>>>>>> 0df61390f31a5eb0229f8c824d11079417120ef0
     L.boss = {
         x = L.width / 2 - 150,
         y = 0,
@@ -90,6 +86,11 @@ function lvl4.loop(dt)
     if L.boss.hp <= 0 then
         L.boss.dead = true
         return false
+    end
+    if L.boss.dead == true then
+        L.nextLevel = 3
+        L.active_level_i = L.transition
+        L.reset()
     end
 
     L.player.on_ground = true

@@ -250,10 +250,13 @@ function L.render(dt)
 	        end
 	    end
 	end
-	for i = 1, #L.levels do
-		if L.key_released(tostring(i)) then
-			L.active_level_i = i
-			L.reset()
+
+	if L.debug then
+		for i = 1, #L.levels do
+			if L.key_released(tostring(i)) then
+				L.active_level_i = i
+				L.reset()
+			end
 		end
 	end
 end

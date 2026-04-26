@@ -394,7 +394,7 @@ function lvl2.endScene(dt)
     Player.physicsOnlyLoop()
 	L.updateDeathDebris(dt, 220)
 	if L.time() - L.boss.timeOfDeath >= 3.5 then
-		L.nextLevel = 3
+		L.nextLevel = 4
 		L.active_level_i = L.transition
 		L.reset()
 		return false

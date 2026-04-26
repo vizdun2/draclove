@@ -536,16 +536,16 @@ function lvl3.endScene()
     elseif lvl3.endPhase == "reveal" then
         L.draw({ x = 0, y = 0, sprite = "scenes/3", s = 6.66 })
         
-        L.draw({ 
-            x = 0, 
-            y = 200, 
-            s = L.boss.s, 
+        L.draw({
+            x = 0,
+            y = 200,
+            s = L.boss.s,
             sprite = "idibiks/toilet_normal",
-            sx = -1 
+            sx = -1
         })
 
         if timeInPhase >= lvl3.cooldwon then
-            L.nextLevel = 4
+            L.nextLevel = 5
             L.active_level_i = L.transition
             L.reset()
         end
