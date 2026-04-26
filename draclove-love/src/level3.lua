@@ -53,7 +53,7 @@ function lvl3.setup()
         state = states.moving_around,
         -- state_begin = L.time(),
         -- next_state = 1,
-        hp = 20,
+        hp = 25,
         sprite = "idibiks/idle",
         sprite_t = 0.1,
         pl = -20,
@@ -63,12 +63,13 @@ function lvl3.setup()
         last_chased = L.time(),
         chaseCooldown = 10,
         lastState=states.moving_around,
-        chaseSpeed = 350,
+        chaseSpeed = 280,
         chaseDuration = 4.0,
         shootCount = 0,
         spillCount = 0,
         queuedAttack = nil,
-        chaseThresholds = {15, 10, 5},
+        chaseThresholds = {20, 15, 10, 5},
+        takeHitCooldown = 0.6,
     }
     Player.setup()
     L.pipes = {}
@@ -84,7 +85,7 @@ local pellet_angle = 30
 
 local outwardSpeed = 200
 local spinSpeed = 100
-local pelletsInCircleBase = 8
+local pelletsInCircleBase = 5
 
 local function shoot_water(pelletsInCircle)
     local angleStep = 360 / pelletsInCircle
@@ -110,10 +111,10 @@ local function shoot_water(pelletsInCircle)
         }
     end
 end
-local prep_rot_speed = 200
-local flow_speed = 8
+local prep_rot_speed = 300
+local flow_speed = 15
 local magic_y = 540 / 2
-local desired_water_level = 290
+local desired_water_level = 100
 
 local function changeState(state)
     L.boss.lastState=L.boss.state
@@ -198,7 +199,7 @@ local function do_toilet()
 
     if L.boss.state == states.shooting then
         if L.time() > L.boss.state_start + 0.5 then
-            shoot_water(pelletsInCircleBase+1)
+            shoot_water(pelletsInCircleBase+2)
             L.boss.sprite = "idibiks/idle"
             changeState(states.moving_around)
         end
@@ -341,18 +342,17 @@ function lvl3.loop(dt)
             if L.player.is_punching()then
                 L.water_projs[id] = nil
             else
-                L.water_projs[id] = nil
-                L.player.take_damage()
+                if(L.player.take_damage())then
+                    L.water_projs[id] = nil
+                end
             end
-  
-        else
-            L.move_vel(proj)
         end
+        L.move_vel(proj)
     end
 
     do_toilet()
 
-    if L.hit_time and L.pasttime(L.hit_time + 1) then
+    if L.hit_time and L.pasttime(L.hit_time + L.boss.takeHitCooldown) then
         L.hit_time = nil
     end
 
@@ -391,11 +391,11 @@ function lvl3.loop(dt)
             if L.collide(L.player, pipe) and not L.hit_time then
                 L.hit_time = L.time()
                 L.boss.hp = L.boss.hp - 1
-                L.player.vel_y = -1000
+                L.player.vel_y = -1500
                 if #L.scars == 0 then
                     L.scars = nil
                 end
-                L.print("hit")
+                --L.print("hit")
                 break
             end
         end
@@ -424,7 +424,7 @@ function lvl3.loop(dt)
     Player.loop()
 
     for _i, scar in pairs(L.scars) do
-        L.print(scar)
+        --L.print(scar)
         scar.x = L.boss.x < 0 and math.max(scar.x, L.boss.x) or math.min(scar.x, L.boss.x)
         scar.y = L.boss.y < 0 and math.max(scar.y, L.boss.y) or math.min(scar.y, L.boss.y)
         L.draw(scar)
