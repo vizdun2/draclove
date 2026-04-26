@@ -136,8 +136,10 @@ function L.render(dt)
 			L.reset()
 		end
 	end
-	pauseUnpause()
-	if not L.player.timeStopped then
+	if L.player then
+		pauseUnpause()
+	end
+	if not L.player or not L.player.timeStopped then
 		L.active_level().loop(dt)
 	end
 end
