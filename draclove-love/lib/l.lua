@@ -20,7 +20,7 @@ local L = {
     next_uid = 1,
     stopped_since = nil,
     skipped_secs = 0,
-    debug = true,
+    debug = false,
 }
 
 local square_size = 32
