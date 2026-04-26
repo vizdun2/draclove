@@ -36,6 +36,7 @@ local states = {
     spilling_finishing = 6,
     spilling_recover = 4,
     chasing = 7,
+    shooting = 8,
 }
 
 local boss_max_hp = 20
@@ -63,7 +64,11 @@ function lvl3.setup()
         chaseCooldown = 10,
         lastState=states.moving_around,
         chaseSpeed = 350,
-        chaseDuration = 4.0
+        chaseDuration = 4.0,
+        shootCount = 0,
+        spillCount = 0,
+        queuedAttack = nil,
+        chaseThresholds = {15, 10, 5},
     }
     Player.setup()
     L.pipes = {}
@@ -79,9 +84,9 @@ local pellet_angle = 30
 
 local outwardSpeed = 200
 local spinSpeed = 100
-local pelletsInCircle = 8
+local pelletsInCircleBase = 8
 
-local function shoot_water()
+local function shoot_water(pelletsInCircle)
     local angleStep = 360 / pelletsInCircle
     
     for i = 1, pelletsInCircle do
@@ -114,30 +119,51 @@ local function changeState(state)
     L.boss.lastState=L.boss.state
     L.boss.state=state
 end
+local function decideNextAttack()
+    if #L.boss.chaseThresholds > 0 and L.boss.hp <= L.boss.chaseThresholds[1] then
+        
+        while #L.boss.chaseThresholds > 0 and L.boss.hp <= L.boss.chaseThresholds[1] do
+            table.remove(L.boss.chaseThresholds, 1)
+        end
+        
+        L.boss.shootCount = 0
+        L.boss.spillCount = 0
+        return "chase"
+    end
+
+    local choice = math.random(1, 2)
+
+    if choice == 1 and L.boss.shootCount >= 2 then
+        choice = 2
+    elseif choice == 2 and L.boss.spillCount >= 1 then
+        choice = 1
+    end
+
+    if choice == 1 then
+        L.boss.shootCount = L.boss.shootCount + 1
+        L.boss.spillCount = 0
+        return "shoot"
+    else
+        L.boss.spillCount = L.boss.spillCount + 1
+        L.boss.shootCount = 0
+        return "spill"
+    end
+end
 local function do_toilet()
     if L.boss.state == states.moving_around then
-        if L.time() > L.boss.last_chased + L.boss.chaseCooldown then
+        
+        if not L.boss.queuedAttack then
+            L.boss.queuedAttack = decideNextAttack()
+            L.boss.target = nil
+        end
+
+        if L.boss.queuedAttack == "chase" then
             changeState(states.chasing)
             L.boss.state_start = L.time()
             L.boss.sprite = "idibiks/attack"
+            L.boss.queuedAttack = nil
             return
         end
-        if L.boss.lastState == states.chasing then
-            L.boss.state=states.spilling_prep
-            return
-        end 
-        
-        if L.time() > L.boss.last_burped + 2 then
-            shoot_water()
-            L.boss.last_burped = L.time()
-            return
-        elseif L.time() > L.boss.last_burped + 3.5 then
-            L.boss.sprite = "idibiks/attack"
-            return
-        elseif L.time() > L.boss.last_burped + 0.5 then
-            L.boss.sprite = "idibiks/idle"
-        end
-
 
         if not L.boss.target then
             L.boss.target = { x = L.boss.x, y = L.boss.y }
@@ -147,19 +173,35 @@ local function do_toilet()
             local vx, vy = L.vec_to(L.boss.target, L.boss)
             L.boss.vel_x = vx * toilet_speed
             L.boss.vel_y = vy * toilet_speed
-            if L.boss.vel_x < 0 then
-                L.boss.sx = -1
-            else
-                L.boss.sx = 1
-            end
+            
+            L.boss.sx = L.boss.vel_x < 0 and -1 or 1
         end
 
         if L.dist(L.boss, L.boss.target) < 10 then
             L.boss.vel_x, L.boss.vel_y = 0, 0
             L.boss.target = nil
+            
+            if L.boss.queuedAttack == "spill" then
+                changeState(states.spilling_prep)
+            elseif L.boss.queuedAttack == "shoot" then
+                shoot_water(pelletsInCircleBase)
+                changeState(states.shooting)
+                L.boss.state_start = L.time()
+                L.boss.sprite = "idibiks/attack"
+            end
+            
+            L.boss.queuedAttack = nil
         end
 
         L.move_vel(L.boss)
+    end
+
+    if L.boss.state == states.shooting then
+        if L.time() > L.boss.state_start + 0.5 then
+            shoot_water(pelletsInCircleBase+1)
+            L.boss.sprite = "idibiks/idle"
+            changeState(states.moving_around)
+        end
     end
     if L.boss.state == states.chasing then
         local timeInChase = L.time() - L.boss.state_start
