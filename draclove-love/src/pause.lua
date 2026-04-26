@@ -9,7 +9,7 @@ function BS.loop()
     
     L.draw({x=0,y=0, sprite="UI/background", rainbow=true, s=6.66})
     L.draw({c="#000000", text="Press esc to continue", font="pixelifysans", font_size=38, align="lm", x=-L.width/2+100, y=-L.height/2+100 })
-    L.draw({c="#000000", text="You scared, little fuckboy?", font="pixelifysans", font_size=38, align="lm", x=-L.width/2+100, y=-L.height/2+50})
+    L.draw({c="#000000", text="You scared?", font="pixelifysans", font_size=38, align="lm", x=-L.width/2+100, y=-L.height/2+50})
     return true
 end
 function BS.startScene()
