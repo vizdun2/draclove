@@ -21,7 +21,13 @@ L.controls = L.table_length(L.levels)-2
 L.transition = L.table_length(L.levels)-3
 L.pauseScreen = PS
 
-
+function L.audio_intro(path) 
+	if Audio_source ~= nil then
+		Audio_source:stop()
+	end
+	Audio_source = L.play(path)
+	Source_path = path
+end
 
 function L.setup()
 	L.active_level_i = L.active_level_i or L.mainMenu
