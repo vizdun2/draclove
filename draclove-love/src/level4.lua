@@ -4,7 +4,11 @@ local Player = require("src/player")
 local lvl4 = {}
 
 function lvl4.setup()
+<<<<<<< HEAD
     
+=======
+    L.audio_intro("audio/soundtrack/first_ost_intro")
+>>>>>>> 0df61390f31a5eb0229f8c824d11079417120ef0
     L.boss = {
         x = L.width / 2 - 150,
         y = 0,
@@ -15,6 +19,7 @@ function lvl4.setup()
         -- state_begin = L.time(),
         -- next_state = 1,
         hp = 20,
+        maxHp = 20,
         sprite = "mouse_dragon/idle",
         -- sprite = "mouse_dragon/dragon_flight",
         sprite_t = 0.1,
@@ -25,6 +30,7 @@ function lvl4.setup()
         last_burped = L.time(),
         burp_i = 0,
         takeHitCooldown = 0.6,
+        fucktuts = false,
     }
     Player.setup()
     L.fire_projs = {}
@@ -52,9 +58,35 @@ function lvl4.setup()
 
 end
 
+local function draw_hud()
+    local totalIcons = math.ceil(L.boss.maxHp / 5)
+    
+    local activeIcons = math.ceil(L.boss.hp / 5)
+
+    for i = 1, totalIcons do
+        L.draw({ 
+            sprite = "mouse_dragon/trava",
+            s = 3, 
+            x = -600 + (i - 1) * 80, 
+            y = -L.height / 2 + 60, 
+            c = (i <= activeIcons and "FFFFFF" or "606060") 
+        })
+    end
+end
+
 local weed_speed = 500
 
+function lvl4.start_audio_loop()
+    Source_path = "audio/soundtrack/first_ost_loop"
+    Audio_source = L.play(Source_path)
+    Audio_source:setLooping(true)
+end
+
 function lvl4.loop(dt)
+    if Source_path ~= "audio/soundtrack/first_ost_intro" and not Audio_source:isPlaying() then
+        lvl4.start_audio_loop()
+    end
+    
     if L.boss.hp <= 0 then
         L.boss.dead = true
         return false
@@ -88,6 +120,7 @@ function lvl4.loop(dt)
         if L.collide(w, L.patch(L.boss, { s = 0.8 })) then
             L.weed[id] = nil
             L.boss.hp = L.boss.hp - 1
+            L.boss.fucktuts = true
         end
 
         L.move_vel(w)
@@ -148,10 +181,14 @@ function lvl4.loop(dt)
 
     for _, weed in pairs(L.weed) do
         L.draw(weed)
+        if weed.sprite == "mouse_dragon/trava" and not L.boss.fucktuts then
+            L.draw({r=(weed.y > 0 and 90 or -90), sprite="UI/hand", x = weed.x, y = weed.y + (weed.y > 0 and -75 or 75), sx = L.boss.x > 0 and 1 or -1, sprite_t = 0.08})
+        end
     end
 
     Player.loop()
     L.draw(L.player)
+    draw_hud()
     L.draw_hud()
     return true
 end

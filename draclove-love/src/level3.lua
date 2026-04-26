@@ -465,7 +465,9 @@ function lvl3.loop(dt)
         L.draw(scar)
     end
 
-    L.draw({sprite="UI/hand", x = origin_x + (L.boss.x > 0 and -75 or 75), y = (L.boss.y - L.height / 2) / 2, sx = L.boss.x > 0 and 1 or -1, sprite_t = 0.08})
+    if not L.pasttime(L.boss.started + 5) then
+        L.draw({sprite="UI/hand", x = origin_x + (L.boss.x > 0 and -75 or 75), y = (L.boss.y - L.height / 2) / 2, sx = L.boss.x > 0 and 1 or -1, sprite_t = 0.08})
+    end
 
     --L.draw(L.patch(L.boss, {debug=true}))
     L.draw(L.boss)
