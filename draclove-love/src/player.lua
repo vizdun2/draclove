@@ -65,6 +65,7 @@ function Player.setup()
         if L.player.is_dodging() then return false end
         if L.player.hurt_time ~= nil and L.time() - L.player.hurt_time < 1 then return false end
         
+        L.play("audio/player/ooh")
         L.player.hurt_time = L.time()
         L.player.hunger = L.player.hunger + 1
         

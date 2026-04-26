@@ -464,6 +464,9 @@ function lvl3.loop(dt)
         scar.y = L.boss.y < 0 and math.max(scar.y, L.boss.y) or math.min(scar.y, L.boss.y)
         L.draw(scar)
     end
+
+    L.draw({sprite="UI/hand", x = origin_x + (L.boss.x > 0 and -75 or 75), y = (L.boss.y - L.height / 2) / 2, sx = L.boss.x > 0 and 1 or -1, sprite_t = 0.08})
+
     --L.draw(L.patch(L.boss, {debug=true}))
     L.draw(L.boss)
 

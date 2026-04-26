@@ -39,7 +39,9 @@ local function spawn_a_chip()
 end
 
 function lvl5.setup()
-    L.audio_intro("audio/soundtrack/menu_music")
+    Audio_source:stop()
+    Audio_source = nil
+    Source_path = nil
     L.player = { x = 0, y = 0, sprite = "chips/honza_citron_idle", s = 0.075, vel_x = 0, vel_y = 0, dash_mult = 1, last_used_dash = 0 }
     L.chips = { sprite = "chips/normal", s = 2, x = 500, y = 0, spawned = L.time() }
     L.chip_projs = {}
@@ -110,6 +112,7 @@ function lvl5.loop(dt)
         L.move_vel(chip)
         if L.collide(chip, L.player) then
             -- L.print("ate a chip (and lied)")
+            L.play("audio/player/chroupani")
             L.chip_projs[id] = nil
             L.deads[L.uid()] = { x = chip.x, y = chip.y, sprite = "particles/chip_destroyed", sprite_t = 0.1, sprite_start =
             L.time(), s=2 }
@@ -122,7 +125,7 @@ function lvl5.loop(dt)
     end
     about_to_eat = L.player.ate and not L.pasttime(L.player.ate + 0.5)
     L.player.sprite = about_to_eat and "chips/honza_citron_eating" or "chips/honza_citron_idle"
-
+    
     if L.pasttime(L.chips.spawned + 0.5) then
         spawn_a_chip()
         L.chips.spawned = L.time()
