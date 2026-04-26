@@ -13,7 +13,7 @@ function lvl4.setup()
         r = 0,
         -- state_begin = L.time(),
         -- next_state = 1,
-        hp = 10,
+        hp = 20,
         sprite = "mouse_dragon/idle",
         -- sprite = "mouse_dragon/dragon_flight",
         sprite_t = 0.1,
