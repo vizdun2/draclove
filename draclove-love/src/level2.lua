@@ -184,6 +184,9 @@ local function updateDebris(dt)
             if d.bounces == 0 then
                 d.velY = -d.velY * 0.5
                 d.bounces = 1
+                if L.pasttime(d.born + 0.2) then
+                    L.play("audio/stuff_break", 0.3)
+                end
             else
                 d.dead = true
             end
@@ -200,6 +203,9 @@ local function updateDebris(dt)
 
         if d.dead then
             table.remove(L.boss.debris, i)
+            if L.pasttime(d.born + 0.2) then
+                L.play("audio/stuff_break", 0.3)
+            end
         else
             L.draw(d)
         end
