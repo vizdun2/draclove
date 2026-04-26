@@ -111,7 +111,7 @@ function lvl5.loop(dt)
         if L.collide(chip, L.player) then
             -- L.print("ate a chip (and lied)")
             L.chip_projs[id] = nil
-            L.deads[L.uid()] = { x = chip.x, y = chip.y, sprite = "particles/chip_destroayed", sprite_t = 0.1, sprite_start =
+            L.deads[L.uid()] = { x = chip.x, y = chip.y, sprite = "particles/chip_destroyed", sprite_t = 0.1, sprite_start =
             L.time(), s=2 }
             L.player.ate = L.time()
         elseif L.pasttime(chip.born + 20) then
