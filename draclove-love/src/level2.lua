@@ -68,7 +68,7 @@ function lvl2.setup()
         velX = 0,
         velY = 0,
         slamSpeed = 1000,
-        riseSpeed = 500,
+        riseSpeed = 200,
         groundedDuration = 2.0,
         timeHitGround = 0,
         rotationSpeed = 400,
@@ -298,7 +298,6 @@ function lvl2.loop(dt)
             
             L.boss.y=hoverY
             L.boss.lastTimeChangedDirection = currentTime 
-            L.boss.lastTimeAttacked = currentTime
         end
 
     else

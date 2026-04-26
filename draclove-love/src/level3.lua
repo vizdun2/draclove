@@ -35,6 +35,7 @@ local states = {
     spilling_hard = 5,
     spilling_finishing = 6,
     spilling_recover = 4,
+    chasing = 7,
 }
 
 local boss_max_hp = 20
@@ -53,10 +54,15 @@ function lvl3.setup()
         hp = 20,
         sprite = "idibiks/idle",
         sprite_t = 0.1,
-        pl = -12,
-        pr = -8,
+        pl = -20,
+        pr = -28,
         pb = 0,
         last_burped = L.time(),
+        last_chased = L.time(),
+        chaseCooldown = 10,
+        lastState=states.moving_around,
+        chaseSpeed = 350,
+        chaseDuration = 4.0
     }
     Player.setup()
     L.pipes = {}
@@ -88,8 +94,23 @@ local flow_speed = 8
 local magic_y = 540 / 2
 local desired_water_level = 290
 
+local function changeState(state)
+    L.boss.lastState=L.boss.state
+    L.boss.state=state
+end
 local function do_toilet()
     if L.boss.state == states.moving_around then
+        if L.time() > L.boss.last_chased + L.boss.chaseCooldown then
+            changeState(states.chasing)
+            L.boss.state_start = L.time()
+            L.boss.sprite = "idibiks/attack"
+            return
+        end
+        if L.boss.lastState == states.chasing then
+            L.boss.state=states.spilling_prep
+            return
+        end 
+        
         if L.time() > L.boss.last_burped + 2 then
             shoot_water()
             L.boss.last_burped = L.time()
@@ -100,6 +121,7 @@ local function do_toilet()
         elseif L.time() > L.boss.last_burped + 0.5 then
             L.boss.sprite = "idibiks/idle"
         end
+
 
         if not L.boss.target then
             L.boss.target = { x = L.boss.x, y = L.boss.y }
@@ -119,18 +141,35 @@ local function do_toilet()
         if L.dist(L.boss, L.boss.target) < 10 then
             L.boss.vel_x, L.boss.vel_y = 0, 0
             L.boss.target = nil
-            L.boss.state = states.spilling_prep
         end
 
         L.move_vel(L.boss)
     end
-
+    if L.boss.state == states.chasing then
+        local timeInChase = L.time() - L.boss.state_start
+        
+        if timeInChase <= L.boss.chaseDuration then
+            local vx, vy = L.vec_to(L.player, L.boss)
+            
+            L.boss.vel_x = vx * L.boss.chaseSpeed
+            L.boss.vel_y = vy * L.boss.chaseSpeed
+            
+            L.boss.sx = L.boss.vel_x < 0 and -1 or 1
+            
+            L.move_vel(L.boss)
+        else
+            L.boss.last_chased = L.time()
+            L.boss.sprite = "idibiks/idle"
+            L.boss.target = nil
+            changeState(states.moving_around)
+        end
+    end
     local r_mod = L.boss.sx > 0 and 1 or -1
     if L.boss.state == states.spilling_prep then
         L.boss.r = (L.boss.r or 0) + prep_rot_speed * r_mod * L.dt
         if r_mod == 1 and L.boss.r >= 180 or r_mod == -1 and L.boss.r <= -180 then
             L.boss.r = 180 * r_mod
-            L.boss.state = states.spilling
+            changeState(states.spilling)
             L.boss.state_start = L.time()
             L.boss.sprite = "idibiks/attack"
         end
@@ -150,7 +189,7 @@ local function do_toilet()
         if L.spill.y >= (L.boss.y + magic_y) / 2 then
             -- L.spill.y = (L.boss.y + magic_y) / 2
             -- L.spill.sy = (L.boss.y + magic_y) / 13
-            L.boss.state = states.spilling_hard
+            changeState(states.spilling_hard)
             L.boss.state_start = L.time()
         end
     end
@@ -164,7 +203,7 @@ local function do_toilet()
         L.water_level.y = origin - d * flow_speed * 32
         if L.water_level.y <= desired_water_level then
             L.water_level.y = L.water_level.desired_water_level
-            L.boss.state = states.spilling_finishing
+            changeState(states.spilling_finishing)
             L.boss.state_start = L.time()
             L.boss.sprite = "idibiks/idle"
         end
@@ -178,7 +217,7 @@ local function do_toilet()
         if L.spill.sy <= 0 and L.water_level.y >= origin then
             L.spill.sy = 0
             L.water_level.y = origin
-            L.boss.state = states.spilling_recover
+            changeState(states.spilling_recover)
             L.boss.state_start = L.time()
         end
     end
@@ -187,7 +226,7 @@ local function do_toilet()
         L.boss.r = (L.boss.r or 0) - prep_rot_speed * r_mod * L.dt
         if (r_mod == 1 and L.boss.r <= 0) or (r_mod == -1 and L.boss.r >= 0) then
             L.boss.r = 0
-            L.boss.state = states.moving_around
+            changeState(states.moving_around)
             L.boss.state_start = nil
             L.boss.last_burped = L.time()
         end
@@ -287,9 +326,16 @@ function lvl3.loop(dt)
     end
 
     if L.spill and L.collide(L.spill, L.player) or L.water_level and L.collide(L.water_level, L.player) then
-        L.player.take_damage()
+       L.player.take_damage()
     end
-
+    if L.collide(L.boss, L.player) then
+        if L.boss.state == states.chasing then
+            L.player.take_damage()
+            
+            L.player.vel_x = 1000
+            L.player.vel_y = -1000
+        end
+    end
     if not L.scars or #L.scars > 0 and L.sprite_finished(L.scars[1]) then
         spawn_scars()
     end
@@ -307,7 +353,7 @@ function lvl3.loop(dt)
         scar.y = L.boss.y < 0 and math.max(scar.y, L.boss.y) or math.min(scar.y, L.boss.y)
         L.draw(scar)
     end
-
+    --L.draw(L.patch(L.boss, {debug=true}))
     L.draw(L.boss)
 
     for _, proj in pairs(L.water_projs) do

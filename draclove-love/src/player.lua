@@ -39,7 +39,7 @@ function Player.setup()
         timeStopped = false,
         space = false,
     }
-
+    Player.jump_speed=base_jump_speed
     function L.player.is_dodging()
         return L.player.sprite == "player/matrix_from_air" or L.player.sprite =="player/matrix_from_idle"
     end
