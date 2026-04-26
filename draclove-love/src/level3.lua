@@ -74,22 +74,37 @@ function lvl3.setup()
 end
 
 local toilet_speed = 200
-local proj_speed = 200
 local pellet_count = 4
 local pellet_angle = 30
 
+local outwardSpeed = 200
+local spinSpeed = 100
+local pelletsInCircle = 8
+
 local function shoot_water()
-    local each_angle = pellet_angle / (pellet_count - 1)
-    local original_angle = -pellet_angle / 2
-    local r = L.angle_look_at(L.boss.x, L.boss.y, L.player.x, L.player.y)
-    for i = 0, pellet_count do
-        local cr = r + original_angle + i * each_angle
-        local vx, vy = L.angle_vec(cr)
-        L.water_projs[L.uid()] = { x = L.boss.x, y = L.boss.y, vel_x = vx * proj_speed, vel_y = vy * proj_speed, born = L
-        .time(), sprite_t = 0.1, sprite = "idibiks/water_projectile" }
+    local angleStep = 360 / pelletsInCircle
+    
+    for i = 1, pelletsInCircle do
+        local currentAngle = i * angleStep
+        
+        local vxOut, vyOut = L.angle_vec(currentAngle)
+        
+        local vxSpin, vySpin = L.angle_vec(currentAngle + 90)
+        
+        local finalVx = (vxOut * outwardSpeed) + (vxSpin * spinSpeed)
+        local finalVy = (vyOut * outwardSpeed) + (vySpin * spinSpeed)
+        
+        L.water_projs[L.uid()] = { 
+            x = L.boss.x, 
+            y = L.boss.y, 
+            vel_x = finalVx, 
+            vel_y = finalVy, 
+            born = L.time(), 
+            sprite_t = 0.1, 
+            sprite = "idibiks/water_projectile" 
+        }
     end
 end
-
 local prep_rot_speed = 200
 local flow_speed = 8
 local magic_y = 540 / 2
@@ -334,6 +349,7 @@ function lvl3.loop(dt)
             if L.collide(L.player, pipe) and not L.hit_time then
                 L.hit_time = L.time()
                 L.boss.hp = L.boss.hp - 1
+                L.player.vel_y = -1000
                 if #L.scars == 0 then
                     L.scars = nil
                 end
@@ -348,10 +364,10 @@ function lvl3.loop(dt)
     end
     if L.collide(L.boss, L.player) then
         if L.boss.state == states.chasing then
-            L.player.take_damage()
-            
-            L.player.vel_x = 1000
-            L.player.vel_y = -1000
+            if L.player.take_damage() then
+                L.player.vel_x = 1000
+                L.player.vel_y = -1000
+            end
         end
     end
     if not L.scars or #L.scars > 0 and L.sprite_finished(L.scars[1]) then
