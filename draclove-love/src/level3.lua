@@ -338,9 +338,19 @@ function lvl3.start_playing_audio_loop()
     Audio_source:setLooping(true)
 end
 local function draw_hud()
-	for i = 1, L.boss.maxHp/5, 1 do
-		L.draw({ sprite = "chair/wheel", s = 5, x = -600 + (i - 1) * 60, y = -L.height / 2 + 30, c = (i <= L.boss.hp/5 and "FFFFFF" or "606060") })
-	end
+    local totalIcons = math.ceil(L.boss.maxHp / 5)
+    
+    local activeIcons = math.ceil(L.boss.hp / 5)
+
+    for i = 1, totalIcons do
+        L.draw({ 
+            sprite = "UI/toilet_icon", 
+            s = 3, 
+            x = -600 + (i - 1) * 80, 
+            y = -L.height / 2 + 60, 
+            c = (i <= activeIcons and "FFFFFF" or "606060") 
+        })
+    end
 end
 function lvl3.loop(dt)
 

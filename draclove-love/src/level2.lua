@@ -295,13 +295,13 @@ function lvl2.start_playing_audio_loop()
 end
 local function draw_hud()
 	for i = 1, L.boss.maxHp, 1 do
-		L.draw({ sprite = "chair/wheel", s = 5, x = -600 + (i - 1) * 60, y = -L.height / 2 + 30, c = (i <= L.boss.hp and "FFFFFF" or "606060") })
+		L.draw({ sprite = "UI/door_icon", s = 5, x = -600 + (i - 1) * 60, y = -L.height / 2 + 30, c = (i <= L.boss.hp and "FFFFFF" or "606060") })
 	end
 end
 function lvl2.loop(dt)
     if Source_path == "audio/soundtrack/second_ost_intro" and not Audio_source:isPlaying() then
         Audio_source:stop()
-        print("Started playing sountrack")
+        --print("Started playing sountrack")
         lvl2.start_playing_audio_loop()
     end
         if L.boss.hp <= 0 then
@@ -337,7 +337,7 @@ function lvl2.loop(dt)
                     L.boss.sprite = "door/door_damaga"
                     L.boss.sprite_t = 0.1
                     L.boss.sprite_start = L.time()
-                    L.print("Boss Hit! HP:", L.boss.hp)
+                    --L.print("Boss Hit! HP:", L.boss.hp)
 
 
                     L.boss.timeHitGround = 0
