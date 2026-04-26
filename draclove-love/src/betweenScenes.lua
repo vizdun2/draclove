@@ -6,11 +6,11 @@ local buttons = {}
 
 local cutsceneMap = {
     [1] = "assets/cutscene.ogv", -- before initial level
-    [2] = "assets/cutscene1",
-    [3] = "assets/cutscene2",
-    [4] = "assets/cutscene3",
-    [5] = "assets/cutscene4",
-    [6] = nil, -- after last elvel
+    [2] = "assets/cutscene1.ogv",
+    [3] = "assets/cutscene2.ogv",
+    [4] = "assets/cutscene4.ogv",
+    [5] = "assets/outro.ogv",
+    [6] = nil,
 }
 local voiclineMap = {
     [1] = "WHerE iS MY mINd", -- before initial level
@@ -30,6 +30,9 @@ function BS.setup()
     
     if videoPath and love.filesystem.getInfo(videoPath) then
         BS.video = love.graphics.newVideo(videoPath)
+        if Audio_source then
+            Audio_source:stop()
+        end
         BS.video:play()
     else
         L.printNoBs("No cutscene found or mapped for transition to level " .. tostring(L.nextLevel))
@@ -46,6 +49,7 @@ function BS.loop()
         
         if L.key_pressed("space") or L.key_pressed("escape") then
             BS.video:pause()
+            BS.video:rewind()
         end
         
         return true
@@ -58,7 +62,7 @@ function BS.loop()
     if UI.isButtonPressed("goNext", buttons) then
         L.active_level_i = L.nextLevel or 1
         
-        if BS.video then BS.video:pause(); BS.video = nil end 
+        if BS.video then BS.video:pause(); BS.video:rewind(); BS.video = nil end 
         
         L.reset()
         return true
