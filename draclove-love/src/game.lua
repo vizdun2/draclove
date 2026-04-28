@@ -11,17 +11,17 @@ local CO = require("src/controls")
 local BS = require("src/betweenScenes")
 local PS = require("src/pause")
 -- as of now, all levels MUST have a .setup function and a .loop function
-L.levels = { L1, L2, L3, L4, L5, BS, CO, MM, GO }
+L.levels = { L1, L2, L4, L3, L5, BS, CO, MM, GO }
 L.hunger_limit = 5
 L.failedLevel = nil
 L.nextLevel = nil
 L.gameOverScreen = L.table_length(L.levels)
-L.mainMenu = L.table_length(L.levels)-1
-L.controls = L.table_length(L.levels)-2
-L.transition = L.table_length(L.levels)-3
+L.mainMenu = L.table_length(L.levels) - 1
+L.controls = L.table_length(L.levels) - 2
+L.transition = L.table_length(L.levels) - 3
 L.pauseScreen = PS
 
-function L.audio_intro(path) 
+function L.audio_intro(path)
 	if Audio_source ~= nil then
 		Audio_source:stop()
 	end
@@ -39,90 +39,92 @@ function L.setup()
 end
 
 function L.drawVerticalHealthBar(boss, posX, posY, fillSprite, borderSprite, baseScale)
-    baseScale = baseScale or 1
+	baseScale = baseScale or 1
 
-    local healthPercent = math.max(0, math.min(1, boss.hp / boss.maxHp))
+	local healthPercent = math.max(0, math.min(1, boss.hp / boss.maxHp))
 
-    local fillBar = {
-        x = posX,
-        y = posY,
-        sprite = fillSprite,
-        s = baseScale,
-        sy = healthPercent
-    }
-    local dummyMeasurement = { sprite = fillSprite, s = baseScale, sy = 1 }
-    local _, fullHeight = L.obj_dims(dummyMeasurement)
+	local fillBar = {
+		x = posX,
+		y = posY,
+		sprite = fillSprite,
+		s = baseScale,
+		sy = healthPercent
+	}
+	local dummyMeasurement = { sprite = fillSprite, s = baseScale, sy = 1 }
+	local _, fullHeight = L.obj_dims(dummyMeasurement)
 
-    local missingHeight = (fullHeight+20) * (1 - healthPercent)
-    fillBar.y = fillBar.y + (missingHeight / 2)
+	local missingHeight = (fullHeight + 20) * (1 - healthPercent)
+	fillBar.y = fillBar.y + (missingHeight / 2)
 
-    local borderBar = {
-        x = posX,
-        y = posY,
-        sprite = borderSprite,
-        s = baseScale,
-        sy = 1
-    }
+	local borderBar = {
+		x = posX,
+		y = posY,
+		sprite = borderSprite,
+		s = baseScale,
+		sy = 1
+	}
 
-    L.draw(fillBar)
-    L.draw(borderBar)
+	L.draw(fillBar)
+	L.draw(borderBar)
 end
+
 function L.spawnDeathDebris(originX, originY, spriteList, scale)
-    local pieceSprites = spriteList
+	local pieceSprites = spriteList
 
 
-    for i = 1, L.table_length(pieceSprites) do
-        local speedX = math.random(-600, 600)
-        local speedY = -math.random(600, 1200)
+	for i = 1, L.table_length(pieceSprites) do
+		local speedX = math.random(-600, 600)
+		local speedY = -math.random(600, 1200)
 
-        table.insert(L.deathDebris, {
-            x = originX,
-            y = originY,
-            sx = 1,
-            sy = 1,
-            s = scale,
-            sprite = pieceSprites[i],
-            
-            velX = speedX,
-            velY = speedY,
-            bounces = 0,
-            
-            r = math.random(0, 360),
-            rotSpeed = math.random(-400, 400) 
-        })
-    end
+		table.insert(L.deathDebris, {
+			x = originX,
+			y = originY,
+			sx = 1,
+			sy = 1,
+			s = scale,
+			sprite = pieceSprites[i],
+
+			velX = speedX,
+			velY = speedY,
+			bounces = 0,
+
+			r = math.random(0, 360),
+			rotSpeed = math.random(-400, 400)
+		})
+	end
 end
 
 function L.updateDeathDebris(dt, groundLevelY)
-    local gravityPull = 1500
+	local gravityPull = 1500
 
-    for i = #L.deathDebris, 1, -1 do
-        local d = L.deathDebris[i]
+	for i = #L.deathDebris, 1, -1 do
+		local d = L.deathDebris[i]
 
-        d.velY = d.velY + (gravityPull * dt)
-        d.x = d.x + (d.velX * dt)
-        d.y = d.y + (d.velY * dt)
-        d.r = d.r + (d.rotSpeed * dt)
+		d.velY = d.velY + (gravityPull * dt)
+		d.x = d.x + (d.velX * dt)
+		d.y = d.y + (d.velY * dt)
+		d.r = d.r + (d.rotSpeed * dt)
 
-        if d.y >= groundLevelY then
-            d.y = groundLevelY
-            
-            if d.bounces < 2 then
-                d.velY = -d.velY * 0.35 
-                d.velX = d.velX * 0.5 
-                d.rotSpeed = d.rotSpeed * 0.5 
-                d.bounces = d.bounces + 1
-            else
-                d.velX = 0
-                d.velY = 0
-                d.rotSpeed = 0
-            end
-        end
+		if d.y >= groundLevelY then
+			d.y = groundLevelY
 
-        -- 3. Draw the piece
-        L.draw(d)
-    end
+			if d.bounces < 2 then
+				d.velY = -d.velY * 0.35
+				d.velX = d.velX * 0.5
+				d.rotSpeed = d.rotSpeed * 0.5
+				d.bounces = d.bounces + 1
+			else
+				d.velX = 0
+				d.velY = 0
+				d.rotSpeed = 0
+			end
+		end
+
+		-- 3. Draw the piece
+		L.draw(d)
+	end
 end
+
 local last_dialogue_active_uid = nil
 
 function L.push_dialogue(dialogue_event)
@@ -201,24 +203,25 @@ function L.base_dialogue_loop()
 		end
 	end
 end
+
 local function pauseUnpause()
 	if L.player.timeStopped then
 		L.pauseScreen.loop()
 	end
 	if L.key_pressed("escape") then
-        if L.player.timeStopped then
-            L.start_time()
-            L.player.timeStopped = false
-        else
-            L.stop_time()
+		if L.player.timeStopped then
+			L.start_time()
+			L.player.timeStopped = false
+		else
+			L.stop_time()
 			L.pauseScreen.loop()
-            L.player.timeStopped = true
-        end
-    end
+			L.player.timeStopped = true
+		end
+	end
 end
 function L.draw_hud()
 	for i = 1, L.hunger_limit, 1 do
-		L.draw({ sprite = "icons/hunger", s = 3, x = 600 - (i - 1) * 60, y = -L.height/2+30, c = (i > L.player.hunger and "FFFFFF" or "606060") })
+		L.draw({ sprite = "icons/hunger", s = 3, x = 600 - (i - 1) * 60, y = -L.height / 2 + 30, c = (i > L.player.hunger and "FFFFFF" or "606060") })
 	end
 end
 
@@ -226,32 +229,38 @@ function L.render(dt)
 	if L.player then
 		pauseUnpause()
 	end
-	
+
 	if not L.player or not L.player.timeStopped then
 		local currentLevel = L.active_level()
-	    
-	    if L.scenePhase == "start" then
-	        if currentLevel.startScene and currentLevel.startScene() then
-	        else
-	            L.scenePhase = "loop"
-	        end
-	    end
-	    
-	    if L.scenePhase == "loop" then
-	        if currentLevel.loop and currentLevel.loop(dt) then
-	        else
-	            L.scenePhase = "end"
-	        end
-	    end
-	    
-	    if L.scenePhase == "end"then
-	        if currentLevel.endScene then
-	            currentLevel.endScene(dt)
-	        end
-	    end
+
+		if L.scenePhase == "start" then
+			if currentLevel.startScene and currentLevel.startScene() then
+			else
+				L.scenePhase = "loop"
+			end
+		end
+
+		if L.scenePhase == "loop" then
+			if currentLevel.loop and currentLevel.loop(dt) then
+			else
+				L.scenePhase = "end"
+			end
+		end
+
+		if L.scenePhase == "end" then
+			if currentLevel.endScene then
+				currentLevel.endScene(dt)
+			end
+		end
 	end
 
 	if L.debug then
+		if L.key_pressed("l") and L.boss and not L.boss.dead then
+			if L.boss.hp then L.boss.hp = 0 end
+			if L.boss.health then L.boss.health = 0 end
+			L.boss.timeOfDeath = L.time()
+			L.boss.dead = true
+		end
 		for i = 1, #L.levels do
 			if L.key_released(tostring(i)) then
 				L.active_level_i = i

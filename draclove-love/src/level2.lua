@@ -12,17 +12,17 @@ local jumpSpeeds = { -15, -35 }
 
 local function newCrack()
     local crack = {
-        x=L.boss.x,
-        y=L.boss.y+100,
-        sprite="particles/crack",
+        x = L.boss.x,
+        y = L.boss.y + 100,
+        sprite = "particles/crack",
         finalSprite = "particles/crack_last",
-        tag="lingerEffect",
-        sprite_t=0.3,
+        tag = "lingerEffect",
+        sprite_t = 0.3,
         sprite_start = L.time(),
         startTime = L.time(),
         hasSwapped = false,
-        lifetime=30,
-        s=2,
+        lifetime = 30,
+        s = 2,
     }
     table.insert(L.player.particles, crack)
 end
@@ -89,7 +89,7 @@ function lvl2.setup()
     L.player.x = -L.width / 2 + 100
     L.player.y = L.height / 2 - 50
     L.player.currentDJSprite = "particles/2/jump_burst"
-    lvl2.bossPieces = {"destroyed/door1", "destroyed/door2", "destroyed/door3"}
+    lvl2.bossPieces = { "destroyed/door1", "destroyed/door2", "destroyed/door3" }
 end
 
 local function updateBossDirection(boss, player)
@@ -126,10 +126,10 @@ local function getUniqueRandoms(maxNumber, drawCount)
     end
 
     local drawnResults = {}
-    
+
     for i = 1, drawCount do
         local randomIndex = math.random(1, #numberPool)
-        
+
         table.insert(drawnResults, table.remove(numberPool, randomIndex))
     end
 
@@ -144,7 +144,7 @@ local function spawnDebris(originX, originY)
         "door/projectile5",
         "door/projectile6",
     }
-    local indexes = getUniqueRandoms(6,4)
+    local indexes = getUniqueRandoms(6, 4)
 
     for i = 1, 4 do
         local direction = (i % 2 == 0) and 1 or -1
@@ -262,7 +262,7 @@ local function bossStateMachine(dt)
             L.boss.already_got_hit = false
         end
     elseif L.boss.state == "grounded" then
-        L.draw({sprite="UI/hand",s = 2, x = L.boss.x, y = L.boss.y-150, r = 90, sprite_t = 0.08})
+        L.draw({ sprite = "UI/hand", s = 2, x = L.boss.x, y = L.boss.y - 150, r = 90, sprite_t = 0.08 })
 
         if L.time() - L.boss.timeHitGround >= L.boss.groundedDuration and L.sprite_finished(L.boss) then
             L.boss.last_grounded = L.time()
@@ -272,7 +272,7 @@ local function bossStateMachine(dt)
         end
     elseif L.boss.state == "rising" then
         L.boss.y = L.boss.y + (L.boss.velY * dt * 0.5)
-        
+
         if L.boss.r > 0 then
             L.boss.r = math.max(0, L.boss.r - (L.boss.rotationSpeed * dt))
         end
@@ -293,10 +293,11 @@ function lvl2.start_playing_audio_loop()
     Source_path = "audio/soundtrack/second_ost_loop"
     Audio_source:setLooping(true)
 end
+
 local function draw_hud()
-	for i = 1, L.boss.maxHp, 1 do
-		L.draw({ sprite = "UI/door_icon", s = 1, x = -600 + (i - 1) * 60, y = -L.height / 2 + 30, c = (i <= L.boss.hp and "FFFFFF" or "606060") })
-	end
+    for i = 1, L.boss.maxHp, 1 do
+        L.draw({ sprite = "UI/door_icon", s = 1, x = -600 + (i - 1) * 60, y = -L.height / 2 + 30, c = (i <= L.boss.hp and "FFFFFF" or "606060") })
+    end
 end
 function lvl2.loop(dt)
     if Source_path == "audio/soundtrack/second_ost_intro" and not Audio_source:isPlaying() then
@@ -304,60 +305,61 @@ function lvl2.loop(dt)
         --print("Started playing sountrack")
         lvl2.start_playing_audio_loop()
     end
-        if L.boss.hp <= 0 then
-            L.spawnDeathDebris(L.boss.x, L.boss.y, lvl2.bossPieces, 4)
-            L.boss.timeOfDeath = L.time()
-            L.boss.dead = true
-        end
-        if L.boss.dead == true then
-            return false
-        end
-        L.draw({ x = 0, y = 0, sprite = "scenes/2", s = 6.66, sprite_t = 0.1 })
-        local leftEdge = -L.width / 2
-        local rightEdge = L.width / 2
+    if L.boss.hp <= 0 then
+        L.spawnDeathDebris(L.boss.x, L.boss.y, lvl2.bossPieces, 4)
+        L.boss.timeOfDeath = L.time()
+        L.boss.dead = true
+    end
+    if L.boss.dead == true then
+        return false
+    end
+    L.draw({ x = 0, y = 0, sprite = "scenes/2", s = 6.66, sprite_t = 0.1 })
+    local leftEdge = -L.width / 2
+    local rightEdge = L.width / 2
 
-        -- Player Lerp Updates
-        L.player.s = calculatePlayerScale(L.player.x, leftEdge, rightEdge, scales)
-        Player.jump_speed = calculateJumpSpeed(L.player.x, leftEdge, rightEdge, jumpSpeeds)
+    -- Player Lerp Updates
+    L.player.s = calculatePlayerScale(L.player.x, leftEdge, rightEdge, scales)
+    Player.jump_speed = calculateJumpSpeed(L.player.x, leftEdge, rightEdge, jumpSpeeds)
 
-        Player.loop()
-        L.player.on_ground = gravity.ground_collide(L.player, groundBot)
+    Player.loop()
+    L.player.on_ground = gravity.ground_collide(L.player, groundBot)
 
-        -- Boss State Machine
-        bossStateMachine(dt)
+    -- Boss State Machine
+    bossStateMachine(dt)
 
-        -- Collision & Damage Logic
-        local collide, fromAbove, _ = gravity.check_collide(L.player, L.boss)
-        if collide then
-            if (L.boss.state == "grounded" or not L.pasttime(L.boss.last_grounded + 0.5)) and fromAbove then
-                if not L.boss.already_got_hit then
-                    L.boss.already_got_hit = true
-                    L.player.vel_y = -2000
-                    L.boss.hp = L.boss.hp - 1
-                    L.boss.sprite = "door/door_damaga"
-                    L.boss.sprite_t = 0.1
-                    L.boss.sprite_start = L.time()
-                    --L.print("Boss Hit! HP:", L.boss.hp)
+    -- Collision & Damage Logic
+    local collide, fromAbove, _ = gravity.check_collide(L.player, L.boss)
+    if collide then
+        if (L.boss.state == "grounded" or not L.pasttime(L.boss.last_grounded + 0.5)) and fromAbove then
+            if not L.boss.already_got_hit then
+                L.boss.already_got_hit = true
+                L.player.vel_y = -2000
+                L.boss.hp = L.boss.hp - 1
+                L.boss.sprite = "door/door_damaga"
+                L.boss.sprite_t = 0.1
+                L.boss.sprite_start = L.time()
+                --L.print("Boss Hit! HP:", L.boss.hp)
 
 
-                    L.boss.timeHitGround = 0
-                    L.play("audio/door_cracked", 0.6)
-                end
-            elseif L.boss.state ~= "grounded" then
-                L.player.take_damage()
+                L.boss.timeHitGround = 0
+                L.play("audio/door_cracked", 0.6)
             end
+        elseif L.boss.state ~= "grounded" then
+            L.player.take_damage()
         end
+    end
 
-        updateDebris(dt)
-        --L.draw(L.patch(L.boss, {debug=true}))
-        draw_hud()
-        L.draw(L.boss)
-        L.draw(L.player)
-        --L.draw(groundBot)
-        L.draw_hud()
-    
+    updateDebris(dt)
+    --L.draw(L.patch(L.boss, {debug=true}))
+    draw_hud()
+    L.draw(L.boss)
+    L.draw(L.player)
+    --L.draw(groundBot)
+    L.draw_hud()
+
     return true
 end
+
 function lvl2.startScene()
     if L.boss.state == "intro" then
         local currentTime = L.time()
@@ -388,17 +390,19 @@ function lvl2.startScene()
     end
     return false
 end
+
 function lvl2.endScene(dt)
-	L.draw({ x = 0, y = 0, sprite = "scenes/2", s = 6.66, sprite_t = 0.1 })
-	L.draw(L.player)
+    L.draw({ x = 0, y = 0, sprite = "scenes/2", s = 6.66, sprite_t = 0.1 })
+    L.draw(L.player)
     Player.physicsOnlyLoop()
-	L.updateDeathDebris(dt, 220)
-	if L.time() - L.boss.timeOfDeath >= 3.5 then
-		L.nextLevel = 4
-		L.active_level_i = L.transition
-		L.reset()
-		return false
-	end
-	return true
+    L.updateDeathDebris(dt, 220)
+    if L.time() - L.boss.timeOfDeath >= 3.5 then
+        L.nextLevel = 3
+        L.active_level_i = L.transition
+        L.reset()
+        return false
+    end
+    return true
 end
+
 return lvl2

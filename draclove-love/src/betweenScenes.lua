@@ -23,11 +23,12 @@ local voiclineMap = {
 
 function BS.setup()
     buttons = {}
-    UI.newButton(-L.width/2+100,-250,40,20,"goNext", buttons, "UI/button_idle", 1.5, "UI/button_hover", "UI/button_click","UI/button_hovering","Let the trip go on",230)
+    UI.newButton(-L.width / 2 + 100, -250, 40, 20, "goNext", buttons, "UI/button_idle", 1.5, "UI/button_hover",
+        "UI/button_click", "UI/button_hovering", "Let the trip go on", 230)
 
     local videoPath = cutsceneMap[L.nextLevel]
     BS.video = nil
-    
+
     if videoPath and love.filesystem.getInfo(videoPath) then
         BS.video = love.graphics.newVideo(videoPath)
         if Audio_source then
@@ -42,32 +43,35 @@ end
 function BS.loop()
     if BS.video and BS.video:isPlaying() then
         local vw, vh = BS.video:getDimensions()
-        local sx, sy = L.width / vw, L.height / vh
-        
-        love.graphics.setColor(1, 1, 1, 1)
-        love.graphics.draw(BS.video, 0, 0, 0, sx, sy)
-        
+        if vw > 0 and vh > 0 then
+            local sx, sy = L.width / vw, L.height / vh
+            love.graphics.setColor(1, 1, 1, 1)
+            love.graphics.draw(BS.video, 0, 0, 0, sx, sy)
+        end
         if L.key_pressed("space") or L.key_pressed("escape") then
             BS.video:pause()
             BS.video:rewind()
         end
-        
+
         return true
     end
-    
+
     UI.update(buttons)
-    L.draw({x=0,y=0, sprite="UI/background", rainbow=true, s=6.66})
-    L.draw({c="#000000", text=voiclineMap[L.nextLevel], font="pixelifysans", font_size=38, align="lm", x=-L.width/2+100, y=-L.height/2+200})
-    
+    L.draw({ x = 0, y = 0, sprite = "UI/background", rainbow = true, s = 6.66 })
+    L.draw({ c = "#000000", text = voiclineMap[L.nextLevel], font = "pixelifysans", font_size = 38, align = "lm", x = -L
+    .width / 2 + 100, y = -L.height / 2 + 200 })
+
     if UI.isButtonPressed("goNext", buttons) then
         L.active_level_i = L.nextLevel or 1
-        
-        if BS.video then BS.video:pause(); BS.video:rewind(); BS.video = nil end 
-        
+
+        if BS.video then
+            BS.video:pause(); BS.video:rewind(); BS.video = nil
+        end
+
         L.reset()
         return true
     end
-    
+
     UI.render(buttons)
     return true
 end

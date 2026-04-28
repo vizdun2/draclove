@@ -39,10 +39,10 @@ function lvl4.setup()
     L.last_weed_gen = 0
 
 
-    L.boss.x = L.width/2 - 20
+    L.boss.x = L.width / 2 - 20
     L.boss.introTargetX = L.width / 2 - 150
     L.boss.introSpeed = 150
-    L.boss.y=180
+    L.boss.y = 180
     lvl4.introPhase = "walking"
 
     L.boss.sprite = "mouse_dragon/mouse_runnin"
@@ -51,21 +51,20 @@ function lvl4.setup()
 
     L.boss.introTargetY = 0
     L.boss.ascendSpeed = 100
-
 end
 
 local function draw_hud()
     local totalIcons = math.ceil(L.boss.maxHp / 5)
-    
+
     local activeIcons = math.ceil(L.boss.hp / 5)
 
     for i = 1, totalIcons do
-        L.draw({ 
+        L.draw({
             sprite = "mouse_dragon/trava",
-            s = 3, 
-            x = -600 + (i - 1) * 80, 
-            y = -L.height / 2 + 60, 
-            c = (i <= activeIcons and "FFFFFF" or "606060") 
+            s = 3,
+            x = -600 + (i - 1) * 80,
+            y = -L.height / 2 + 60,
+            c = (i <= activeIcons and "FFFFFF" or "606060")
         })
     end
 end
@@ -82,13 +81,13 @@ function lvl4.loop(dt)
     if Source_path ~= "audio/soundtrack/first_ost_intro" and not Audio_source:isPlaying() then
         lvl4.start_audio_loop()
     end
-    
+
     if L.boss.hp <= 0 then
         L.boss.dead = true
         return false
     end
     if L.boss.dead == true then
-        L.nextLevel = 3
+        L.nextLevel = 4
         L.active_level_i = L.transition
         L.reset()
     end
@@ -147,8 +146,18 @@ function lvl4.loop(dt)
         local speed = 800
         local vx, vy = L.vec_to(L.player, L.boss)
         local r = L.angle_look_at(L.boss.x, L.boss.y, L.player.x, L.player.y)
-        L.fire_projs[L.uid()] = { r = r+180, s = 1.5, sprite = "mouse_dragon/fireball", sprite_t = 0.1, x = L.boss.x, y = L
-        .boss.y, vel_x = vx * speed, vel_y = vy * speed, born = L.time() }
+        L.fire_projs[L.uid()] = {
+            r = r + 180,
+            s = 1.5,
+            sprite = "mouse_dragon/fireball",
+            sprite_t = 0.1,
+            x = L.boss.x,
+            y = L
+                .boss.y,
+            vel_x = vx * speed,
+            vel_y = vy * speed,
+            born = L.time()
+        }
         L.boss.burp_i = L.boss.burp_i + 1
 
         if L.boss.burp_i >= burst then
@@ -159,10 +168,16 @@ function lvl4.loop(dt)
     if L.pasttime(L.last_weed_gen + 1) then
         L.last_weed_gen = L.time()
         local on_roof = math.random() <= 0.5
-        local nw =  { x = math.random() * L.height - L.height / 2, y = on_roof and -L.height / 2 + 25 or 220 + 32, sy =
-        on_roof and -1 or 1, sprite = "mouse_dragon/trava", s = 4 }
+        local nw = {
+            x = math.random() * L.height - L.height / 2,
+            y = on_roof and -L.height / 2 + 25 or 220 + 32,
+            sy =
+                on_roof and -1 or 1,
+            sprite = "mouse_dragon/trava",
+            s = 4
+        }
 
-        local okay = not L.collide(nw, L.patch(L.player, {s=3}))
+        local okay = not L.collide(nw, L.patch(L.player, { s = 3 }))
         for oid, ow in pairs(L.weed) do
             okay = okay and not L.collide(nw, ow)
         end
@@ -183,7 +198,15 @@ function lvl4.loop(dt)
     for _, weed in pairs(L.weed) do
         L.draw(weed)
         if weed.sprite == "mouse_dragon/trava" and not L.boss.fucktuts then
-            L.draw({r=(weed.y > 0 and 90 or -90), sprite="UI/hand", x = weed.x, y = weed.y + (weed.y > 0 and -75 or 75), sx = L.boss.x > 0 and 1 or -1, sprite_t = 0.08})
+            L.draw({
+                r = (weed.y > 0 and 90 or -90),
+                sprite = "UI/hand",
+                x = weed.x,
+                y = weed.y +
+                    (weed.y > 0 and -75 or 75),
+                sx = L.boss.x > 0 and 1 or -1,
+                sprite_t = 0.08
+            })
         end
     end
 
@@ -198,41 +221,35 @@ function lvl4.startScene()
     L.draw({ x = 0, y = 0, sprite = "scenes/4", s = 6.66 })
 
     if lvl4.introPhase == "walking" then
-        
         if L.boss.x > L.boss.introTargetX then
             L.boss.x = L.boss.x - (L.boss.introSpeed * L.dt)
         else
             L.boss.x = L.boss.introTargetX
-            
+
             lvl4.introPhase = "animating"
-            
+
             L.boss.sprite = "mouse_dragon/transformation"
             L.boss.sprite_t = 0.12
-            L.boss.sprite_start = L.time() 
+            L.boss.sprite_start = L.time()
         end
-
     elseif lvl4.introPhase == "animating" then
-        
         if L.sprite_finished(L.boss) then
-            
             L.boss.sprite = "mouse_dragon/idle"
             L.boss.sprite_start = L.time()
-            
+
             lvl4.introPhase = "ascending"
         end
-
     elseif lvl4.introPhase == "ascending" then
-        
         if L.boss.y > L.boss.introTargetY then
             L.boss.y = L.boss.y - (L.boss.ascendSpeed * L.dt)
         else
             L.boss.y = L.boss.introTargetY
-            
-            return false 
+
+            return false
         end
     end
 
-    L.draw(L.player) 
+    L.draw(L.player)
     L.draw(L.boss)
 
     return true
@@ -241,11 +258,11 @@ end
 function lvl4.endScene()
     if not lvl4.endSceneStarted then
         lvl4.endSceneStarted = true
-        
-        
+
+
         L.boss.sprite = "mouse_dragon/transformation"
-        
-        L.boss.sprite_t = -0.12 
+
+        L.boss.sprite_t = -0.12
         L.boss.sprite_start = L.time()
     end
 
@@ -254,10 +271,10 @@ function lvl4.endScene()
     L.draw(L.boss)
 
     if L.sprite_cycle_count(L.boss) <= -2 then
-        
-        L.nextLevel = 5 
+        L.nextLevel = 4
         L.active_level_i = L.transition
         L.reset()
     end
 end
+
 return lvl4

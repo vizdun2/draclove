@@ -57,7 +57,7 @@ function lvl3.setup()
         -- state_begin = L.time(),
         -- next_state = 1,
         hp = 25,
-        maxHp=25,
+        maxHp = 25,
         sprite = "idibiks/idle",
         sprite_t = 0.1,
         pl = -20,
@@ -66,13 +66,13 @@ function lvl3.setup()
         last_burped = L.time(),
         last_chased = L.time(),
         chaseCooldown = 10,
-        lastState=states.moving_around,
+        lastState = states.moving_around,
         chaseSpeed = 280,
         chaseDuration = 4.0,
         shootCount = 0,
         spillCount = 0,
         queuedAttack = nil,
-        chaseThresholds = {20, 15, 10, 5},
+        chaseThresholds = { 20, 15, 10, 5 },
         takeHitCooldown = 0.75,
     }
     Player.setup()
@@ -80,7 +80,7 @@ function lvl3.setup()
     L.water_projs = {}
     L.spill = nil
     L.water_level = nil
-    L.player.currentDJSprite="particles/3/jump_burst"
+    L.player.currentDJSprite = "particles/3/jump_burst"
     L.player.y = 220
 
     L.introAnimation = {
@@ -90,7 +90,7 @@ function lvl3.setup()
         sprite = "idibiks/zachod_transform",
         sprite_t = 0.12,
         sprite_start = L.time(),
-		sx = -1,
+        sx = -1,
     }
 end
 
@@ -104,25 +104,25 @@ local pelletsInCircleBase = 5
 
 local function shoot_water(pelletsInCircle)
     local angleStep = 360 / pelletsInCircle
-    
+
     for i = 1, pelletsInCircle do
         local currentAngle = i * angleStep
-        
+
         local vxOut, vyOut = L.angle_vec(currentAngle)
-        
+
         local vxSpin, vySpin = L.angle_vec(currentAngle + 90)
-        
+
         local finalVx = (vxOut * outwardSpeed) + (vxSpin * spinSpeed)
         local finalVy = (vyOut * outwardSpeed) + (vySpin * spinSpeed)
-        
-        L.water_projs[L.uid()] = { 
-            x = L.boss.x, 
-            y = L.boss.y, 
-            vel_x = finalVx, 
-            vel_y = finalVy, 
-            born = L.time(), 
-            sprite_t = 0.1, 
-            sprite = "idibiks/water_projectile" 
+
+        L.water_projs[L.uid()] = {
+            x = L.boss.x,
+            y = L.boss.y,
+            vel_x = finalVx,
+            vel_y = finalVy,
+            born = L.time(),
+            sprite_t = 0.1,
+            sprite = "idibiks/water_projectile"
         }
     end
 
@@ -134,16 +134,15 @@ local magic_y = 540 / 2
 local desired_water_level = 200
 
 local function changeState(state)
-    L.boss.lastState=L.boss.state
-    L.boss.state=state
+    L.boss.lastState = L.boss.state
+    L.boss.state = state
 end
 local function decideNextAttack()
     if #L.boss.chaseThresholds > 0 and L.boss.hp <= L.boss.chaseThresholds[1] then
-        
         while #L.boss.chaseThresholds > 0 and L.boss.hp <= L.boss.chaseThresholds[1] do
             table.remove(L.boss.chaseThresholds, 1)
         end
-        
+
         L.boss.shootCount = 0
         L.boss.spillCount = 0
         return "chase"
@@ -169,7 +168,6 @@ local function decideNextAttack()
 end
 local function do_toilet()
     if L.boss.state == states.moving_around then
-        
         if not L.boss.queuedAttack then
             L.boss.queuedAttack = decideNextAttack()
             L.boss.target = nil
@@ -191,14 +189,14 @@ local function do_toilet()
             local vx, vy = L.vec_to(L.boss.target, L.boss)
             L.boss.vel_x = vx * toilet_speed
             L.boss.vel_y = vy * toilet_speed
-            
+
             L.boss.sx = L.boss.vel_x < 0 and -1 or 1
         end
 
         if L.dist(L.boss, L.boss.target) < 10 then
             L.boss.vel_x, L.boss.vel_y = 0, 0
             L.boss.target = nil
-            
+
             if L.boss.queuedAttack == "spill" then
                 changeState(states.spilling_prep)
             elseif L.boss.queuedAttack == "shoot" then
@@ -207,7 +205,7 @@ local function do_toilet()
                 L.boss.state_start = L.time()
                 L.boss.sprite = "idibiks/attack"
             end
-            
+
             L.boss.queuedAttack = nil
         end
 
@@ -216,22 +214,22 @@ local function do_toilet()
 
     if L.boss.state == states.shooting then
         if L.time() > L.boss.state_start + 0.5 then
-            shoot_water(pelletsInCircleBase+2)
+            shoot_water(pelletsInCircleBase + 2)
             L.boss.sprite = "idibiks/idle"
             changeState(states.moving_around)
         end
     end
     if L.boss.state == states.chasing then
         local timeInChase = L.time() - L.boss.state_start
-        
+
         if timeInChase <= L.boss.chaseDuration then
             local vx, vy = L.vec_to(L.player, L.boss)
-            
+
             L.boss.vel_x = vx * L.boss.chaseSpeed
             L.boss.vel_y = vy * L.boss.chaseSpeed
-            
+
             L.boss.sx = L.boss.vel_x < 0 and -1 or 1
-            
+
             L.move_vel(L.boss)
         else
             L.boss.last_chased = L.time()
@@ -337,23 +335,23 @@ function lvl3.start_playing_audio_loop()
     Source_path = audio_loop
     Audio_source:setLooping(true)
 end
+
 local function draw_hud()
     local totalIcons = math.ceil(L.boss.maxHp / 5)
-    
+
     local activeIcons = math.ceil(L.boss.hp / 5)
 
     for i = 1, totalIcons do
-        L.draw({ 
-            sprite = "UI/toilet_icon", 
-            s = 3, 
-            x = -600 + (i - 1) * 80, 
-            y = -L.height / 2 + 60, 
-            c = (i <= activeIcons and "FFFFFF" or "606060") 
+        L.draw({
+            sprite = "UI/toilet_icon",
+            s = 3,
+            x = -600 + (i - 1) * 80,
+            y = -L.height / 2 + 60,
+            c = (i <= activeIcons and "FFFFFF" or "606060")
         })
     end
 end
 function lvl3.loop(dt)
-
     if Source_path == audio_intro and not Audio_source:isPlaying() then
         Audio_source:stop()
         lvl3.start_playing_audio_loop()
@@ -363,12 +361,12 @@ function lvl3.loop(dt)
         L.boss.dead = true
         return false
     end
-    
+
     L.player.on_ground = gravity.ground_collide(L.player, ground_bot)
 
     for id, proj in pairs(L.water_projs) do
         if L.collide(proj, L.player) then
-            if(L.player.take_damage())then
+            if (L.player.take_damage()) then
                 L.play("audio/splash2", 0.6)
                 L.water_projs[id] = nil
             end
@@ -435,7 +433,7 @@ function lvl3.loop(dt)
     end
 
     if L.spill and L.collide(L.spill, L.player) or L.water_level and L.collide(L.water_level, L.player) then
-       L.player.take_damage()
+        L.player.take_damage()
     end
     if L.collide(L.boss, L.player) then
         if L.boss.state == states.chasing then
@@ -466,7 +464,14 @@ function lvl3.loop(dt)
     end
 
     if not L.pasttime(L.boss.started + 5) then
-        L.draw({sprite="UI/hand", x = origin_x + (L.boss.x > 0 and -75 or 75), y = (L.boss.y - L.height / 2) / 2, sx = L.boss.x > 0 and 1 or -1, sprite_t = 0.08})
+        L.draw({
+            sprite = "UI/hand",
+            x = origin_x + (L.boss.x > 0 and -75 or 75),
+            y = (L.boss.y - L.height / 2) / 2,
+            sx =
+                L.boss.x > 0 and 1 or -1,
+            sprite_t = 0.08
+        })
     end
 
     --L.draw(L.patch(L.boss, {debug=true}))
@@ -497,11 +502,11 @@ function lvl3.startScene()
     if not lvl3.intro then
         return false
     end
-	L.draw({ x = 0, y = 0, sprite = "scenes/3", s = 6.66 })
+    L.draw({ x = 0, y = 0, sprite = "scenes/3", s = 6.66 })
     if L.sprite_finished(L.introAnimation) and lvl3.timer ~= nil then
-        L.draw({ x = 0, y = 0, sprite = "scenes/blackout", s = 6.66})
+        L.draw({ x = 0, y = 0, sprite = "scenes/blackout", s = 6.66 })
         if L.time() > lvl3.timer + lvl3.cooldwon then
-        lvl3.intro = false
+            lvl3.intro = false
         end
     end
     if L.sprite_finished(L.introAnimation) and lvl3.timer == nil then
@@ -510,14 +515,15 @@ function lvl3.startScene()
     if not L.sprite_finished(L.introAnimation) then
         L.draw(L.introAnimation)
     end
-	
-	return true
+
+    return true
 end
+
 function lvl3.endScene()
     if not lvl3.endTimer then
         lvl3.endTimer = L.time()
         lvl3.endPhase = "blackout"
-        
+
         if Audio_source then
             Audio_source:stop()
         end
@@ -526,16 +532,15 @@ function lvl3.endScene()
     local timeInPhase = L.time() - lvl3.endTimer
 
     if lvl3.endPhase == "blackout" then
-        L.draw({ x = 0, y = 0, sprite = "scenes/blackout", s = 6.66})
-        
+        L.draw({ x = 0, y = 0, sprite = "scenes/blackout", s = 6.66 })
+
         if timeInPhase >= lvl3.cooldwon then
             lvl3.endPhase = "reveal"
             lvl3.endTimer = L.time()
         end
-
     elseif lvl3.endPhase == "reveal" then
         L.draw({ x = 0, y = 0, sprite = "scenes/3", s = 6.66 })
-        
+
         L.draw({
             x = 0,
             y = 200,
@@ -551,4 +556,5 @@ function lvl3.endScene()
         end
     end
 end
+
 return lvl3

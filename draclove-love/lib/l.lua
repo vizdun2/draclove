@@ -40,7 +40,8 @@ local function load_assets_rec(dir)
         else
             L.print("Started loading", filename)
             local texture_name, texture_row, texture_col = filename:match("^(.*)_([0-9]+)x([0-9]+)%.png$")
-            local audio_name = filename:match("^(.*)%.mp3$") or filename:match("^(.*)%.wav$") or filename:match("^(.*)%.ogg$")
+            local audio_name = filename:match("^(.*)%.mp3$") or filename:match("^(.*)%.wav$") or
+                filename:match("^(.*)%.ogg$")
             local font_name = filename:match("^(.*)%.ttf$")
 
             if texture_name then
@@ -583,7 +584,7 @@ function L.start_time()
 end
 
 function L.clamp(low, n, high)
-  return math.min(math.max(n, low), high)
+    return math.min(math.max(n, low), high)
 end
 
 local last_mod_time = nil

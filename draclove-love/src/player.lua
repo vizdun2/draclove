@@ -1,5 +1,5 @@
 local L = require("lib/l")
-local gravity = require("src/gravity") 
+local gravity = require("src/gravity")
 
 -----------------------------------------------------------------------------------------------------------------
 -- in your level file, do "local Player = require("src/player")" at the top and then call Player.setup() in setup
@@ -17,14 +17,14 @@ Player.jump_speed = base_jump_speed -- DO NOT MOVE, IT *WILL* BREAK SHIT
 
 local function newDJEffect(sprite)
     local newDJEffect = {
-        x=L.player.x,
-        y=L.player.y,
-        sprite=sprite,
-        sprite_t=0.1,
-        s=3,
+        x = L.player.x,
+        y = L.player.y,
+        sprite = sprite,
+        sprite_t = 0.1,
+        s = 3,
         sprite_start = L.time(),
-        tag="tempEffect",
-        currentDJSprite="particles/1/jump_burst",
+        tag = "tempEffect",
+        currentDJSprite = "particles/1/jump_burst",
     }
     table.insert(L.player.particles, newDJEffect)
 end
@@ -32,9 +32,16 @@ end
 -- Base Setup
 function Player.setup()
     L.player = {
-        x = 0, y = 0, speed = 15, s = 2,
-        vel_x = 0, vel_y = 0, hunger = 0,
-        last_dodged = 0, dead = false, jumped_midair = true,
+        x = 0,
+        y = 0,
+        speed = 15,
+        s = 2,
+        vel_x = 0,
+        vel_y = 0,
+        hunger = 0,
+        last_dodged = 0,
+        dead = false,
+        jumped_midair = true,
         sprite = "player/idle",
         particles = {},
         timeStopped = false,
@@ -42,11 +49,11 @@ function Player.setup()
     }
     Player.jump_speed = base_jump_speed
     function L.player.is_dodging()
-        return L.player.sprite == "player/matrix_from_air" or L.player.sprite =="player/matrix_from_idle"
+        return L.player.sprite == "player/matrix_from_air" or L.player.sprite == "player/matrix_from_idle"
     end
 
     function L.player.is_punching()
-        return L.player.sprite == "player/punch_from_idle" or L.player.sprite=="player/punch_from_air"
+        return L.player.sprite == "player/punch_from_idle" or L.player.sprite == "player/punch_from_air"
     end
 
     function L.player.is_inair()
@@ -54,7 +61,7 @@ function Player.setup()
     end
 
     function L.player.is_jump_from_idle()
-        return L.player.sprite=="player/jump_from_idle"
+        return L.player.sprite == "player/jump_from_idle"
     end
 
     function L.player.is_jump_from_air()
@@ -64,22 +71,20 @@ function Player.setup()
     function L.player.take_damage()
         if L.player.is_dodging() then return false end
         if L.player.hurt_time ~= nil and L.time() - L.player.hurt_time < 1 then return false end
-        
+
         L.play("audio/player/ooh")
         L.player.hurt_time = L.time()
         L.player.hunger = L.player.hunger + 1
-        
+
         if L.player.hunger >= L.hunger_limit then
             L.player.dead = true
             L.failedLevel = L.active_level_i
             L.active_level_i = L.gameOverScreen
-		    L.reset()
+            L.reset()
         end
         return true
     end
 end
-
-
 
 -- Internal movement logic
 local function player_anime(sprite, t)
@@ -119,64 +124,64 @@ end
 
 local function player_movement()
     if not L.player.on_ground and not L.player.is_inair() and not L.player.is_dodging() and not L.player.is_punching() and not L.player.is_jump_from_air() then
-		L.player.sprite = "player/in_air"
-		L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
-	end
+        L.player.sprite = "player/in_air"
+        L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
+    end
 
-	local player_speed = L.player.speed
+    local player_speed = L.player.speed
 
 
-	if L.key_down("space") and not L.player.jump_disabled then
-		if L.player.on_ground and not L.player.is_jump_from_idle() then
-			L.player.jumped_midair = false
-			L.player.vel_y = Player.jump_speed * movement_const
-			L.player.sprite = "player/in_air" -- reset this
-			L.key_pressed("space")
-		elseif L.key_pressed("space") and not L.player.jumped_midair then
-			L.player.vel_y = Player.jump_speed * movement_const
-			L.player.jumped_midair = true
-			L.player.sprite = "player/in_air"
+    if L.key_down("space") and not L.player.jump_disabled then
+        if L.player.on_ground and not L.player.is_jump_from_idle() then
+            L.player.jumped_midair = false
+            L.player.vel_y = Player.jump_speed * movement_const
+            L.player.sprite = "player/in_air" -- reset this
+            L.key_pressed("space")
+        elseif L.key_pressed("space") and not L.player.jumped_midair then
+            L.player.vel_y = Player.jump_speed * movement_const
+            L.player.jumped_midair = true
+            L.player.sprite = "player/in_air"
             L.play("audio/double_jump", 0.1)
             newDJEffect(L.player.currentDJSprite)
-		end
-	end
+        end
+    end
 
 
-	if (not L.player.roofwalk and L.key_down("d")) or (L.player.roofwalk and L.key_down("a")) then
-		L.player.vel_x = player_speed * movement_const
-		L.player.sx = not L.player.roofwalk and 1 or -1
-		if not L.player.is_jump_from_idle() and L.player.on_ground and not L.player.is_dodging() and not L.player.is_punching() then
-			L.player.sprite_t = 0.1
-			L.player.sprite = "player/runnin"
-			L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
-		end
-	elseif (not L.player.roofwalk and L.key_down("a")) or (L.player.roofwalk and L.key_down("d")) then
-		L.player.vel_x = -player_speed * movement_const
-		L.player.sx = not L.player.roofwalk and -1 or 1
-		if not L.player.is_jump_from_idle() and L.player.on_ground and not L.player.is_dodging() and not L.player.is_punching() then
-			L.player.sprite_t = 0.1
-			L.player.sprite = "player/runnin"
-			L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
-		end
-	else
-		if not L.player.is_punching() and not L.player.is_dodging() and not L.player.is_jump_from_idle() then
-			L.player.sprite = "player/idle"
-			L.player.sprite_t = 0.1
-			L.player.pr = (L.player.sx == -1) and -15 or -15
-			L.player.pl = (L.player.sx == -1) and -15 or -15
-			L.player.pt = 0
-		end
-		L.player.vel_x = 0
-	end
+    if (not L.player.roofwalk and L.key_down("d")) or (L.player.roofwalk and L.key_down("a")) then
+        L.player.vel_x = player_speed * movement_const
+        L.player.sx = not L.player.roofwalk and 1 or -1
+        if not L.player.is_jump_from_idle() and L.player.on_ground and not L.player.is_dodging() and not L.player.is_punching() then
+            L.player.sprite_t = 0.1
+            L.player.sprite = "player/runnin"
+            L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
+        end
+    elseif (not L.player.roofwalk and L.key_down("a")) or (L.player.roofwalk and L.key_down("d")) then
+        L.player.vel_x = -player_speed * movement_const
+        L.player.sx = not L.player.roofwalk and -1 or 1
+        if not L.player.is_jump_from_idle() and L.player.on_ground and not L.player.is_dodging() and not L.player.is_punching() then
+            L.player.sprite_t = 0.1
+            L.player.sprite = "player/runnin"
+            L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
+        end
+    else
+        if not L.player.is_punching() and not L.player.is_dodging() and not L.player.is_jump_from_idle() then
+            L.player.sprite = "player/idle"
+            L.player.sprite_t = 0.1
+            L.player.pr = (L.player.sx == -1) and -15 or -15
+            L.player.pl = (L.player.sx == -1) and -15 or -15
+            L.player.pt = 0
+        end
+        L.player.vel_x = 0
+    end
 
-	if L.player.hurt_time and L.pasttime(L.player.hurt_time + 0.4) then
-		L.hurt_time = nil
-		L.player.c = "#FFFFFF"
-	elseif L.player.hurt_time then
-		-- L.player.sprite = "player/damage"
-		-- L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
-		L.player.c = "#FF4040"
-	end
+    if L.player.hurt_time and L.pasttime(L.player.hurt_time + 0.4) then
+        L.hurt_time = nil
+        L.player.c = "#FFFFFF"
+    elseif L.player.hurt_time then
+        -- L.player.sprite = "player/damage"
+        -- L.player.pr, L.player.pl, L.player.pt = 0, 0, 0
+        L.player.c = "#FF4040"
+    end
 
     if L.player.roofwalk then
         L.player.sy = -1
@@ -189,22 +194,20 @@ local function particleLoop()
 
     for i = #L.player.particles, 1, -1 do
         local ptc = L.player.particles[i]
-        
+
         L.draw(ptc)
-        
+
         if ptc.tag == "tempEffect" then
             if L.sprite_finished(ptc) then
                 table.remove(L.player.particles, i)
             end
-            
         elseif ptc.tag == "lingerEffect" then
-            
             if not ptc.hasSwapped and L.sprite_finished(ptc) then
                 ptc.sprite = ptc.finalSprite
                 ptc.sprite_t = nil
                 ptc.hasSwapped = true
             end
-            
+
             if currentTime - ptc.startTime >= ptc.lifetime then
                 table.remove(L.player.particles, i)
             end
@@ -213,7 +216,7 @@ local function particleLoop()
 end
 function Player.physicsOnlyLoop()
     L.player.vel_x = 0
-    
+
     if not L.player.on_ground then
         L.player.sprite = "player/in_air"
     else
@@ -221,13 +224,13 @@ function Player.physicsOnlyLoop()
     end
 
     L.move_vel(L.player)
-    
+
     if not L.player.roofwalk and not L.player.off_move then
         gravity.change_vel(L.player)
     end
-    
+
     particleLoop()
-    
+
     if L.player.off_move then
         if L.player.x < -610 then
             L.player.roofwalk = not L.player.roofwalk
@@ -238,6 +241,7 @@ function Player.physicsOnlyLoop()
         L.player.x, L.player.y = L.getSafeCoordinates(L.player, 15 * L.player.s, 15 * L.player.s)
     end
 end
+
 -- The main loop
 function Player.loop()
     player_action()
